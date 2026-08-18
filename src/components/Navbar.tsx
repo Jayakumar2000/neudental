@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Phone, Menu, X, Shield, Clock, MapPin, ChevronDown } from 'lucide-react';
 import { TREATMENTS } from '../data';
+import BrandLogo, { BRAND } from './BrandLogo';
 
 interface NavbarProps {
 onOpenBooking: () => void;
@@ -47,24 +48,12 @@ Safe &amp; Premium Dental Care under Dr. Swetha
 
 <header className="sticky top-0 w-full z-40 bg-white/95 backdrop-blur-md border-b border-cool-gray/10 transition-all premium-shadow">
 <div className="flex items-center justify-between px-margin-mobile md:px-margin-desktop py-4 max-w-[1280px] mx-auto w-full">
-<a href="#" onClick={handleLogoClick} className="flex items-center gap-3 select-none group">
-<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" className="w-11 h-11 shrink-0">
-<defs>
-<linearGradient id="logoCyan" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#3AC3E6" /><stop offset="100%" stopColor="#0B98C2" /></linearGradient>
-</defs>
-<path d="M 45 42 C 55 42, 65 44, 75 40 C 72 48, 62 55, 45 54 C 40 52, 38 48, 45 42 Z" fill="#A5F3FC" opacity="0.85" />
-<path d="M 33 46 C 30 38, 38 24, 52 24 C 57 24, 60 27, 63 31 C 66 27, 69 24, 74 24 C 88 24, 96 38, 93 46 C 90 55, 87 64, 84 72 C 81 80, 78 86, 75 86 C 73 86, 72 82, 70 78 C 67 72, 63 68, 63 70 C 63 72, 59 72, 56 78 C 54 82, 53 86, 51 86 C 48 86, 45 80, 42 72 C 39 64, 36 55, 33 46 Z" stroke="url(#logoCyan)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-<path d="M 26 55 C 34 40, 48 58, 65 58 C 76 58, 86 52, 92 42" stroke="#0B3B60" strokeWidth="4.5" strokeLinecap="round" fill="none" />
-<circle cx="92" cy="42" r="3" fill="#3AC3E6" />
-<path d="M 85 22 L 87 25 L 90 25 L 87 27 L 88 30 L 85 28 L 82 30 L 83 27 L 80 25 L 83 25 Z" fill="#3AC3E6" />
-</svg>
-<div>
-<div className="flex items-center gap-1">
-<span className="font-sans font-extrabold text-xl md:text-2xl text-[#3AC3E6] tracking-tight leading-none">neu</span>
-<span className="font-sans font-extrabold text-xl md:text-2xl text-[#0B3B60] tracking-tight leading-none">dental</span>
-</div>
-<p className="text-[10px] text-cool-gray tracking-wide font-sans mt-0.5">Modern Dental Care for Confident Smiles</p>
-</div>
+<a href="#" onClick={handleLogoClick} className="flex items-center select-none group" aria-label={`${BRAND.name} — ${BRAND.tagline}`}>
+<BrandLogo
+markClassName="h-10 w-auto sm:h-11 md:h-12"
+wordmarkClassName="h-[18px] w-auto sm:h-[22px] md:h-[26px]"
+taglineClassName="text-[9px] sm:text-[10px] text-cool-gray tracking-wide font-sans mt-1"
+/>
 </a>
 
 <nav className="hidden lg:flex items-center gap-6 xl:gap-8">
@@ -95,7 +84,7 @@ return (<a key={item.name} href={item.href} onClick={(e) => handleLinkClick(e, i
 </nav>
 
 <div className="hidden md:flex items-center gap-4">
-<a href="tel:+919342367446" className="flex items-center gap-2 text-primary font-bold hover:text-secondary font-sans transition-colors" title="Click to dial Chennai Neudental support">
+<a href="tel:+919342367446" className="flex items-center gap-2 text-primary font-bold hover:text-secondary font-sans transition-colors" title="Click to dial Chennai neudental support">
 <div className="w-9 h-9 rounded-full bg-primary/5 flex items-center justify-center text-primary"><Phone className="w-4 h-4 text-secondary" /></div>
 <div className="text-left leading-none"><span className="text-[10px] block opacity-60 uppercase font-bold tracking-wider">Quick Helpline</span><span className="text-sm font-bold font-sans">+91 93423 67446</span></div>
 </a>

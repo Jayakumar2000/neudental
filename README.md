@@ -24,6 +24,13 @@ bludental/
 ├── firestore.rules        # Firebase security rules
 ├── .env.example           # Environment variables template
 ├── .gitignore             # Git ignore rules
+├── public/                # Static brand assets served from site root
+│   ├── favicon.ico / favicon-*.png
+│   ├── apple-touch-icon.png
+│   ├── android-chrome-*.png / maskable-icon-512x512.png
+│   ├── og-image.jpg       # 1200x630 social share card
+│   ├── site.webmanifest
+│   └── brand/             # Logo artwork (mark / wordmark / full lockup)
 ├── src/
 │   ├── main-v1.tsx        # App entry point
 │   ├── App-v1.tsx         # Root component
@@ -32,6 +39,7 @@ bludental/
 │   ├── data.ts            # Static data (treatments, FAQs)
 │   ├── index.css          # Global styles
 │   └── components/
+│       ├── BrandLogo.tsx  # Single source of truth for the neudental identity
 │       ├── Navbar.tsx
 │       ├── Hero.tsx
 │       ├── About.tsx
@@ -79,6 +87,36 @@ VITE_FIREBASE_APP_ID=your_app_id
 ```bash
 npm run dev
 ```
+
+---
+
+## Brand Assets
+
+The neudental identity is defined in **one** place: `src/components/BrandLogo.tsx`.
+It exports a `BRAND` constant (name, tagline, phone, colours, asset paths) and a
+`<BrandLogo />` component used by both the Navbar and the Footer. Change the brand
+there and it changes everywhere.
+
+| Asset | Path | Use |
+|---|---|---|
+| Tooth mark | `public/brand/neudental-mark.png` | Header / footer icon, favicon source |
+| Tooth mark (light) | `public/brand/neudental-mark-light.png` | On the navy `--color-primary` background |
+| Wordmark | `public/brand/neudental-wordmark.png` | Header lockup |
+| Wordmark (light) | `public/brand/neudental-wordmark-light.png` | Footer lockup |
+| Full lockup | `public/brand/neudental-logo.png` | schema.org `logo`, print, partners |
+| Share card | `public/og-image.jpg` | Open Graph / Twitter, 1200x630 |
+
+Brand rules:
+
+- The brand name is always lowercase: **neudental** (never "Neudental" or "NeuDental").
+- The tagline is always **"Modern Dental Care for Confident Smiles"**.
+- Core colours: cyan `#3AC3E6`, navy `#0B1341`, deep blue `#0B3B60`.
+- On dark backgrounds use the `-light` artwork variants, never the standard ones.
+
+All raster artwork is derived from the master logo file and regenerated at 2x for
+retina displays. `index.html` carries the favicon set, PWA manifest, Open Graph /
+Twitter cards and a `Dentist` schema.org block so the brand name, logo and clinic
+details stay identical across search, social previews and the site itself.
 
 ---
 
