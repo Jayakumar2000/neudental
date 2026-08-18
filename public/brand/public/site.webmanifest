@@ -1,0 +1,16 @@
+{
+  "name": "neudental — Premium Dental Clinic, Kodungaiyur",
+  "short_name": "neudental",
+  "description": "Modern Dental Care for Confident Smiles. Painless Rotary RCT, Invisalign clear aligners and dental implants by Dr. Swetha BDS, FGDS.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#0B1341",
+  "lang": "en-IN",
+  "icons": [
+    { "src": "/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/maskable-icon-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
