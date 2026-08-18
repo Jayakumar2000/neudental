@@ -44,7 +44,7 @@ Experience premium-grade clinical sterilizations and expert treatments including
 </div>
 <div className="lg:col-span-5 relative mt-12 lg:mt-0">
 <div className="relative aspect-[4/5] max-w-md mx-auto rounded-3xl overflow-hidden shadow-2xl border-4 border-white select-none group">
-<img alt="Premium dental operatory at neudental chennai" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida/AP1WRLvMab6pshPrT48LuXq8IH2HZumT_4Z83AnNmImX8W5-zaC44Xk5KmV1m4Eh0mlhOz81SvbgKLNOcqKApeYpOxOMixk07lizVI1U75-AUzH52zRPS1hHGxdl4Yl7YFCGey9h6nhMTZ1UrmQsy1q1t5tvf5Sprm2OOuItKr-XDvNGN-m-jm-Lpi1ZTA-MJFqbOD6uRZWtoPZv9u8aK7fEF2jYoUP28RDfxWXTxI62IL3I403gtZT7JEZCfw" />
+<img alt="neudental clinic storefront in Kodungaiyur, Chennai" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="/clinic/Entrance_neudental_clinic.jpeg" />
 <div className="absolute inset-0 bg-gradient-to-t from-primary/30 to-transparent" />
 </div>
 <div className="absolute -bottom-6 -left-6 bg-white p-5 rounded-2xl premium-shadow border border-cool-gray/10 hidden md:block max-w-[220px]">
