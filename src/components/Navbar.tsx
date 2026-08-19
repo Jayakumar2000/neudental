@@ -39,11 +39,11 @@ return (
 <div className="bg-primary text-white text-[12px] font-sans py-2 px-6 md:px-10 lg:px-16 text-center flex flex-col sm:flex-row justify-center items-center gap-2 border-b border-white/10 select-none">
 <span className="inline-flex items-center gap-1.5 font-medium">
 <span className="w-2 h-2 rounded-full bg-[#10B981] animate-ping" />
-<span className="text-emerald-400 font-bold">CLINIC UPDATE:</span>
-Safe &amp; Premium Dental Care under Dr. Swetha
+<span className="text-emerald-400 font-bold">MILESTONE:</span>
+neudental is now an officially Registered Trademark&reg;
 </span>
 <span className="hidden sm:inline opacity-60">|</span>
-<span className="opacity-90">Book same-day priority appointments instantly online</span>
+<span className="opacity-90">A trusted name in dental care, now official</span>
 </div>
 
 <header className="sticky top-0 w-full z-40 bg-white/95 backdrop-blur-md border-b border-cool-gray/10 transition-all premium-shadow">
