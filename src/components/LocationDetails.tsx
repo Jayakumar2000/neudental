@@ -2,8 +2,10 @@ import React from 'react';
 import { Clock, MapPin, Phone, HelpCircle, Navigation, ExternalLink, Calendar } from 'lucide-react';
 
 export default function LocationDetails() {
-const addressQuery = "Door+no+13,+neudental+Clinic,+1st+Main+Road,+Kodungaiyur+(East),+Vasuki+Nagar,+Kodungaiyur,+Chennai,+Tamil+Nadu";
-const directionUrl = `https://www.google.com/maps/dir/?api=1&destination=${addressQuery}`;
+const clinicLat = 13.1416;
+const clinicLng = 80.2525;
+const googleMapsUrl = "https://maps.app.goo.gl/XU9TaB1WSEaVK9m79";
+const directionUrl = `https://www.google.com/maps/dir/?api=1&destination=${clinicLat},${clinicLng}`;
 
 return (
 <section id="location" className="py-24 bg-surface-alt px-margin-mobile md:px-margin-desktop border-b border-cool-gray/5">
@@ -41,10 +43,10 @@ return (
 <div className="lg:col-span-7 bg-white rounded-3xl p-4 border border-cool-gray/10 premium-shadow flex flex-col justify-between overflow-hidden">
 <div className="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-cool-gray/10 pb-4 mb-4 gap-3">
 <div><span className="text-[10px] text-cool-gray font-bold uppercase tracking-widest font-sans">Interactive Locator Map</span><h4 className="font-serif text-lg font-bold text-primary">Map view of neudental Clinic</h4></div>
-<a href="https://google.com/maps/place/neudental" target="_blank" rel="noreferrer" className="text-xs text-secondary font-bold hover:underline inline-flex items-center gap-1 font-sans">Open in Google Maps App <ExternalLink className="w-3.5 h-3.5" /></a>
+<a href={googleMapsUrl} target="_blank" rel="noreferrer" className="text-xs text-secondary font-bold hover:underline inline-flex items-center gap-1 font-sans">Open in Google Maps App <ExternalLink className="w-3.5 h-3.5" /></a>
 </div>
 <div className="w-full grow min-h-[350px] rounded-2xl overflow-hidden border border-cool-gray/15 select-none bg-cool-gray/5 relative">
-<iframe title="Google map exact directions neudental clinic chennai" src="https://maps.google.com/maps?q=neudental+Clinic,+Vasuki+Nagar,+Kodungaiyur+East,+Chennai,+Tamil+Nadu+600118&z=17&output=embed" className="w-full h-full border-none absolute inset-0" allowFullScreen={true} loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
+<iframe title="Google map exact directions neudental clinic chennai" src={`https://maps.google.com/maps?q=${clinicLat},${clinicLng}&z=17&output=embed`} className="w-full h-full border-none absolute inset-0" allowFullScreen={true} loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
 </div>
 </div>
 </div>
