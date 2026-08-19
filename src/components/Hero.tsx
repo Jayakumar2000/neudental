@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, Star, Sparkles, MapPin, Award } from 'lucide-react';
+import { ShieldCheck, Star, Sparkles, BadgeCheck, Award } from 'lucide-react';
 
 interface HeroProps {
 onOpenBooking: () => void;
@@ -13,9 +13,11 @@ return (
 <div className="absolute bottom-10 right-10 w-96 h-96 rounded-full bg-mint/35 blur-3xl -z-10" />
 <div className="max-w-[1280px] mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
 <div className="lg:col-span-7 flex flex-col items-start gap-6">
-<div className="inline-flex items-center gap-2 bg-[#E0F2F1] text-secondary border border-secondary/10 px-4 py-1.5 rounded-full select-none">
-<MapPin className="w-4 h-4 text-secondary" />
-<span className="font-sans text-xs font-semibold tracking-wide uppercase">
+<div className="inline-flex items-center gap-3 bg-white pl-1.5 pr-4 py-1.5 rounded-full premium-shadow border border-secondary/15 select-none">
+<span className="flex items-center justify-center w-7 h-7 rounded-full bg-gradient-to-br from-secondary to-primary text-white shrink-0">
+<BadgeCheck className="w-4 h-4" strokeWidth={2.5} />
+</span>
+<span className="font-sans text-xs font-bold tracking-wide text-primary uppercase">
 Best Dental Clinic in Kodungaiyur, Chennai
 </span>
 </div>
