@@ -1,8 +1,18 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { TESTIMONIALS } from '../data';
-import { Star, ShieldCheck, ThumbsUp, Quote } from 'lucide-react';
+import { Star, ShieldCheck, ThumbsUp, Quote, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function Testimonials() {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const scrollByCard = (direction: 1 | -1) => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const card = el.querySelector<HTMLElement>('[data-testimonial-card]');
+    const amount = (card?.offsetWidth ?? 340) + 32; // card width + gap
+    el.scrollBy({ left: direction * amount, behavior: 'smooth' });
+  };
+
   return (
     <section id="testimonials" className="py-24 bg-white px-6 md:px-10 lg:px-16 border-b border-cool-gray/5">
       <div className="max-w-[1280px] mx-auto w-full">
@@ -51,12 +61,34 @@ export default function Testimonials() {
           </div>
         </div>
 
-        {/* Testimonials grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        {/* Testimonials — horizontal scroll strip with prev/next controls, no card left hanging alone on its own row */}
+        <div className="relative max-w-6xl mx-auto">
+          <button
+            type="button"
+            onClick={() => scrollByCard(-1)}
+            aria-label="Previous review"
+            className="hidden md:flex absolute -left-5 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full bg-white premium-shadow border border-cool-gray/10 items-center justify-center text-primary hover:text-secondary hover:border-secondary/30 transition-all cursor-pointer"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollByCard(1)}
+            aria-label="Next review"
+            className="hidden md:flex absolute -right-5 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full bg-white premium-shadow border border-cool-gray/10 items-center justify-center text-primary hover:text-secondary hover:border-secondary/30 transition-all cursor-pointer"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+
+          <div
+            ref={scrollRef}
+            className="flex gap-8 overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar pb-2"
+          >
           {TESTIMONIALS.map((test) => (
             <div
               key={test.id}
-              className="bg-white border border-cool-gray/10 rounded-2xl p-8 premium-shadow hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between relative group"
+              data-testimonial-card
+              className="bg-white border border-cool-gray/10 rounded-2xl p-8 premium-shadow hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between relative group shrink-0 snap-start w-[300px] sm:w-[360px]"
             >
               {/* Giant quote layout background absolute */}
               <Quote className="absolute right-6 top-6 w-12 h-12 text-cool-gray/5 select-none pointer-events-none group-hover:text-secondary/5 transition-colors duration-300" />
@@ -109,6 +141,7 @@ export default function Testimonials() {
               </div>
             </div>
           ))}
+          </div>
         </div>
       </div>
     </section>
