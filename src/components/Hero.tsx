@@ -1,5 +1,12 @@
 import React from 'react';
-import { ShieldCheck, Star, Sparkles, BadgeCheck, Award, Zap } from 'lucide-react';
+import { ShieldCheck, Star, Sparkles, BadgeCheck, Award, Zap, Search, Stethoscope, Phone, Leaf } from 'lucide-react';
+
+const FEATURED_ON = [
+{ name: 'Google', Icon: Search, color: '#4285F4' },
+{ name: 'Practo', Icon: Stethoscope, color: '#0D9488' },
+{ name: 'JustDial', Icon: Phone, color: '#E11D48' },
+{ name: 'Kiwi Health', Icon: Leaf, color: '#16A34A' },
+];
 
 interface HeroProps {
 onScrollToBooking: () => void;
@@ -50,9 +57,11 @@ Experience premium-grade clinical sterilizations and painless laser dentistry pr
 <div className="w-full">
 <p className="font-sans text-[10px] font-bold uppercase tracking-widest text-cool-gray mb-2.5">Featured &amp; Reviewed On</p>
 <div className="flex items-center flex-wrap gap-2">
-{['Google', 'Practo', 'JustDial', 'Kiwi Health'].map((name) => (
-<span key={name} className="inline-flex items-center gap-1.5 bg-white border border-cool-gray/15 rounded-full px-3 py-1.5 text-xs font-sans font-semibold text-on-surface-variant">
-<span className="w-1.5 h-1.5 rounded-full bg-secondary/60" />
+{FEATURED_ON.map(({ name, Icon, color }) => (
+<span key={name} className="inline-flex items-center gap-1.5 bg-white border border-cool-gray/15 rounded-full pl-1.5 pr-3 py-1.5 text-xs font-sans font-semibold text-on-surface-variant">
+<span className="w-5 h-5 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: `${color}1A`, color }}>
+<Icon className="w-3 h-3" strokeWidth={2.5} />
+</span>
 {name}
 </span>
 ))}
