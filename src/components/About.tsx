@@ -1,6 +1,25 @@
 import React from 'react';
 import { DOCTORS } from '../data';
-import { Award, CheckCircle, HeartPulse, ShieldCheck, Cpu, GraduationCap } from 'lucide-react';
+import { Award, CheckCircle, HeartPulse, ShieldCheck, Cpu, GraduationCap, Camera } from 'lucide-react';
+
+interface GalleryPhoto {
+  src: string;
+  alt: string;
+}
+
+const CLINIC_PHOTOS: GalleryPhoto[] = [
+  { src: '/clinic/Entrance_neudental_clinic.jpeg', alt: 'neudental clinic storefront and signage, Kodungaiyur, Chennai' },
+  { src: '/clinic/Signboard_neudental_clinic.jpeg', alt: 'neudental clinic signboard with address, timings and Dr. Swetha U details' },
+  { src: '/clinic/Dental_Chair_neudental_clinic.jpeg', alt: 'Dental treatment chair and operatory at neudental clinic' },
+  { src: '/clinic/Dental_Chair_Operatory_neudental_clinic.jpeg', alt: 'Fully equipped dental operatory at neudental clinic' },
+  { src: '/clinic/Treatment_Room_neudental_clinic.jpeg', alt: 'Treatment room interior at neudental clinic' },
+  { src: '/clinic/Treatment_Room_Wide_neudental_clinic.jpeg', alt: 'Wide view of the treatment room at neudental clinic' },
+  { src: '/clinic/Treatment_Room_Counter_neudental_clinic.jpeg', alt: 'Treatment room counter and workstation at neudental clinic' },
+  { src: '/clinic/Consultation_Desk_neudental_clinic.jpeg', alt: 'Consultation desk and waiting area at neudental clinic' },
+  { src: '/clinic/Reception_Logo_Wall_neudental_clinic.jpeg', alt: 'neudental logo wall at the clinic entrance' },
+  { src: '/clinic/Interior_Logo_Wall_neudental_clinic.jpeg', alt: 'neudental brand wall inside the clinic' },
+  { src: '/clinic/Neudental_Clinic_logo_signage.jpeg', alt: 'neudental clinic logo signage close-up' },
+];
 
 export default function About() {
 return (
@@ -120,6 +139,27 @@ className="bg-white border border-cool-gray/20 text-on-surface text-xs px-2.5 py
 </div>
 </div>
 </div>
+</div>
+))}
+</div>
+</div>
+{/* Clinic Photo Gallery */}
+<div className="max-w-5xl mx-auto pt-20">
+<h3 className="text-center font-serif text-2xl md:text-3xl font-bold text-primary flex items-center justify-center gap-2">
+<Camera className="w-6 h-6 text-secondary" /> Take a Look at Our Clinic
+</h3>
+<p className="text-center font-sans text-sm text-on-surface-variant mt-3 max-w-xl mx-auto leading-relaxed">
+Real photos from our Kodungaiyur practice, so you know exactly what to expect when you walk in.
+</p>
+<div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mt-10">
+{CLINIC_PHOTOS.map((photo) => (
+<div key={photo.src} className="group relative aspect-square rounded-2xl overflow-hidden border border-cool-gray/10 premium-shadow">
+<img
+src={photo.src}
+alt={photo.alt}
+loading="lazy"
+className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+/>
 </div>
 ))}
 </div>

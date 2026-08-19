@@ -4,8 +4,6 @@ import React, { useState } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import About from './components/About';
-import SmileSlider from './components/SmileSlider';
-import ClinicGallery from './components/ClinicGallery';
 import Services from './components/Services';
 import SymptomChecker from './components/SymptomChecker';
 import BookingForm from './components/BookingForm';
@@ -58,8 +56,6 @@ export default function App() {
       <Navbar onSelectTreatment={handleNavbarSelectTreatment} onScrollToBooking={handleScrollToBooking} onLogoClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} />
       <Hero onScrollToBooking={handleScrollToBooking} />
       <About />
-      <ClinicGallery />
-      <SmileSlider />
       <Services onSelectTreatment={handleSelectTreatment} onViewTreatmentDetail={handleNavbarSelectTreatment} />
       <SymptomChecker onSelectTreatment={handleSelectTreatment} />
       <section id="booking-section" className="py-20 bg-gray-50">
