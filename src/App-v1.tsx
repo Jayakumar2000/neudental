@@ -57,12 +57,12 @@ export default function App() {
       <Hero onScrollToBooking={handleScrollToBooking} />
       <About />
       <Services onSelectTreatment={handleSelectTreatment} onViewTreatmentDetail={handleNavbarSelectTreatment} />
-      <SymptomChecker onSelectTreatment={handleSelectTreatment} />
       <section id="booking-section" className="py-20 bg-gray-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <BookingForm preSelectedTreatmentId={preSelectedTreatmentId} />
         </div>
       </section>
+      <SymptomChecker onSelectTreatment={handleSelectTreatment} />
       <Testimonials />
       <LocationDetails onScrollToBooking={handleScrollToBooking} />
       <section className="py-20 bg-white">

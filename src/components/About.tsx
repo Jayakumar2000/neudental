@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { DOCTORS } from '../data';
-import { Award, CheckCircle, HeartPulse, ShieldCheck, Cpu, GraduationCap, Camera } from 'lucide-react';
+import { HeartPulse, ShieldCheck, Cpu, GraduationCap, Camera, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface GalleryPhoto {
   src: string;
@@ -22,6 +23,25 @@ const CLINIC_PHOTOS: GalleryPhoto[] = [
 ];
 
 export default function About() {
+const doc = DOCTORS[0];
+const [activePhoto, setActivePhoto] = useState(0);
+const [isPaused, setIsPaused] = useState(false);
+const activePhotoRef = useRef(activePhoto);
+activePhotoRef.current = activePhoto;
+
+useEffect(() => {
+if (isPaused) return;
+const timer = setInterval(() => {
+setActivePhoto((activePhotoRef.current + 1) % CLINIC_PHOTOS.length);
+}, 4000);
+return () => clearInterval(timer);
+}, [isPaused]);
+
+const goToPhoto = (index: number) => {
+setActivePhoto(((index % CLINIC_PHOTOS.length) + CLINIC_PHOTOS.length) % CLINIC_PHOTOS.length);
+setIsPaused(true);
+};
+
 return (
 <section id="about" className="py-24 bg-white px-6 md:px-10 lg:px-16">
 <div className="max-w-[1280px] mx-auto w-full">
@@ -68,70 +88,56 @@ From ultra-low radiation high-resolution digital imaging to micro-jet scaler tec
 </div>
 </div>
 </div>
-{/* Meet the Doctors */}
-<div className="space-y-12 max-w-5xl mx-auto pt-8">
-<h3 className="text-center font-serif text-2xl md:text-3xl font-bold text-primary">
-Meet Our Lead Surgeon
+{/* Meet the Doctor + Clinic Tour */}
+<div className="max-w-5xl mx-auto pt-8">
+<div className="text-center max-w-2xl mx-auto mb-10">
+<span className="text-secondary font-sans text-xs font-bold tracking-[0.2em] uppercase flex items-center justify-center gap-2">
+<Camera className="w-4 h-4 text-secondary" /> Who You'll Meet, Where You'll Be Treated
+</span>
+<h3 className="font-serif text-2xl md:text-3xl font-bold text-primary mt-3 leading-tight">
+Meet Dr. Swetha &amp; Step Inside neudental
 </h3>
-<div className="max-w-2xl mx-auto">
-{DOCTORS.map((doc, idx) => (
-<div
-key={doc.name}
-className="group flex flex-col md:flex-row bg-surface-alt/50 rounded-3xl overflow-hidden border border-cool-gray/10 premium-shadow hover:-translate-y-1 transition-all duration-300"
->
-{/* Doctor Portrait */}
-<div className="aspect-[4/5] md:w-[260px] shrink-0 relative overflow-hidden bg-primary/5 flex items-center justify-center select-none border-b md:border-b-0 md:border-r border-cool-gray/10">
+<p className="font-sans text-sm text-on-surface-variant mt-3 leading-relaxed">
+Real credentials and real photos of our Kodungaiyur practice, side by side, so you know exactly who's treating you and exactly where you're walking in.
+</p>
+</div>
+<div className="rounded-[2rem] border border-cool-gray/10 premium-shadow overflow-hidden bg-white grid grid-cols-1 lg:grid-cols-12">
+{/* Doctor Pane */}
+<div className="lg:col-span-5 bg-surface-alt/60 p-8 md:p-10 flex flex-col gap-4 lg:border-r border-cool-gray/10">
+<div className="w-full aspect-[4/3] rounded-2xl overflow-hidden bg-primary/5 flex items-center justify-center select-none relative">
 {doc.avatarUrl ? (
-<img
-src={doc.avatarUrl}
-alt={doc.imageAlt}
-className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-/>
+<img src={doc.avatarUrl} alt={doc.imageAlt} className="w-full h-full object-cover" />
 ) : (
 <div className="flex flex-col items-center justify-center p-8 text-center text-primary/40">
-<GraduationCap className="w-16 h-16 text-secondary mb-3 animate-pulse" />
-<span className="text-xl font-serif font-black tracking-widest text-primary/80">Dr. Swetha</span>
+<GraduationCap className="w-14 h-14 text-secondary mb-3" />
+<span className="text-lg font-serif font-black tracking-widest text-primary/80">Dr. Swetha</span>
 <span className="text-[10px] font-mono uppercase tracking-wider text-secondary mt-1">neudental Lead</span>
 </div>
 )}
-{/* Subtle color overlay */}
-<div className="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 </div>
-{/* Doc Details */}
-<div className="p-8 flex flex-col gap-4">
 <div>
 <span className="text-secondary font-sans text-xs tracking-wider uppercase font-bold font-display block mb-1">
 {doc.title}
 </span>
-<h4 className="font-serif text-xl sm:text-2xl font-bold text-primary group-hover:text-secondary transition-colors">
+<h4 className="font-serif text-xl sm:text-2xl font-bold text-primary">
 {doc.name}
 </h4>
 <p className="font-sans text-sm font-medium text-cool-gray mt-1 flex items-center gap-1.5">
 <GraduationCap className="w-4 h-4 text-secondary inline" /> {doc.education}
 </p>
 </div>
-{/* Specialty and Experience */}
 <div className="flex flex-wrap gap-2 text-xs font-sans">
-<span className="bg-primary text-white px-2.5 py-1 rounded">
-{doc.experience}
-</span>
-<span className="bg-secondary/10 text-secondary px-2.5 py-1 rounded font-medium">
-{doc.specialty}
-</span>
+<span className="bg-primary text-white px-2.5 py-1 rounded">{doc.experience}</span>
+<span className="bg-secondary/10 text-secondary px-2.5 py-1 rounded font-medium">{doc.specialty}</span>
 </div>
-{/* Bio */}
 <p className="font-sans text-sm text-on-surface-variant leading-relaxed">
 {doc.bio}
 </p>
-{/* Skills Tagged List */}
 <div className="pt-4 border-t border-cool-gray/10">
 <p className="text-xs font-bold uppercase tracking-wider text-primary mb-2">Core Clinical Mastery:</p>
 <div className="flex flex-wrap gap-1.5">
 {doc.skills.map((skill) => (
-<span
-key={skill}
-className="bg-white border border-cool-gray/20 text-on-surface text-xs px-2.5 py-1 rounded-full flex items-center gap-1"
->
+<span key={skill} className="bg-white border border-cool-gray/20 text-on-surface text-xs px-2.5 py-1 rounded-full flex items-center gap-1">
 <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#10B981]" />
 {skill}
 </span>
@@ -139,29 +145,52 @@ className="bg-white border border-cool-gray/20 text-on-surface text-xs px-2.5 py
 </div>
 </div>
 </div>
+{/* Clinic Tour Pane */}
+<div className="lg:col-span-7 p-8 md:p-10 flex flex-col gap-5">
+<div>
+<h4 className="font-serif text-lg font-bold text-primary">Take a Look at Our Clinic</h4>
+<p className="font-sans text-xs text-on-surface-variant mt-1">Tap a thumbnail, or let it play — {CLINIC_PHOTOS.length} real photos from our practice.</p>
 </div>
-))}
-</div>
-</div>
-{/* Clinic Photo Gallery */}
-<div className="max-w-5xl mx-auto pt-20">
-<h3 className="text-center font-serif text-2xl md:text-3xl font-bold text-primary flex items-center justify-center gap-2">
-<Camera className="w-6 h-6 text-secondary" /> Take a Look at Our Clinic
-</h3>
-<p className="text-center font-sans text-sm text-on-surface-variant mt-3 max-w-xl mx-auto leading-relaxed">
-Real photos from our Kodungaiyur practice, so you know exactly what to expect when you walk in.
-</p>
-<div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mt-10">
-{CLINIC_PHOTOS.map((photo) => (
-<div key={photo.src} className="group relative aspect-square rounded-2xl overflow-hidden border border-cool-gray/10 premium-shadow">
-<img
-src={photo.src}
-alt={photo.alt}
-loading="lazy"
-className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+<div
+className="relative w-full aspect-[16/11] rounded-2xl overflow-hidden bg-cool-gray/5 select-none"
+onMouseEnter={() => setIsPaused(true)}
+onMouseLeave={() => setIsPaused(false)}
+>
+<AnimatePresence mode="wait">
+<motion.img
+key={CLINIC_PHOTOS[activePhoto].src}
+src={CLINIC_PHOTOS[activePhoto].src}
+alt={CLINIC_PHOTOS[activePhoto].alt}
+initial={{ opacity: 0, scale: 1.03 }}
+animate={{ opacity: 1, scale: 1 }}
+exit={{ opacity: 0 }}
+transition={{ duration: 0.45, ease: 'easeOut' }}
+className="absolute inset-0 w-full h-full object-cover"
 />
+</AnimatePresence>
+<div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-primary/70 to-transparent px-4 py-3 pointer-events-none">
+<span className="text-white text-xs font-sans font-medium">{CLINIC_PHOTOS[activePhoto].alt}</span>
 </div>
+<button onClick={() => goToPhoto(activePhoto - 1)} aria-label="Previous photo" className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-primary flex items-center justify-center shadow-md transition-all cursor-pointer">
+<ChevronLeft className="w-4 h-4" />
+</button>
+<button onClick={() => goToPhoto(activePhoto + 1)} aria-label="Next photo" className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-primary flex items-center justify-center shadow-md transition-all cursor-pointer">
+<ChevronRight className="w-4 h-4" />
+</button>
+</div>
+<div className="flex gap-2.5 overflow-x-auto pb-1 no-scrollbar">
+{CLINIC_PHOTOS.map((photo, i) => (
+<button
+key={photo.src}
+onClick={() => goToPhoto(i)}
+aria-label={`Show photo: ${photo.alt}`}
+className={`shrink-0 w-14 h-14 rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${i === activePhoto ? 'border-secondary' : 'border-transparent opacity-60 hover:opacity-100'}`}
+>
+<img src={photo.src} alt="" loading="lazy" className="w-full h-full object-cover" />
+</button>
 ))}
+</div>
+</div>
 </div>
 </div>
 </div>

@@ -4,23 +4,23 @@ import { TREATMENTS } from '../data';
 import BrandLogo, { BRAND } from './BrandLogo';
 
 interface NavbarProps {
-onOpenBooking: () => void;
+onScrollToBooking: () => void;
 onSelectTreatment: (treatmentId: string) => void;
-onHomeClick?: () => void;
+onLogoClick?: () => void;
 }
 
-export default function Navbar({ onOpenBooking, onSelectTreatment, onHomeClick }: NavbarProps) {
+export default function Navbar({ onScrollToBooking, onSelectTreatment, onLogoClick }: NavbarProps) {
 const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
 const handleLogoClick = (e: React.MouseEvent) => {
 e.preventDefault();
-if (onHomeClick) onHomeClick();
+if (onLogoClick) onLogoClick();
 window.scrollTo({ top: 0, behavior: "smooth" });
 };
 
 const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
 e.preventDefault();
-if (onHomeClick) onHomeClick();
+if (onLogoClick) onLogoClick();
 const id = href.slice(1);
 setTimeout(() => {
 const el = document.getElementById(id);
@@ -88,7 +88,7 @@ return (<a key={item.name} href={item.href} onClick={(e) => handleLinkClick(e, i
 <div className="w-9 h-9 rounded-full bg-primary/5 flex items-center justify-center text-primary"><Phone className="w-4 h-4 text-secondary" /></div>
 <div className="text-left leading-none"><span className="text-[10px] block opacity-60 uppercase font-bold tracking-wider">Quick Helpline</span><span className="text-sm font-bold font-sans">+91 93423 67446</span></div>
 </a>
-<button id="cta_nav_book_button" onClick={onOpenBooking} className="bg-primary text-white hover:bg-secondary border border-transparent shadow shadow-primary/10 hover:shadow-lg hover:shadow-secondary/20 hover:-translate-y-0.5 active:translate-y-0 px-6 py-2.5 rounded-full font-sans text-xs uppercase tracking-widest font-bold transition-all duration-200">Book Slot</button>
+<button id="cta_nav_book_button" onClick={onScrollToBooking} className="bg-primary text-white hover:bg-secondary border border-transparent shadow shadow-primary/10 hover:shadow-lg hover:shadow-secondary/20 hover:-translate-y-0.5 active:translate-y-0 px-6 py-2.5 rounded-full font-sans text-xs uppercase tracking-widest font-bold transition-all duration-200">Book Appointment</button>
 </div>
 
 <button className="lg:hidden p-2 text-primary hover:bg-primary/5 rounded-lg active:scale-95 transition-all" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
@@ -120,7 +120,7 @@ return (<a key={item.name} href={item.href} className="text-primary hover:text-s
 <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary"><Phone className="w-5 h-5" /></div>
 <div><p className="text-xs text-cool-gray uppercase font-bold tracking-wider">Quick Mobile Call</p><p className="text-sm font-bold text-primary font-sans">+91 93423 67446</p></div>
 </a>
-<button onClick={() => { setMobileMenuOpen(false); onOpenBooking(); }} className="w-full bg-primary hover:bg-secondary text-white py-4 rounded-xl font-sans text-xs uppercase tracking-widest font-bold transition-all text-center">Book An Appointment</button>
+<button onClick={() => { setMobileMenuOpen(false); onScrollToBooking(); }} className="w-full bg-primary hover:bg-secondary text-white py-4 rounded-xl font-sans text-xs uppercase tracking-widest font-bold transition-all text-center">Book Appointment</button>
 </div>
 </div>
 )}

@@ -2,11 +2,15 @@ import React from 'react';
 import { ShieldCheck, Star, Sparkles, BadgeCheck, Award } from 'lucide-react';
 
 interface HeroProps {
-onOpenBooking: () => void;
-onExploreTreatments: () => void;
+onScrollToBooking: () => void;
 }
 
-export default function Hero({ onOpenBooking, onExploreTreatments }: HeroProps) {
+export default function Hero({ onScrollToBooking }: HeroProps) {
+const handleExploreTreatments = () => {
+const el = document.getElementById('services');
+if (el) el.scrollIntoView({ behavior: 'smooth' });
+};
+
 return (
 <section className="relative overflow-hidden bg-gradient-to-br from-white via-surface-alt to-[#EEF5FC] py-16 lg:py-24 px-6 md:px-10 lg:px-16">
 <div className="absolute top-1/4 left-10 w-72 h-72 rounded-full bg-secondary/5 blur-3xl -z-10" />
@@ -36,8 +40,8 @@ Experience premium-grade clinical sterilizations and expert treatments including
 <div className="flex items-center gap-2.5 text-on-surface"><div className="w-5 h-5 rounded-full bg-secondary/10 flex items-center justify-center text-secondary"><ShieldCheck className="w-3.5 h-3.5" /></div><span>5+ Years Expert Surgeon Care</span></div>
 </div>
 <div className="flex flex-col sm:flex-row gap-4 pt-4 w-full sm:w-auto">
-<button onClick={onOpenBooking} className="bg-primary text-white hover:bg-secondary cursor-pointer shadow-xl shadow-primary/10 hover:shadow-secondary/20 hover:-translate-y-0.5 active:translate-y-0 px-8 py-4 rounded-xl font-sans text-sm tracking-wider uppercase font-bold transition-all duration-200">Book Appointment</button>
-<button onClick={onExploreTreatments} className="border border-cool-gray/30 text-primary hover:border-primary hover:bg-primary/5 cursor-pointer px-8 py-4 rounded-xl font-sans text-sm tracking-wider uppercase font-bold transition-all duration-200">Explore Treatments</button>
+<button onClick={onScrollToBooking} className="bg-primary text-white hover:bg-secondary cursor-pointer shadow-xl shadow-primary/10 hover:shadow-secondary/20 hover:-translate-y-0.5 active:translate-y-0 px-8 py-4 rounded-xl font-sans text-sm tracking-wider uppercase font-bold transition-all duration-200">Book Appointment</button>
+<button onClick={handleExploreTreatments} className="border border-cool-gray/30 text-primary hover:border-primary hover:bg-primary/5 cursor-pointer px-8 py-4 rounded-xl font-sans text-sm tracking-wider uppercase font-bold transition-all duration-200">Explore Treatments</button>
 </div>
 <div className="flex items-center gap-4 pt-4 border-t border-cool-gray/10 w-full">
 <div className="flex items-center gap-1 text-[#FBBF24]"><Star className="w-5 h-5 fill-current" /><Star className="w-5 h-5 fill-current" /><Star className="w-5 h-5 fill-current" /><Star className="w-5 h-5 fill-current" /><Star className="w-5 h-5 fill-current" /></div>
