@@ -36,7 +36,7 @@ const navItems = [
 
 return (
 <>
-<div className="bg-primary text-white text-[12px] font-sans py-2 px-margin-mobile md:px-margin-desktop text-center flex flex-col sm:flex-row justify-center items-center gap-2 border-b border-white/10 select-none">
+<div className="bg-primary text-white text-[12px] font-sans py-2 px-6 md:px-10 lg:px-16 text-center flex flex-col sm:flex-row justify-center items-center gap-2 border-b border-white/10 select-none">
 <span className="inline-flex items-center gap-1.5 font-medium">
 <span className="w-2 h-2 rounded-full bg-[#10B981] animate-ping" />
 <span className="text-emerald-400 font-bold">CLINIC UPDATE:</span>
@@ -47,7 +47,7 @@ Safe &amp; Premium Dental Care under Dr. Swetha
 </div>
 
 <header className="sticky top-0 w-full z-40 bg-white/95 backdrop-blur-md border-b border-cool-gray/10 transition-all premium-shadow">
-<div className="flex items-center justify-between px-margin-mobile md:px-margin-desktop py-4 max-w-[1280px] mx-auto w-full">
+<div className="flex items-center justify-between px-6 md:px-10 lg:px-16 py-4 max-w-[1280px] mx-auto w-full">
 <a href="#" onClick={handleLogoClick} className="flex items-center select-none group" aria-label={`${BRAND.name} — ${BRAND.tagline}`}>
 <BrandLogo
 markClassName="h-10 w-auto sm:h-11 md:h-12"
@@ -97,7 +97,7 @@ return (<a key={item.name} href={item.href} onClick={(e) => handleLinkClick(e, i
 </div>
 
 {mobileMenuOpen && (
-<div className="lg:hidden bg-white border-t border-cool-gray/10 px-margin-mobile py-6 flex flex-col gap-5 max-h-[85vh] overflow-y-auto animate-in fade-in slide-in-from-top-4 duration-200">
+<div className="lg:hidden bg-white border-t border-cool-gray/10 px-6 py-6 flex flex-col gap-5 max-h-[85vh] overflow-y-auto animate-in fade-in slide-in-from-top-4 duration-200">
 <nav className="flex flex-col gap-3">
 {navItems.map((item) => {
 if (item.name === 'Treatments') {

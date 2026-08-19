@@ -4,7 +4,7 @@ import BrandLogo, { BRAND } from './BrandLogo';
 
 export default function Footer() {
 return (
-<footer className="bg-primary text-white border-t border-white/5 pt-16 pb-8 px-margin-mobile md:px-margin-desktop">
+<footer className="bg-primary text-white border-t border-white/5 pt-16 pb-8 px-6 md:px-10 lg:px-16">
 <div className="max-w-[1280px] mx-auto w-full grid grid-cols-1 md:grid-cols-4 gap-12 font-sans mb-12">
 {/* Left Column Brand info */}
 <div className="space-y-4">

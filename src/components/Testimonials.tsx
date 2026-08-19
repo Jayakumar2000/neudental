@@ -4,7 +4,7 @@ import { Star, ShieldCheck, ThumbsUp, Quote } from 'lucide-react';
 
 export default function Testimonials() {
   return (
-    <section id="testimonials" className="py-24 bg-white px-margin-mobile md:px-margin-desktop border-b border-cool-gray/5">
+    <section id="testimonials" className="py-24 bg-white px-6 md:px-10 lg:px-16 border-b border-cool-gray/5">
       <div className="max-w-[1280px] mx-auto w-full">
         {/* Title */}
         <div className="text-center max-w-2xl mx-auto mb-16">

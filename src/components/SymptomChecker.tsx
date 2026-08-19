@@ -20,7 +20,7 @@ return '';
 };
 
 return (
-<section id="symptom-finder" className="py-24 bg-white px-margin-mobile md:px-margin-desktop">
+<section id="symptom-finder" className="py-24 bg-white px-6 md:px-10 lg:px-16">
 <div className="max-w-[1280px] mx-auto w-full">
 <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6 mb-16">
 <div className="max-w-xl">

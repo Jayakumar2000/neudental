@@ -23,7 +23,7 @@ const CLINIC_PHOTOS: GalleryPhoto[] = [
 
 export default function About() {
 return (
-<section id="about" className="py-24 bg-white px-margin-mobile md:px-margin-desktop">
+<section id="about" className="py-24 bg-white px-6 md:px-10 lg:px-16">
 <div className="max-w-[1280px] mx-auto w-full">
 {/* Section Title */}
 <div className="text-center max-w-2xl mx-auto mb-16">

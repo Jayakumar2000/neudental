@@ -10,6 +10,13 @@
   --color-primary: #0B1341;
   --color-secondary: #0557BC;
   --color-mint: #E0F2F1;
+
+  --color-surface: #F8FAFC;
+  --color-surface-alt: #F8FAFC;
+  --color-surface-container-low: #F8FAFC;
+  --color-on-surface: #1E293B;
+  --color-on-surface-variant: #475569;
+  --color-cool-gray: #64748B;
 }
 
 /* Scroll smooth fallback and animations */
