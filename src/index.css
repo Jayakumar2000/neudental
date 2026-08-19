@@ -40,3 +40,35 @@ html {
 .ambient-glow {
   box-shadow: 0 20px 50px -12px rgba(5, 87, 188, 0.08);
 }
+
+/* Continuous photo marquee (clinic tour) */
+@keyframes marquee-left {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes marquee-right {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(0); }
+}
+.marquee-row {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
+  mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee-left 38s linear infinite;
+}
+.marquee-track.marquee-reverse {
+  animation-name: marquee-right;
+  animation-duration: 32s;
+}
+.marquee-row:hover .marquee-track {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+}

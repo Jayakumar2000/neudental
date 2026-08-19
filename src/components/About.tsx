@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import React from 'react';
 import { DOCTORS } from '../data';
-import { HeartPulse, ShieldCheck, Cpu, GraduationCap, Camera, ChevronLeft, ChevronRight } from 'lucide-react';
+import { HeartPulse, ShieldCheck, Cpu, GraduationCap, Camera } from 'lucide-react';
 
 interface GalleryPhoto {
   src: string;
@@ -22,25 +21,11 @@ const CLINIC_PHOTOS: GalleryPhoto[] = [
   { src: '/clinic/Neudental_Clinic_logo_signage.jpeg', alt: 'neudental clinic logo signage close-up' },
 ];
 
+const CLINIC_ROW_1 = CLINIC_PHOTOS.filter((_, i) => i % 2 === 0);
+const CLINIC_ROW_2 = CLINIC_PHOTOS.filter((_, i) => i % 2 === 1);
+
 export default function About() {
 const doc = DOCTORS[0];
-const [activePhoto, setActivePhoto] = useState(0);
-const [isPaused, setIsPaused] = useState(false);
-const activePhotoRef = useRef(activePhoto);
-activePhotoRef.current = activePhoto;
-
-useEffect(() => {
-if (isPaused) return;
-const timer = setInterval(() => {
-setActivePhoto((activePhotoRef.current + 1) % CLINIC_PHOTOS.length);
-}, 4000);
-return () => clearInterval(timer);
-}, [isPaused]);
-
-const goToPhoto = (index: number) => {
-setActivePhoto(((index % CLINIC_PHOTOS.length) + CLINIC_PHOTOS.length) % CLINIC_PHOTOS.length);
-setIsPaused(true);
-};
 
 return (
 <section id="about" className="py-24 bg-white px-6 md:px-10 lg:px-16">
@@ -88,107 +73,71 @@ From ultra-low radiation high-resolution digital imaging to micro-jet scaler tec
 </div>
 </div>
 </div>
-{/* Meet the Doctor + Clinic Tour */}
+{/* Meet the Doctor + Clinic Tour — one flowing composition, not two boxed-off panes */}
 <div className="max-w-5xl mx-auto pt-8">
 <div className="text-center max-w-2xl mx-auto mb-10">
 <span className="text-secondary font-sans text-xs font-bold tracking-[0.2em] uppercase flex items-center justify-center gap-2">
-<Camera className="w-4 h-4 text-secondary" /> Who You'll Meet, Where You'll Be Treated
+<Camera className="w-4 h-4 text-secondary" /> Step Inside neudental
 </span>
 <h3 className="font-serif text-2xl md:text-3xl font-bold text-primary mt-3 leading-tight">
-Meet Dr. Swetha &amp; Step Inside neudental
+Real Clinic, Real Doctor
 </h3>
 <p className="font-sans text-sm text-on-surface-variant mt-3 leading-relaxed">
-Real credentials and real photos of our Kodungaiyur practice, side by side, so you know exactly who's treating you and exactly where you're walking in.
+{CLINIC_PHOTOS.length} real photos from our Kodungaiyur practice, and the surgeon behind every treatment.
 </p>
 </div>
-<div className="rounded-[2rem] border border-cool-gray/10 premium-shadow overflow-hidden bg-white grid grid-cols-1 lg:grid-cols-12">
-{/* Doctor Pane */}
-<div className="lg:col-span-5 bg-surface-alt/60 p-8 md:p-10 flex flex-col gap-4 lg:border-r border-cool-gray/10">
-<div className="w-full aspect-[4/3] rounded-2xl overflow-hidden bg-primary/5 flex items-center justify-center select-none relative">
-{doc.avatarUrl ? (
-<img src={doc.avatarUrl} alt={doc.imageAlt} className="w-full h-full object-cover" />
-) : (
-<div className="flex flex-col items-center justify-center p-8 text-center text-primary/40">
-<GraduationCap className="w-14 h-14 text-secondary mb-3" />
-<span className="text-lg font-serif font-black tracking-widest text-primary/80">Dr. Swetha</span>
-<span className="text-[10px] font-mono uppercase tracking-wider text-secondary mt-1">neudental Lead</span>
+
+<div className="rounded-[2rem] border border-cool-gray/10 premium-shadow overflow-hidden bg-white">
+{/* Doctor Bio */}
+<div className="p-8 md:p-10">
+<div className="flex flex-col sm:flex-row gap-5 sm:items-center">
+<div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-gradient-to-br from-secondary to-primary flex items-center justify-center shrink-0 mx-auto sm:mx-0">
+<GraduationCap className="w-10 h-10 md:w-11 md:h-11 text-white" />
 </div>
-)}
-</div>
-<div>
+<div className="text-center sm:text-left">
 <span className="text-secondary font-sans text-xs tracking-wider uppercase font-bold font-display block mb-1">
-{doc.title}
+{doc.title} &middot; {doc.specialty}
 </span>
 <h4 className="font-serif text-xl sm:text-2xl font-bold text-primary">
 {doc.name}
 </h4>
-<p className="font-sans text-sm font-medium text-cool-gray mt-1 flex items-center gap-1.5">
-<GraduationCap className="w-4 h-4 text-secondary inline" /> {doc.education}
+<p className="font-sans text-sm font-medium text-cool-gray mt-1 flex items-center justify-center sm:justify-start gap-1.5">
+<GraduationCap className="w-4 h-4 text-secondary inline shrink-0" /> {doc.education} &middot; {doc.experience}
 </p>
 </div>
-<div className="flex flex-wrap gap-2 text-xs font-sans">
-<span className="bg-primary text-white px-2.5 py-1 rounded">{doc.experience}</span>
-<span className="bg-secondary/10 text-secondary px-2.5 py-1 rounded font-medium">{doc.specialty}</span>
 </div>
-<p className="font-sans text-sm text-on-surface-variant leading-relaxed">
+<p className="font-sans text-sm text-on-surface-variant leading-relaxed mt-5">
 {doc.bio}
 </p>
-<div className="pt-4 border-t border-cool-gray/10">
-<p className="text-xs font-bold uppercase tracking-wider text-primary mb-2">Core Clinical Mastery:</p>
-<div className="flex flex-wrap gap-1.5">
+<div className="flex flex-wrap justify-center sm:justify-start gap-1.5 mt-5 pt-5 border-t border-cool-gray/10">
 {doc.skills.map((skill) => (
-<span key={skill} className="bg-white border border-cool-gray/20 text-on-surface text-xs px-2.5 py-1 rounded-full flex items-center gap-1">
+<span key={skill} className="bg-surface-alt border border-cool-gray/20 text-on-surface text-xs px-2.5 py-1 rounded-full flex items-center gap-1">
 <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#10B981]" />
 {skill}
 </span>
 ))}
 </div>
 </div>
+{/* Clinic Tour — continuous marquee, same panel, no border between them */}
+<div className="bg-surface-alt/60 pt-6 pb-8">
+<p className="text-center font-sans text-xs font-bold uppercase tracking-widest text-cool-gray mb-4">Take a Look at Our Clinic</p>
+<div className="marquee-row">
+<div className="marquee-track gap-3 px-1.5">
+{[...CLINIC_ROW_1, ...CLINIC_ROW_1].map((photo, i) => (
+<div key={`${photo.src}-${i}`} className="relative shrink-0 w-48 h-32 sm:w-56 sm:h-36 rounded-2xl overflow-hidden group">
+<img src={photo.src} alt={photo.alt} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
 </div>
-{/* Clinic Tour Pane */}
-<div className="lg:col-span-7 p-8 md:p-10 flex flex-col gap-5">
-<div>
-<h4 className="font-serif text-lg font-bold text-primary">Take a Look at Our Clinic</h4>
-<p className="font-sans text-xs text-on-surface-variant mt-1">Tap a thumbnail, or let it play — {CLINIC_PHOTOS.length} real photos from our practice.</p>
-</div>
-<div
-className="relative w-full aspect-[16/11] rounded-2xl overflow-hidden bg-cool-gray/5 select-none"
-onMouseEnter={() => setIsPaused(true)}
-onMouseLeave={() => setIsPaused(false)}
->
-<AnimatePresence mode="wait">
-<motion.img
-key={CLINIC_PHOTOS[activePhoto].src}
-src={CLINIC_PHOTOS[activePhoto].src}
-alt={CLINIC_PHOTOS[activePhoto].alt}
-initial={{ opacity: 0, scale: 1.03 }}
-animate={{ opacity: 1, scale: 1 }}
-exit={{ opacity: 0 }}
-transition={{ duration: 0.45, ease: 'easeOut' }}
-className="absolute inset-0 w-full h-full object-cover"
-/>
-</AnimatePresence>
-<div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-primary/70 to-transparent px-4 py-3 pointer-events-none">
-<span className="text-white text-xs font-sans font-medium">{CLINIC_PHOTOS[activePhoto].alt}</span>
-</div>
-<button onClick={() => goToPhoto(activePhoto - 1)} aria-label="Previous photo" className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-primary flex items-center justify-center shadow-md transition-all cursor-pointer">
-<ChevronLeft className="w-4 h-4" />
-</button>
-<button onClick={() => goToPhoto(activePhoto + 1)} aria-label="Next photo" className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-primary flex items-center justify-center shadow-md transition-all cursor-pointer">
-<ChevronRight className="w-4 h-4" />
-</button>
-</div>
-<div className="flex gap-2.5 overflow-x-auto pb-1 no-scrollbar">
-{CLINIC_PHOTOS.map((photo, i) => (
-<button
-key={photo.src}
-onClick={() => goToPhoto(i)}
-aria-label={`Show photo: ${photo.alt}`}
-className={`shrink-0 w-14 h-14 rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${i === activePhoto ? 'border-secondary' : 'border-transparent opacity-60 hover:opacity-100'}`}
->
-<img src={photo.src} alt="" loading="lazy" className="w-full h-full object-cover" />
-</button>
 ))}
+</div>
+</div>
+<div className="marquee-row mt-3">
+<div className="marquee-track marquee-reverse gap-3 px-1.5">
+{[...CLINIC_ROW_2, ...CLINIC_ROW_2].map((photo, i) => (
+<div key={`${photo.src}-${i}`} className="relative shrink-0 w-48 h-32 sm:w-56 sm:h-36 rounded-2xl overflow-hidden group">
+<img src={photo.src} alt={photo.alt} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+</div>
+))}
+</div>
 </div>
 </div>
 </div>
