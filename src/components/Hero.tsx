@@ -33,12 +33,11 @@ Best Dental Clinic in Kodungaiyur, Chennai
 </span>
 </div>
 <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-5xl text-primary leading-tight font-bold tracking-tight">
-Complete Dental Care <br />
-<span className="text-secondary italic font-light">for You &amp; Your Family</span>
+Gentle Dentistry. <br />
+<span className="text-secondary italic font-light">For Every Age, From Day One.</span>
 </h1>
 <p className="font-sans text-base md:text-lg text-on-surface-variant max-w-xl leading-relaxed">
-Experience premium-grade clinical sterilizations and painless laser dentistry procedures including <strong>Rotary Root Canals (RCT)</strong>,
-<strong> Invisalign Clear Aligners</strong>, and <strong>Dental Implants</strong> with absolute patient-first care, high safety, and gentle precision techniques.
+Painless, laser-assisted care with a conservative, tooth-first approach — from a child's first checkup to a <strong>Root Canal</strong> or <strong>Implant</strong>, by Dr. Swetha BDS, FGDS.
 </p>
 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 w-full max-w-lg font-sans text-sm">
 <div className="flex items-center gap-2.5 text-on-surface"><div className="w-5 h-5 rounded-full bg-secondary/10 flex items-center justify-center text-secondary"><Zap className="w-3.5 h-3.5" /></div><span>Advanced Laser Dentistry</span></div>
