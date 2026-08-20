@@ -5,10 +5,11 @@ import { HeartPulse, ShieldCheck, Cpu, GraduationCap, Camera } from 'lucide-reac
 interface GalleryPhoto {
   src: string;
   alt: string;
+  position?: string;
 }
 
 const CLINIC_PHOTOS: GalleryPhoto[] = [
-  { src: '/clinic/Entrance_neudental_clinic.jpeg', alt: 'neudental clinic storefront and signage, Kodungaiyur, Chennai' },
+  { src: '/clinic/Entrance_neudental_clinic.jpeg', alt: 'neudental clinic storefront and signage, Kodungaiyur, Chennai', position: 'top' },
   { src: '/clinic/Signboard_neudental_clinic.jpeg', alt: 'neudental clinic signboard with address, timings and Dr. Swetha U details' },
   { src: '/clinic/Dental_Chair_neudental_clinic.jpeg', alt: 'Dental treatment chair and operatory at neudental clinic' },
   { src: '/clinic/Dental_Chair_Operatory_neudental_clinic.jpeg', alt: 'Fully equipped dental operatory at neudental clinic' },
@@ -19,6 +20,7 @@ const CLINIC_PHOTOS: GalleryPhoto[] = [
   { src: '/clinic/Reception_Logo_Wall_neudental_clinic.jpeg', alt: 'neudental logo wall at the clinic entrance' },
   { src: '/clinic/Interior_Logo_Wall_neudental_clinic.jpeg', alt: 'neudental brand wall inside the clinic' },
   { src: '/clinic/Neudental_Clinic_logo_signage.jpeg', alt: 'neudental clinic logo signage close-up' },
+  { src: '/clinic/Waiting_Area_Reception_neudental_clinic.jpeg', alt: 'Waiting area and reception at neudental clinic' },
 ];
 
 const CLINIC_ROW_1 = CLINIC_PHOTOS.filter((_, i) => i % 2 === 0);
@@ -131,7 +133,7 @@ className="w-full h-full object-cover object-top"
 <div className="marquee-track gap-3 px-1.5">
 {[...CLINIC_ROW_1, ...CLINIC_ROW_1].map((photo, i) => (
 <div key={`${photo.src}-${i}`} className="relative shrink-0 w-48 h-32 sm:w-56 sm:h-36 rounded-2xl overflow-hidden group">
-<img src={photo.src} alt={photo.alt} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+<img src={photo.src} alt={photo.alt} style={{ objectPosition: photo.position ?? 'center' }} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
 </div>
 ))}
 </div>
@@ -140,7 +142,7 @@ className="w-full h-full object-cover object-top"
 <div className="marquee-track marquee-reverse gap-3 px-1.5">
 {[...CLINIC_ROW_2, ...CLINIC_ROW_2].map((photo, i) => (
 <div key={`${photo.src}-${i}`} className="relative shrink-0 w-48 h-32 sm:w-56 sm:h-36 rounded-2xl overflow-hidden group">
-<img src={photo.src} alt={photo.alt} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+<img src={photo.src} alt={photo.alt} style={{ objectPosition: photo.position ?? 'center' }} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
 </div>
 ))}
 </div>
