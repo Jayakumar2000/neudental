@@ -72,16 +72,19 @@ Painless, laser-assisted care with a conservative, tooth-first approach — from
 <div className="absolute -bottom-6 -left-6 bg-white p-5 rounded-2xl premium-shadow border border-cool-gray/10 hidden md:block max-w-[220px]">
 <div className="flex items-center gap-3"><div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center"><Award className="w-5 h-5" /></div><div className="leading-tight"><p className="text-lg font-bold text-primary font-sans">99.8%</p><p className="text-[11px] text-cool-gray font-sans font-medium uppercase tracking-wider">Sterilization Rate</p></div></div>
 </div>
-<div className="absolute -top-6 -right-6 bg-white p-4 rounded-2xl premium-shadow border border-cool-gray/10 hidden md:flex items-center gap-3 max-w-[220px]">
-<div className="w-11 h-11 rounded-full bg-surface-alt ring-1 ring-cool-gray/10 flex items-center justify-center shrink-0">
-<img src="/logos/google-icon.png" alt="Google" className="w-6 h-6" />
+<div className="absolute -top-6 -right-6 bg-white pl-3 pr-5 py-3.5 rounded-2xl premium-shadow border border-cool-gray/10 hidden md:flex items-center gap-3.5">
+<div className="w-12 h-12 rounded-full bg-surface-alt ring-1 ring-cool-gray/10 flex items-center justify-center shrink-0">
+<img src="/logos/google-icon.png" alt="Google" className="w-6.5 h-6.5" />
 </div>
+<div className="w-px h-9 bg-cool-gray/15 shrink-0" />
 <div className="leading-tight">
+<div className="flex items-baseline gap-2 whitespace-nowrap">
+<span className="text-xl font-bold text-primary font-sans">5.0</span>
 <div className="flex items-center gap-0.5 text-[#FBBF24]">
 <Star className="w-3 h-3 fill-current" /><Star className="w-3 h-3 fill-current" /><Star className="w-3 h-3 fill-current" /><Star className="w-3 h-3 fill-current" /><Star className="w-3 h-3 fill-current" />
 </div>
-<p className="text-base font-bold text-primary font-sans mt-0.5 whitespace-nowrap">150+ 5-Star Ratings</p>
-<p className="text-[10px] text-cool-gray font-sans font-medium uppercase tracking-wider">On Google Maps</p>
+</div>
+<p className="text-[11px] font-bold text-cool-gray font-sans uppercase tracking-wide mt-1 whitespace-nowrap">150+ Ratings on Google</p>
 </div>
 </div>
 </div>
