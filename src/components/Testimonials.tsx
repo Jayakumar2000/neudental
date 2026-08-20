@@ -94,13 +94,6 @@ export default function Testimonials() {
               <Quote className="absolute right-6 top-6 w-12 h-12 text-cool-gray/5 select-none pointer-events-none group-hover:text-secondary/5 transition-colors duration-300" />
               
               <div>
-                {/* 5 Stars */}
-                <div className="flex text-amber-500 gap-1 mb-5">
-                  {[...Array(test.rating)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-current" />
-                  ))}
-                </div>
-
                 <p className="font-sans text-sm text-primary italic leading-relaxed mb-6 select-text">
                   &ldquo;{test.text}&rdquo;
                 </p>
