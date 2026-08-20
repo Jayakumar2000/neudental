@@ -90,11 +90,17 @@ Real Clinic, Real Doctor
 <div className="rounded-[2rem] border border-cool-gray/10 premium-shadow overflow-hidden bg-white">
 {/* Doctor Bio */}
 <div className="p-8 md:p-10">
-<div className="flex flex-col sm:flex-row gap-5 sm:items-center">
-<div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-gradient-to-br from-secondary to-primary flex items-center justify-center shrink-0 mx-auto sm:mx-0">
-<GraduationCap className="w-10 h-10 md:w-11 md:h-11 text-white" />
+<div className="flex flex-col sm:flex-row gap-6 md:gap-8">
+<div className="w-full max-w-[220px] mx-auto sm:mx-0 sm:w-56 md:w-64 shrink-0">
+<div className="aspect-[2/3] rounded-2xl overflow-hidden bg-cool-gray/10 premium-shadow">
+<img
+src="/doctor/dr-swetha.jpg"
+alt="Dr. Swetha U, Lead Dental Surgeon at neudental"
+className="w-full h-full object-cover object-top"
+/>
 </div>
-<div className="text-center sm:text-left">
+</div>
+<div className="flex-1 text-center sm:text-left">
 <span className="text-secondary font-sans text-xs tracking-wider uppercase font-bold font-display block mb-1">
 {doc.title} &middot; {doc.specialty}
 </span>
@@ -104,9 +110,7 @@ Real Clinic, Real Doctor
 <p className="font-sans text-sm font-medium text-cool-gray mt-1 flex items-center justify-center sm:justify-start gap-1.5">
 <GraduationCap className="w-4 h-4 text-secondary inline shrink-0" /> {doc.education} &middot; {doc.experience}
 </p>
-</div>
-</div>
-<p className="font-sans text-sm text-on-surface-variant leading-relaxed mt-5">
+<p className="font-sans text-sm text-on-surface-variant leading-relaxed mt-4">
 {doc.bio}
 </p>
 <div className="flex flex-wrap justify-center sm:justify-start gap-1.5 mt-5 pt-5 border-t border-cool-gray/10">
@@ -116,6 +120,8 @@ Real Clinic, Real Doctor
 {skill}
 </span>
 ))}
+</div>
+</div>
 </div>
 </div>
 {/* Clinic Tour — continuous marquee, same panel, no border between them */}
