@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, Star, Sparkles, BadgeCheck, Award, Zap } from 'lucide-react';
+import { ShieldCheck, Star, BadgeCheck, Award, Zap } from 'lucide-react';
 
 const FEATURED_ON = [
 { name: 'Google', logo: '/logos/google-icon.png', showLabel: true },
@@ -72,8 +72,17 @@ Painless, laser-assisted care with a conservative, tooth-first approach — from
 <div className="absolute -bottom-6 -left-6 bg-white p-5 rounded-2xl premium-shadow border border-cool-gray/10 hidden md:block max-w-[220px]">
 <div className="flex items-center gap-3"><div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center"><Award className="w-5 h-5" /></div><div className="leading-tight"><p className="text-lg font-bold text-primary font-sans">99.8%</p><p className="text-[11px] text-cool-gray font-sans font-medium uppercase tracking-wider">Sterilization Rate</p></div></div>
 </div>
-<div className="absolute -top-6 -right-6 bg-white p-5 rounded-2xl premium-shadow border border-cool-gray/10 hidden md:block max-w-[200px]">
-<div className="flex items-center gap-3"><div className="w-10 h-10 rounded-xl bg-[#EEF5FC] text-secondary flex items-center justify-center"><Sparkles className="w-5 h-5" /></div><div className="leading-tight"><p className="text-base font-bold text-primary font-sans">Lead Surgeon</p><p className="text-[11px] text-cool-gray font-sans font-medium uppercase tracking-wider">Dr. Swetha BDS, FGDS</p></div></div>
+<div className="absolute -top-6 -right-6 bg-white p-4 rounded-2xl premium-shadow border border-cool-gray/10 hidden md:flex items-center gap-3 max-w-[220px]">
+<div className="w-11 h-11 rounded-full bg-surface-alt ring-1 ring-cool-gray/10 flex items-center justify-center shrink-0">
+<img src="/logos/google-icon.png" alt="Google" className="w-6 h-6" />
+</div>
+<div className="leading-tight">
+<div className="flex items-center gap-0.5 text-[#FBBF24]">
+<Star className="w-3 h-3 fill-current" /><Star className="w-3 h-3 fill-current" /><Star className="w-3 h-3 fill-current" /><Star className="w-3 h-3 fill-current" /><Star className="w-3 h-3 fill-current" />
+</div>
+<p className="text-base font-bold text-primary font-sans mt-0.5 whitespace-nowrap">150+ 5-Star Ratings</p>
+<p className="text-[10px] text-cool-gray font-sans font-medium uppercase tracking-wider">On Google Maps</p>
+</div>
 </div>
 </div>
 </div>
