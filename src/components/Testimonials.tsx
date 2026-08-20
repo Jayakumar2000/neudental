@@ -34,7 +34,7 @@ export default function Testimonials() {
         <div className="p-8 rounded-3xl bg-[#F8FAFC] border border-cool-gray/10 max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center mb-16 items-center">
           <div className="space-y-1.5 border-b md:border-b-0 md:border-r border-cool-gray/10 pb-6 md:pb-0">
             <span className="text-sm font-sans font-medium text-cool-gray block uppercase tracking-widest">Aggregate Rating</span>
-            <strong className="text-4xl font-display font-extrabold text-primary block">4.9 / 5.0</strong>
+            <strong className="text-4xl font-display font-extrabold text-primary block">4.97 / 5.0</strong>
             <div className="flex gap-1 justify-center text-amber-500">
               <Star className="w-4 h-4 fill-current" />
               <Star className="w-4 h-4 fill-current" />
@@ -46,7 +46,7 @@ export default function Testimonials() {
 
           <div className="space-y-1.5 border-b md:border-b-0 md:border-r border-cool-gray/10 pb-6 md:pb-0">
             <span className="text-sm font-sans font-medium text-cool-gray block uppercase tracking-widest">Verified Reviews</span>
-            <strong className="text-4xl font-display font-extrabold text-primary block">125+</strong>
+            <strong className="text-4xl font-display font-extrabold text-primary block">150+</strong>
             <span className="font-sans text-xs text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full font-semibold">
               100% Patient Authenticated
             </span>
