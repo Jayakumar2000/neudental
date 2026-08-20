@@ -15,7 +15,7 @@ Built with React, TypeScript, Vite, TailwindCSS, and Firebase.
 ## Project Structure
 
 ```
-bludental/
+neudental/
 ├── index-v1.html          # Entry HTML with SEO meta tags
 ├── package.json           # Dependencies (neudental-v1)
 ├── vite.config-v1.ts      # Vite build configuration
@@ -57,8 +57,8 @@ bludental/
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/Jayakumar2000/bludental.git
-cd bludental
+git clone https://github.com/Jayakumar2000/neudental.git
+cd neudental
 npm install
 ```
 
@@ -162,7 +162,7 @@ git push origin main
 ### Step 2: Connect to Vercel
 1. Go to [vercel.com](https://vercel.com) and sign in with GitHub
 2. Click **"Add New Project"**
-3. Import the **bludental** repository
+3. Import the **neudental** repository
 4. Framework: **Vite** (auto-detected)
 5. Build Command: `npm run build`
 6. Output Directory: `dist`
@@ -193,7 +193,7 @@ The app uses:
 - **Firebase Anonymous Auth** for secure per-user data isolation
 
 After deployment, your site will be live at:
-`https://bludental.vercel.app` (or custom domain)
+`https://neudental-v1.vercel.app` (or custom domain)
 
 ---
 
