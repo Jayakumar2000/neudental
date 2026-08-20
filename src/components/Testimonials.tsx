@@ -6,6 +6,8 @@ import { Star, ShieldCheck, ThumbsUp, Quote, ChevronLeft, ChevronRight } from 'l
 // wordmark logo doesn't fit this avatar-sized circular slot legibly.
 const SOURCE_LOGOS: Partial<Record<string, string>> = {
   google: '/logos/google-icon.png',
+  practo: '/logos/practo-icon.jpeg',
+  justdial: '/logos/justdial-icon.png',
 };
 
 export default function Testimonials() {
