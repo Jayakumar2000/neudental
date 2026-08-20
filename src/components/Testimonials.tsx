@@ -2,6 +2,12 @@ import React, { useRef } from 'react';
 import { TESTIMONIALS } from '../data';
 import { Star, ShieldCheck, ThumbsUp, Quote, ChevronLeft, ChevronRight } from 'lucide-react';
 
+// Only platforms with a real, square icon-only mark on file go here — a full
+// wordmark logo doesn't fit this avatar-sized circular slot legibly.
+const SOURCE_LOGOS: Partial<Record<string, string>> = {
+  google: '/logos/google-icon.png',
+};
+
 export default function Testimonials() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -114,10 +120,16 @@ export default function Testimonials() {
                       }}
                     />
                   ) : null}
-                  {/* Fallback Initials */}
-                  <div className="w-full h-full bg-secondary text-white text-xs font-bold flex items-center justify-center">
-                    {test.initials}
-                  </div>
+                  {test.sourceLogo && SOURCE_LOGOS[test.sourceLogo] ? (
+                    <div className="w-full h-full bg-white flex items-center justify-center p-2">
+                      <img src={SOURCE_LOGOS[test.sourceLogo]} alt={`Review sourced from ${test.sourceLogo}`} className="w-full h-full object-contain" />
+                    </div>
+                  ) : (
+                    /* Fallback Initials */
+                    <div className="w-full h-full bg-secondary text-white text-xs font-bold flex items-center justify-center">
+                      {test.initials}
+                    </div>
+                  )}
                 </div>
 
                 <div className="font-sans leading-tight">

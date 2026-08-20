@@ -35,6 +35,7 @@ export interface Testimonial {
   imgUrl: string;
   imgAlt: string;
   initials: string;
+  sourceLogo?: 'google' | 'practo' | 'justdial';
 }
 
 export interface Symptom {
