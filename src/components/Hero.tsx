@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, Star, Sparkles, BadgeCheck, Award, Zap } from 'lucide-react';
+import { Star, Sparkles, BadgeCheck, Award } from 'lucide-react';
 
 const FEATURED_ON = [
 { name: 'Google', logo: '/logos/google-icon.png', showLabel: true },
@@ -38,20 +38,6 @@ Gentle Dentistry. <br />
 <p className="font-sans text-base md:text-lg text-on-surface-variant max-w-xl leading-relaxed">
 Painless, laser-assisted care with a conservative, tooth-first approach — from a child's first checkup to a <strong>Root Canal</strong> or <strong>Implant</strong>, by Dr. Swetha BDS, FGDS.
 </p>
-<div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 w-full max-w-lg font-sans text-sm">
-<div className="flex items-center gap-2.5 text-on-surface"><div className="w-5 h-5 rounded-full bg-secondary/10 flex items-center justify-center text-secondary"><Zap className="w-3.5 h-3.5" /></div><span>Advanced Laser Dentistry</span></div>
-<div className="flex items-center gap-2.5 text-on-surface"><div className="w-5 h-5 rounded-full bg-secondary/10 flex items-center justify-center text-secondary"><ShieldCheck className="w-3.5 h-3.5" /></div><span>100% Painless Procedures</span></div>
-<div className="flex items-center gap-2.5 text-on-surface"><div className="w-5 h-5 rounded-full bg-secondary/10 flex items-center justify-center text-secondary"><ShieldCheck className="w-3.5 h-3.5" /></div><span>No Hidden Lab Charges</span></div>
-<div className="flex items-center gap-2.5 text-on-surface"><div className="w-5 h-5 rounded-full bg-secondary/10 flex items-center justify-center text-secondary"><ShieldCheck className="w-3.5 h-3.5" /></div><span>5+ Years Expert Surgeon Care</span></div>
-</div>
-<div className="flex flex-col sm:flex-row gap-4 pt-4 w-full sm:w-auto">
-<button onClick={onScrollToBooking} className="bg-primary text-white hover:bg-secondary cursor-pointer shadow-xl shadow-primary/10 hover:shadow-secondary/20 hover:-translate-y-0.5 active:translate-y-0 px-8 py-4 rounded-xl font-sans text-sm tracking-wider uppercase font-bold transition-all duration-200">Book Appointment</button>
-<button onClick={handleExploreTreatments} className="border border-cool-gray/30 text-primary hover:border-primary hover:bg-primary/5 cursor-pointer px-8 py-4 rounded-xl font-sans text-sm tracking-wider uppercase font-bold transition-all duration-200">Explore Treatments</button>
-</div>
-<div className="flex items-center gap-4 pt-4 border-t border-cool-gray/10 w-full">
-<div className="flex items-center gap-1 text-[#FBBF24]"><Star className="w-5 h-5 fill-current" /><Star className="w-5 h-5 fill-current" /><Star className="w-5 h-5 fill-current" /><Star className="w-5 h-5 fill-current" /><Star className="w-5 h-5 fill-current" /></div>
-<p className="font-sans text-xs text-on-surface-variant font-medium"><strong className="text-primary font-bold">125+ Google Reviews</strong> rated excellent by Kodungaiyur residents</p>
-</div>
 <div className="w-full">
 <p className="font-sans text-[10px] font-bold uppercase tracking-widest text-cool-gray mb-2.5">Featured &amp; Reviewed On</p>
 <div className="flex items-center flex-wrap gap-2.5">
@@ -62,6 +48,14 @@ Painless, laser-assisted care with a conservative, tooth-first approach — from
 </span>
 ))}
 </div>
+</div>
+<div className="flex flex-col sm:flex-row gap-4 pt-4 w-full sm:w-auto">
+<button onClick={onScrollToBooking} className="bg-primary text-white hover:bg-secondary cursor-pointer shadow-xl shadow-primary/10 hover:shadow-secondary/20 hover:-translate-y-0.5 active:translate-y-0 px-8 py-4 rounded-xl font-sans text-sm tracking-wider uppercase font-bold transition-all duration-200">Book Appointment</button>
+<button onClick={handleExploreTreatments} className="border border-cool-gray/30 text-primary hover:border-primary hover:bg-primary/5 cursor-pointer px-8 py-4 rounded-xl font-sans text-sm tracking-wider uppercase font-bold transition-all duration-200">Explore Treatments</button>
+</div>
+<div className="flex items-center gap-4 pt-4 border-t border-cool-gray/10 w-full">
+<div className="flex items-center gap-1 text-[#FBBF24]"><Star className="w-5 h-5 fill-current" /><Star className="w-5 h-5 fill-current" /><Star className="w-5 h-5 fill-current" /><Star className="w-5 h-5 fill-current" /><Star className="w-5 h-5 fill-current" /></div>
+<p className="font-sans text-xs text-on-surface-variant font-medium"><strong className="text-primary font-bold">125+ Google Reviews</strong> rated excellent by Kodungaiyur residents</p>
 </div>
 </div>
 <div className="lg:col-span-5 relative mt-12 lg:mt-0">

@@ -1,6 +1,6 @@
 import React from 'react';
 import { DOCTORS } from '../data';
-import { HeartPulse, ShieldCheck, Cpu, GraduationCap, Camera } from 'lucide-react';
+import { HeartPulse, ShieldCheck, Cpu, GraduationCap, Camera, Zap } from 'lucide-react';
 
 interface GalleryPhoto {
   src: string;
@@ -112,9 +112,12 @@ className="w-full h-full object-cover object-top"
 <p className="font-sans text-sm font-medium text-cool-gray mt-1 flex items-center justify-center sm:justify-start gap-1.5">
 <GraduationCap className="w-4 h-4 text-secondary inline shrink-0" /> {doc.education} &middot; {doc.experience}
 </p>
-<p className="font-sans text-sm text-on-surface-variant leading-relaxed mt-4">
-{doc.bio}
-</p>
+<div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 mt-4 font-sans text-sm max-w-lg mx-auto sm:mx-0">
+<div className="flex items-center gap-2.5 text-on-surface justify-center sm:justify-start"><div className="w-5 h-5 rounded-full bg-secondary/10 flex items-center justify-center text-secondary shrink-0"><Zap className="w-3.5 h-3.5" /></div><span>Advanced Laser Dentistry</span></div>
+<div className="flex items-center gap-2.5 text-on-surface justify-center sm:justify-start"><div className="w-5 h-5 rounded-full bg-secondary/10 flex items-center justify-center text-secondary shrink-0"><ShieldCheck className="w-3.5 h-3.5" /></div><span>100% Painless Procedures</span></div>
+<div className="flex items-center gap-2.5 text-on-surface justify-center sm:justify-start"><div className="w-5 h-5 rounded-full bg-secondary/10 flex items-center justify-center text-secondary shrink-0"><ShieldCheck className="w-3.5 h-3.5" /></div><span>No Hidden Lab Charges</span></div>
+<div className="flex items-center gap-2.5 text-on-surface justify-center sm:justify-start"><div className="w-5 h-5 rounded-full bg-secondary/10 flex items-center justify-center text-secondary shrink-0"><ShieldCheck className="w-3.5 h-3.5" /></div><span>5+ Years Expert Surgeon Care</span></div>
+</div>
 <div className="flex flex-wrap justify-center sm:justify-start gap-1.5 mt-5 pt-5 border-t border-cool-gray/10">
 {doc.skills.map((skill) => (
 <span key={skill} className="bg-surface-alt border border-cool-gray/20 text-on-surface text-xs px-2.5 py-1 rounded-full flex items-center gap-1">
