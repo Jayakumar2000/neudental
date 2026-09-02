@@ -1,7 +1,7 @@
 // neudental v1 - Firebase Configuration
 // Uses environment variables for security - see .env.example
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { getAuth, signInAnonymously, onAuthStateChanged, type User } from 'firebase/auth';
 import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
 
 const firebaseConfig = {
@@ -16,7 +16,38 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
-export const auth = getAuth();
+export const auth = getAuth(app);
+
+// firestore.rules requires request.auth != null on every appointments read/
+// write, but nothing in this app ever signed a visitor in — every booking
+// was being rejected with permission-denied. This signs each visitor in
+// anonymously once and caches the resulting user so callers can await it
+// before touching Firestore.
+let anonymousAuthPromise: Promise<User> | null = null;
+export function ensureAnonymousAuth(): Promise<User> {
+  if (!anonymousAuthPromise) {
+    anonymousAuthPromise = new Promise<User>((resolve, reject) => {
+      const unsubscribe = onAuthStateChanged(
+        auth,
+        (user) => {
+          if (user) {
+            unsubscribe();
+            resolve(user);
+          }
+        },
+        (error) => {
+          unsubscribe();
+          reject(error);
+        }
+      );
+      signInAnonymously(auth).catch((error) => {
+        unsubscribe();
+        reject(error);
+      });
+    });
+  }
+  return anonymousAuthPromise;
+}
 
 export enum OperationType {
   CREATE = 'create',

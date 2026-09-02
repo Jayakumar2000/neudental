@@ -3,21 +3,11 @@ import { TREATMENTS } from '../data';
 import { Appointment } from '../types';
 import { Calendar, Clock, Sparkles, Check, Trash2, CalendarCheck, Phone, User, Activity } from 'lucide-react';
 import { collection, query, where, orderBy, onSnapshot, setDoc, doc, Timestamp, updateDoc } from 'firebase/firestore';
-import { db, OperationType, handleFirestoreError } from '../firebase';
+import { db, OperationType, handleFirestoreError, ensureAnonymousAuth } from '../firebase';
 
 interface BookingFormProps {
   preSelectedTreatmentId: string;
   onClose?: () => void;
-}
-
-function getOrCreateSessionId(): string {
-  const key = 'neu_session_id';
-  let id = localStorage.getItem(key);
-  if (!id) {
-    id = 'sess_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
-    localStorage.setItem(key, id);
-  }
-  return id;
 }
 
 export default function BookingForm({ preSelectedTreatmentId, onClose }: BookingFormProps) {
@@ -28,7 +18,7 @@ export default function BookingForm({ preSelectedTreatmentId, onClose }: Booking
   const [date, setDate] = useState('');
   const [timeSlot, setTimeSlot] = useState('10:00 AM');
   const [notes, setNotes] = useState('');
-  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const [dbLoading, setDbLoading] = useState(true);
   const [myBookings, setMyBookings] = useState<Appointment[]>([]);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
@@ -37,25 +27,29 @@ export default function BookingForm({ preSelectedTreatmentId, onClose }: Booking
   useEffect(() => { if (preSelectedTreatmentId) setTreatmentId(preSelectedTreatmentId); }, [preSelectedTreatmentId]);
 
   useEffect(() => {
-    const id = getOrCreateSessionId();
-    setSessionId(id);
+    ensureAnonymousAuth()
+      .then((user) => setUserId(user.uid))
+      .catch((error) => {
+        handleFirestoreError(error, OperationType.GET, 'auth');
+        setErrorMsg('Could not establish a secure session. Please refresh and try again.');
+      });
   }, []);
 
   useEffect(() => {
-    if (!sessionId) return;
+    if (!userId) return;
     setDbLoading(true);
-    const q = query(collection(db, 'appointments'), where('ownerId', '==', sessionId), orderBy('createdAt', 'desc'));
+    const q = query(collection(db, 'appointments'), where('userId', '==', userId), orderBy('createdAt', 'desc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const bookings: Appointment[] = [];
       snapshot.forEach((docSnapshot) => {
         const data = docSnapshot.data();
-        bookings.push({ id: data.id, patientName: data.patientName || '', phone: data.phone || '', email: data.email || '', treatmentId: data.treatmentId || '', date: data.date || '', timeSlot: data.timeSlot || '', status: data.status || 'confirmed', notes: data.notes || '' });
+        bookings.push({ id: data.id, patientName: data.patientName || '', phone: data.phone || '', email: data.email || '', treatmentId: data.treatmentId || '', date: data.date || '', timeSlot: data.timeSlot || '', status: data.status || 'pending', notes: data.notes || '' });
       });
       setMyBookings(bookings);
       setDbLoading(false);
     }, (error) => { setDbLoading(false); handleFirestoreError(error, OperationType.LIST, 'appointments'); });
     return () => unsubscribe();
-  }, [sessionId]);
+  }, [userId]);
 
   const timeSlots = [
     { label: 'Morning Slots (9am - 1pm)', times: ['09:30 AM', '10:00 AM', '10:45 AM', '11:30 AM', '12:15 PM'] },
@@ -66,7 +60,7 @@ export default function BookingForm({ preSelectedTreatmentId, onClose }: Booking
     e.preventDefault();
     setErrorMsg(null);
     setSuccessMsg(null);
-    if (!sessionId) { setErrorMsg('Session establishing. Please try again.'); return; }
+    if (!userId) { setErrorMsg('Session establishing. Please try again.'); return; }
     if (!patientName.trim()) { setErrorMsg('Full Patient Name is required.'); return; }
     if (!phone.trim() || phone.length < 10) { setErrorMsg('Valid 10-digit mobile number is required.'); return; }
     if (!date) { setErrorMsg('Please select a valid treatment date.'); return; }
@@ -75,14 +69,14 @@ export default function BookingForm({ preSelectedTreatmentId, onClose }: Booking
     if (dayOfWeek === 0 && timeSlots[1].times.includes(timeSlot)) { setErrorMsg('neudental evening sessions are CLOSED on Sundays. Please select a morning slot.'); return; }
     const docId = 'app_' + Date.now();
     try {
-      await setDoc(doc(db, 'appointments', docId), { id: docId, patientName: patientName.trim(), phone: phone.trim(), email: email.trim(), treatmentId, date, timeSlot, status: 'confirmed', notes: notes.trim(), ownerId: sessionId, createdAt: Timestamp.now() });
-      setSuccessMsg(`Slot confirmed on ${date} at ${timeSlot} for ${patientName}. Please arrive 10 minutes prior.`);
+      await setDoc(doc(db, 'appointments', docId), { id: docId, patientName: patientName.trim(), phone: phone.trim(), email: email.trim(), treatmentId, date, timeSlot, status: 'pending', notes: notes.trim(), userId, createdAt: Timestamp.now() });
+      setSuccessMsg(`Slot requested for ${date} at ${timeSlot}, ${patientName}. Our team will confirm shortly by phone or WhatsApp.`);
       setPatientName(''); setPhone(''); setEmail(''); setNotes('');
     } catch (err) { handleFirestoreError(err, OperationType.CREATE, 'appointments'); setErrorMsg('Could not register your slot. Please try again.'); }
   };
 
   const handleCancelBooking = async (id: string) => {
-    if (!sessionId) return;
+    if (!userId) return;
     try { await updateDoc(doc(db, 'appointments', id), { status: 'cancelled' }); setSuccessMsg('Your slot has been canceled.'); } catch (err) { setErrorMsg('Could not cancel slot.'); }
   };
 
@@ -108,7 +102,7 @@ export default function BookingForm({ preSelectedTreatmentId, onClose }: Booking
       </form>
       {myBookings.length > 0 && (
         <div className="mt-12 pt-8 border-t border-cool-gray/10">
-          <div className="flex items-center justify-between mb-4"><span className="text-xs font-bold uppercase tracking-wider text-primary">Your Bookings ({myBookings.length})</span><span className="text-[10px] text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full font-bold">Active slots locked</span></div>
+          <div className="flex items-center justify-between mb-4"><span className="text-xs font-bold uppercase tracking-wider text-primary">Your Bookings ({myBookings.length})</span><span className="text-[10px] text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full font-bold">Pending clinic confirmation</span></div>
           <div className="space-y-3">{myBookings.map((booking) => (
             <div key={booking.id} className="p-4 rounded-xl bg-surface border border-cool-gray/10 flex items-center justify-between gap-4">
               <div className="font-sans text-xs leading-relaxed"><p className="font-bold text-primary">{booking.patientName}</p><p className="text-cool-gray font-medium">{getTreatmentName(booking.treatmentId)}</p><div className="flex items-center gap-3 text-[11px] text-cool-gray font-bold mt-1.5"><span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5 text-secondary" /> {booking.date}</span><span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-secondary" /> {booking.timeSlot}</span></div></div>
