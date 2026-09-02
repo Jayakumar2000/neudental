@@ -17,7 +17,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 import type { FAQItem } from './types';
 
 export default function App() {
-  const [preSelectedTreatmentId, setPreSelectedTreatmentId] = useState<string>('rct');
+  const [preSelectedTreatmentId, setPreSelectedTreatmentId] = useState<string>('checkup');
   const [activeTreatmentSubpageId, setActiveTreatmentSubpageId] = useState<string | null>(null);
   const [faqOpenId, setFaqOpenId] = useState<string | null>(null);
 

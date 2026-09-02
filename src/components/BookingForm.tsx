@@ -52,9 +52,11 @@ export default function BookingForm({ preSelectedTreatmentId, onClose }: Booking
   }, [userId]);
 
   const timeSlots = [
-    { label: 'Morning Slots (9am - 1pm)', times: ['09:30 AM', '10:00 AM', '10:45 AM', '11:30 AM', '12:15 PM'] },
-    { label: 'Evening Slots (5pm - 9pm)', times: ['05:15 PM', '06:00 PM', '06:45 PM', '07:30 PM', '08:15 PM'] }
+    { label: 'Morning Slots (10:00 AM - 1:30 PM)', times: ['10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM', '12:00 PM', '12:30 PM', '01:00 PM', '01:30 PM'] },
+    { label: 'Evening Slots (5:00 PM - 9:30 PM)', times: ['05:00 PM', '05:30 PM', '06:00 PM', '06:30 PM', '07:00 PM', '07:30 PM', '08:00 PM', '08:30 PM', '09:00 PM', '09:30 PM'] }
   ];
+
+  const todayStr = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD, matches <input type="date">
 
   const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,6 +66,7 @@ export default function BookingForm({ preSelectedTreatmentId, onClose }: Booking
     if (!patientName.trim()) { setErrorMsg('Full Patient Name is required.'); return; }
     if (!phone.trim() || phone.length < 10) { setErrorMsg('Valid 10-digit mobile number is required.'); return; }
     if (!date) { setErrorMsg('Please select a valid treatment date.'); return; }
+    if (date < todayStr) { setErrorMsg('Please select a future appointment date.'); return; }
     const selectedDateObj = new Date(date);
     const dayOfWeek = selectedDateObj.getDay();
     if (dayOfWeek === 0 && timeSlots[1].times.includes(timeSlot)) { setErrorMsg('neudental evening sessions are CLOSED on Sundays. Please select a morning slot.'); return; }
@@ -95,7 +98,7 @@ export default function BookingForm({ preSelectedTreatmentId, onClose }: Booking
           <div className="space-y-1"><label className="text-xs font-display font-medium text-primary uppercase">Email (Optional)</label><input type="email" placeholder="contact@gmail.com" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-4 py-3 bg-[#F8FAFC] border-0 border-b-2 border-cool-gray/20 focus:border-secondary focus:ring-0 outline-none text-sm text-primary transition-colors font-sans rounded-t" /></div>
         </div>
         <div className="space-y-1"><label className="text-xs font-display font-medium text-primary uppercase">Target Treatment Course</label><select value={treatmentId} onChange={(e) => setTreatmentId(e.target.value)} className="w-full px-4 py-3 bg-[#F8FAFC] border-0 border-b-2 border-cool-gray/20 focus:border-secondary focus:ring-0 outline-none text-sm text-primary font-sans rounded-t">{TREATMENTS.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></div>
-        <div className="space-y-1"><label className="text-xs font-display font-medium text-primary uppercase">Appointment Date</label><input type="date" required value={date} onChange={(e) => setDate(e.target.value)} className="w-full px-4 py-3 bg-[#F8FAFC] border-0 border-b-2 border-cool-gray/20 focus:border-secondary focus:ring-0 outline-none text-sm text-primary font-sans rounded-t" /></div>
+        <div className="space-y-1"><label className="text-xs font-display font-medium text-primary uppercase">Appointment Date</label><input type="date" required min={todayStr} value={date} onChange={(e) => setDate(e.target.value)} className="w-full px-4 py-3 bg-[#F8FAFC] border-0 border-b-2 border-cool-gray/20 focus:border-secondary focus:ring-0 outline-none text-sm text-primary font-sans rounded-t" /></div>
         <div className="space-y-2"><label className="text-xs font-display font-medium text-primary uppercase block">Select Preferred Hour</label><div className="space-y-3">{timeSlots.map((group) => (<div key={group.label} className="bg-[#F8FAFC] p-3 rounded-xl border border-cool-gray/5"><span className="text-[10px] text-cool-gray uppercase font-bold tracking-wider block mb-2">{group.label}</span><div className="flex flex-wrap gap-1.5">{group.times.map((slot) => <button type="button" key={slot} onClick={() => setTimeSlot(slot)} className={`px-3 py-1.5 rounded-lg font-sans text-xs font-semibold cursor-pointer transition-all ${timeSlot === slot ? 'bg-secondary text-white shadow-md' : 'bg-white border border-cool-gray/10 hover:border-cool-gray/30 text-on-surface'}`}>{slot}</button>)}</div></div>))}</div></div>
         <div className="space-y-1"><label className="text-xs font-display font-medium text-primary uppercase">Notes (Optional)</label><textarea placeholder="Symptoms or additional notes" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} className="w-full px-4 py-3 bg-[#F8FAFC] border-0 border-b-2 border-cool-gray/20 focus:border-secondary focus:ring-0 outline-none text-sm text-primary font-sans rounded-t resize-none" /></div>
         <button type="submit" className="w-full bg-primary hover:bg-secondary text-white py-4 cursor-pointer rounded-xl font-sans text-xs uppercase tracking-widest font-bold transition-all duration-200">Confirm My Clinical Slot</button>
