@@ -7,8 +7,21 @@ service cloud.firestore {
     }
     function isSignedIn() { return request.auth != null; }
     function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+    // Admin status is granted only by adding a document at
+    // /admins/{uid} via the Firebase Console or Admin SDK -- it is never
+    // writable by a client, so this cannot be self-granted.
+    function isAdmin() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    match /admins/{adminId} {
+      allow read: if isSignedIn() && request.auth.uid == adminId;
+      allow write: if false;
+    }
+
     match /appointments/{appointmentId} {
-      allow read: if isSignedIn() && isOwner(resource.data.userId);
+      allow read: if isAdmin() || isOwner(resource.data.userId);
       allow create: if isSignedIn()
         && request.resource.data.userId == request.auth.uid
         && request.resource.data.patientName is string
@@ -18,7 +31,7 @@ service cloud.firestore {
         && request.resource.data.date is string
         && request.resource.data.timeSlot is string
         && request.resource.data.status == 'pending';
-      allow update: if isSignedIn() && isOwner(resource.data.userId);
+      allow update: if isAdmin() || isOwner(resource.data.userId);
       allow delete: if false;
     }
   }

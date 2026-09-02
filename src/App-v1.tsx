@@ -11,6 +11,7 @@ import Testimonials from './components/Testimonials';
 import LocationDetails from './components/LocationDetails';
 import Footer from './components/Footer';
 import TreatmentDetailView from './components/TreatmentDetailView';
+import AdminView from './components/AdminView';
 import { FAQS } from './data';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import type { FAQItem } from './types';
@@ -19,6 +20,10 @@ export default function App() {
   const [preSelectedTreatmentId, setPreSelectedTreatmentId] = useState<string>('rct');
   const [activeTreatmentSubpageId, setActiveTreatmentSubpageId] = useState<string | null>(null);
   const [faqOpenId, setFaqOpenId] = useState<string | null>(null);
+
+  if (typeof window !== 'undefined' && window.location.pathname.replace(/\/+$/, '') === '/admin') {
+    return <AdminView />;
+  }
 
   // Scrolls to a section that lives on the home page. If we're currently on a
   // treatment detail subpage (so the section isn't mounted yet), close that

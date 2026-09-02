@@ -55,7 +55,7 @@ export interface Appointment {
   treatmentId: string;
   date: string;
   timeSlot: string;
-  status: 'confirmed' | 'pending' | 'completed';
+  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
   notes?: string;
 }
 
