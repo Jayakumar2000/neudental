@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SYMPTOMS } from '../data';
+import { SYMPTOMS, TREATMENTS } from '../data';
 import { Symptom } from '../types';
 import { AlertCircle, ArrowRight, HelpCircle, Activity, HeartCrack } from 'lucide-react';
 
@@ -10,14 +10,8 @@ onSelectTreatment: (treatmentId: string) => void;
 export default function SymptomChecker({ onSelectTreatment }: SymptomCheckerProps) {
 const [selectedSymptom, setSelectedSymptom] = useState<Symptom | null>(SYMPTOMS[0]);
 
-const mapRecommendedToTreatmentId = (rec: string): string => {
-const r = rec.toLowerCase();
-if (r.includes('root canal') || r.includes('rct')) return 'rct';
-if (r.includes('aligners') || r.includes('invisalign')) return 'ortho';
-if (r.includes('cleaning') || r.includes('scaling') || r.includes('prophylaxis')) return 'cleaning';
-if (r.includes('implant')) return 'implants';
-return '';
-};
+const getRecommendedTreatment = (symptom: Symptom) =>
+TREATMENTS.find((t) => t.id === symptom.recommendedTreatment);
 
 return (
 <section id="symptom-finder" className="py-24 bg-white px-6 md:px-10 lg:px-16">
@@ -54,8 +48,8 @@ return (
 <div className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/10"><h5 className="text-xs font-bold text-amber-800 uppercase tracking-wider mb-2 flex items-center gap-1.5"><AlertCircle className="w-4 h-4 text-amber-600" /> Probable Clinical Root Cause:</h5><p className="text-xs text-amber-900 leading-relaxed">{selectedSymptom.possibleCause}</p></div>
 <div className="pt-4 border-t border-cool-gray/10">
 <h5 className="text-xs font-bold text-primary uppercase tracking-wider mb-2">Recommended Clinical Treatment:</h5>
-<p className="text-sm text-secondary font-bold font-serif mb-4">{selectedSymptom.recommendedTreatment}</p>
-<button onClick={() => { const targetId = mapRecommendedToTreatmentId(selectedSymptom.recommendedTreatment); onSelectTreatment(targetId || 'rct'); }} className="inline-flex items-center gap-2 bg-primary hover:bg-secondary text-white text-xs uppercase tracking-widest font-bold px-6 py-3 rounded-lg transition-all">Configure Recommended Therapy <ArrowRight className="w-3.5 h-3.5" /></button>
+<p className="text-sm text-secondary font-bold font-serif mb-4">{getRecommendedTreatment(selectedSymptom)?.name ?? selectedSymptom.recommendedTreatment}</p>
+<button onClick={() => onSelectTreatment(getRecommendedTreatment(selectedSymptom)?.id ?? 'rct')} className="inline-flex items-center gap-2 bg-primary hover:bg-secondary text-white text-xs uppercase tracking-widest font-bold px-6 py-3 rounded-lg transition-all">Configure Recommended Therapy <ArrowRight className="w-3.5 h-3.5" /></button>
 </div>
 </div>
 </div>

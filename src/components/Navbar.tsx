@@ -7,9 +7,10 @@ interface NavbarProps {
 onScrollToBooking: () => void;
 onSelectTreatment: (treatmentId: string) => void;
 onLogoClick?: () => void;
+onNavigateSection: (sectionId: string) => void;
 }
 
-export default function Navbar({ onScrollToBooking, onSelectTreatment, onLogoClick }: NavbarProps) {
+export default function Navbar({ onScrollToBooking, onSelectTreatment, onLogoClick, onNavigateSection }: NavbarProps) {
 const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
 const handleLogoClick = (e: React.MouseEvent) => {
@@ -20,12 +21,7 @@ window.scrollTo({ top: 0, behavior: "smooth" });
 
 const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
 e.preventDefault();
-if (onLogoClick) onLogoClick();
-const id = href.slice(1);
-setTimeout(() => {
-const el = document.getElementById(id);
-if (el) { el.scrollIntoView({ behavior: 'smooth' }); }
-}, 100);
+onNavigateSection(href.slice(1));
 };
 
 const navItems = [
@@ -61,11 +57,11 @@ taglineClassName="text-[9px] sm:text-[10px] text-cool-gray tracking-wide font-sa
 if (item.name === 'Treatments') {
 return (
 <div key={item.name} className="relative group/dropdown">
-<button className="flex items-center gap-1.5 text-on-surface-variant hover:text-secondary text-sm font-sans font-medium transition-all duration-200 cursor-pointer py-2">
+<button type="button" aria-haspopup="true" className="flex items-center gap-1.5 text-on-surface-variant hover:text-secondary focus-visible:text-secondary text-sm font-sans font-medium transition-all duration-200 cursor-pointer py-2 outline-none">
 <span>Treatments Offered</span>
-<ChevronDown className="w-3.5 h-3.5 transition-transform duration-200 group-hover/dropdown:rotate-180" />
+<ChevronDown className="w-3.5 h-3.5 transition-transform duration-200 group-hover/dropdown:rotate-180 group-focus-within/dropdown:rotate-180" />
 </button>
-<div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 invisible opacity-0 translate-y-2 group-hover/dropdown:visible group-hover/dropdown:opacity-100 group-hover/dropdown:translate-y-0 transition-all duration-200 z-50">
+<div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 invisible opacity-0 translate-y-2 group-hover/dropdown:visible group-hover/dropdown:opacity-100 group-hover/dropdown:translate-y-0 group-focus-within/dropdown:visible group-focus-within/dropdown:opacity-100 group-focus-within/dropdown:translate-y-0 transition-all duration-200 z-50">
 <div className="w-[320px] bg-white border border-cool-gray/10 rounded-2xl shadow-xl p-3 grid grid-cols-1 gap-0.5 max-h-[480px] overflow-y-auto">
 <p className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-cool-gray border-b border-cool-gray/5 mb-1.5">Services Catalog</p>
 {TREATMENTS.map((treat) => (

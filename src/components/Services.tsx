@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { TREATMENTS } from '../data';
 import { Treatment } from '../types';
-import { ShieldAlert, Sparkles, Layers, RotateCw, Scissors, Smile, Check, Clock, DollarSign, ArrowRight, Search, ShieldCheck, Activity, LayoutGrid, Menu } from 'lucide-react';
+import { ShieldAlert, Sparkles, Scissors, Smile, Check, Clock, ArrowRight, Search, Activity, Scan, Shield, Heart, Crown, GitBranch, Star, Anchor } from 'lucide-react';
 
 interface ServicesProps {
 onSelectTreatment: (treatmentId: string) => void;
@@ -21,14 +21,17 @@ if (found) { setSelectedTreatment(found); setActiveCategory('all'); }
 const getIcon = (name: string) => {
 switch (name) {
 case 'Search': return <Search className="w-5 h-5" />;
-case 'RotateCw': return <RotateCw className="w-5 h-5" />;
-case 'Layers': return <Layers className="w-5 h-5" />;
+case 'Sparkles': return <Sparkles className="w-5 h-5" />;
+case 'Scan': return <Scan className="w-5 h-5" />;
+case 'Shield': return <Shield className="w-5 h-5" />;
 case 'ShieldAlert': return <ShieldAlert className="w-5 h-5" />;
 case 'Scissors': return <Scissors className="w-5 h-5" />;
-case 'ShieldCheck': return <ShieldCheck className="w-5 h-5" />;
 case 'Activity': return <Activity className="w-5 h-5" />;
-case 'LayoutGrid': return <LayoutGrid className="w-5 h-5" />;
-case 'Sparkles': return <Sparkles className="w-5 h-5" />;
+case 'Heart': return <Heart className="w-5 h-5" />;
+case 'Crown': return <Crown className="w-5 h-5" />;
+case 'GitBranch': return <GitBranch className="w-5 h-5" />;
+case 'Star': return <Star className="w-5 h-5" />;
+case 'Anchor': return <Anchor className="w-5 h-5" />;
 case 'Smile': return <Smile className="w-5 h-5" />;
 default: return <Smile className="w-5 h-5" />;
 }
