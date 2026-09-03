@@ -1,13 +1,13 @@
 import React from 'react';
 import { DOCTORS } from '../data';
-import { GraduationCap, Camera, Award, Users, Activity, Sparkles, CalendarDays } from 'lucide-react';
+import { GraduationCap, Camera, Award, Users, Activity, Sparkles, Home } from 'lucide-react';
 
 const TRUST_STATS = [
   { icon: Award, value: '5+', label: 'Years of Trusted Dental Care' },
   { icon: Users, value: '3,000+', label: 'Happy Patients Treated' },
   { icon: Activity, value: '5,000+', label: 'Procedures Completed' },
   { icon: Sparkles, value: '99.8%', label: 'Sterilization Success Rate' },
-  { icon: CalendarDays, value: '7 Days', label: "A Week, Always Open For You" },
+  { icon: Home, value: '50+', label: 'Home Visit Patients Treated' },
 ];
 
 interface GalleryPhoto {
@@ -41,25 +41,24 @@ return (
 <section id="about" className="py-24 bg-white px-6 md:px-10 lg:px-16">
 <div className="max-w-[1280px] mx-auto w-full">
 {/* Section Title */}
-<div className="text-center max-w-2xl mx-auto mb-16">
+<div className="text-center max-w-2xl mx-auto mb-14">
 <span className="text-secondary font-sans text-xs font-bold tracking-[0.2em] uppercase">
-Modern Patient-First Dentistry
+Why Patients Trust Us
 </span>
 <h2 className="font-serif text-3xl md:text-4xl text-primary font-bold mt-3 leading-tight">
-Premium, Personalized Medical Care
+Excellence You Can See In The Numbers
 </h2>
 <div className="w-12 h-1 bg-secondary mx-auto mt-6" />
-<p className="font-sans text-base text-on-surface-variant mt-4 leading-relaxed">
-Led by Dr. Swetha, <strong className="text-primary font-bold">neudental</strong> is a newly opened modern dental clinic in Kodungaiyur. We combine high-grade gentle precision with elite research-backed clinical safety.
-</p>
 </div>
 {/* Trust Stats Strip */}
-<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-y-10 gap-x-6 max-w-5xl mx-auto mb-20">
-{TRUST_STATS.map((stat, i) => (
-<div key={stat.label} className={`text-center px-4 ${i > 0 ? 'lg:border-l lg:border-cool-gray/10' : ''}`}>
-<stat.icon className="w-7 h-7 text-secondary mx-auto mb-3" />
-<p className="font-serif text-3xl md:text-4xl font-bold text-primary leading-none">{stat.value}</p>
-<p className="font-sans text-[11px] md:text-xs font-bold uppercase tracking-wider text-cool-gray mt-3 leading-snug">{stat.label}</p>
+<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6 max-w-6xl mx-auto mb-20">
+{TRUST_STATS.map((stat) => (
+<div key={stat.label} className="bg-surface-container-low border border-cool-gray/5 rounded-2xl p-6 text-center hover:border-secondary/20 hover:-translate-y-0.5 transition-all">
+<div className="w-11 h-11 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center mx-auto mb-4">
+<stat.icon className="w-5 h-5" />
+</div>
+<p className="font-serif text-2xl md:text-3xl font-bold text-primary leading-none">{stat.value}</p>
+<p className="font-sans text-[11px] font-bold uppercase tracking-wider text-cool-gray mt-3 leading-snug">{stat.label}</p>
 </div>
 ))}
 </div>
