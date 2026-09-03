@@ -45,8 +45,8 @@ neudental is now an officially Registered Trademark&reg;
 </div>
 
 <header className="sticky top-0 w-full z-40 bg-white/95 backdrop-blur-md border-b border-cool-gray/10 transition-all premium-shadow">
-<div className="flex items-center justify-between px-6 md:px-10 lg:px-16 py-4 max-w-[1280px] mx-auto w-full">
-<a href="#" onClick={handleLogoClick} className="flex items-center select-none group" aria-label={`${BRAND.name} — ${BRAND.tagline}`}>
+<div className="flex items-center justify-between px-6 md:px-10 lg:px-6 xl:px-16 py-4 max-w-[1280px] mx-auto w-full">
+<a href="#" onClick={handleLogoClick} className="flex items-center select-none group shrink-0" aria-label={`${BRAND.name} — ${BRAND.tagline}`}>
 <BrandLogo
 markClassName="h-10 w-auto sm:h-11 md:h-12"
 wordmarkClassName="h-[18px] w-auto sm:h-[22px] md:h-[26px]"
@@ -54,12 +54,12 @@ taglineClassName="text-[9px] sm:text-[10px] text-cool-gray tracking-wide font-sa
 />
 </a>
 
-<nav className="hidden lg:flex items-center gap-6 xl:gap-8">
+<nav className="hidden lg:flex items-center gap-3 xl:gap-8 shrink-0">
 {navItems.map((item) => {
 if (item.name === 'Treatments') {
 return (
-<div key={item.name} className="relative group/dropdown">
-<button type="button" aria-haspopup="true" className="flex items-center gap-1.5 text-on-surface-variant hover:text-secondary focus-visible:text-secondary text-sm font-sans font-medium transition-all duration-200 cursor-pointer py-2 outline-none">
+<div key={item.name} className="relative group/dropdown shrink-0">
+<button type="button" aria-haspopup="true" className="flex items-center gap-1.5 whitespace-nowrap text-on-surface-variant hover:text-secondary focus-visible:text-secondary text-sm font-sans font-medium transition-all duration-200 cursor-pointer py-2 outline-none">
 <span>Treatments Offered</span>
 <ChevronDown className="w-3.5 h-3.5 transition-transform duration-200 group-hover/dropdown:rotate-180 group-focus-within/dropdown:rotate-180" />
 </button>
@@ -78,18 +78,18 @@ return (
 );
 }
 if (item.name === 'Symptom Checker') {
-return (<button key={item.name} type="button" onClick={onOpenSymptomChecker} className="text-on-surface-variant hover:text-secondary text-sm font-sans font-medium hover:scale-105 transition-all duration-200 cursor-pointer">{item.name}</button>);
+return (<button key={item.name} type="button" onClick={onOpenSymptomChecker} className="shrink-0 whitespace-nowrap text-on-surface-variant hover:text-secondary text-sm font-sans font-medium hover:scale-105 transition-all duration-200 cursor-pointer">{item.name}</button>);
 }
-return (<a key={item.name} href={item.href} onClick={(e) => handleLinkClick(e, item.href)} className="text-on-surface-variant hover:text-secondary text-sm font-sans font-medium hover:scale-105 transition-all duration-200">{item.name}</a>);
+return (<a key={item.name} href={item.href} onClick={(e) => handleLinkClick(e, item.href)} className="shrink-0 whitespace-nowrap text-on-surface-variant hover:text-secondary text-sm font-sans font-medium hover:scale-105 transition-all duration-200">{item.name}</a>);
 })}
 </nav>
 
-<div className="hidden md:flex items-center gap-4">
-<a href="tel:+919342367446" className="flex items-center gap-2 text-primary font-bold hover:text-secondary font-sans transition-colors" title="Click to dial Chennai neudental support">
-<div className="w-9 h-9 rounded-full bg-primary/5 flex items-center justify-center text-primary"><Phone className="w-4 h-4 text-secondary" /></div>
-<div className="text-left leading-none"><span className="text-[10px] block opacity-60 uppercase font-bold tracking-wider">Quick Helpline</span><span className="text-sm font-bold font-sans">+91 93423 67446</span></div>
+<div className="hidden md:flex items-center gap-3 xl:gap-4 shrink-0">
+<a href="tel:+919342367446" className="hidden xl:flex items-center gap-2 text-primary font-bold hover:text-secondary font-sans transition-colors" title="Click to dial Chennai neudental support">
+<div className="w-9 h-9 rounded-full bg-primary/5 flex items-center justify-center text-primary shrink-0"><Phone className="w-4 h-4 text-secondary" /></div>
+<div className="text-left leading-none whitespace-nowrap"><span className="text-[10px] block opacity-60 uppercase font-bold tracking-wider">Quick Helpline</span><span className="text-sm font-bold font-sans">+91 93423 67446</span></div>
 </a>
-<button id="cta_nav_book_button" onClick={onScrollToBooking} className="bg-primary text-white hover:bg-secondary border border-transparent shadow shadow-primary/10 hover:shadow-lg hover:shadow-secondary/20 hover:-translate-y-0.5 active:translate-y-0 px-6 py-2.5 rounded-full font-sans text-xs uppercase tracking-widest font-bold transition-all duration-200">Book Appointment</button>
+<button id="cta_nav_book_button" onClick={onScrollToBooking} className="shrink-0 whitespace-nowrap bg-primary text-white hover:bg-secondary border border-transparent shadow shadow-primary/10 hover:shadow-lg hover:shadow-secondary/20 hover:-translate-y-0.5 active:translate-y-0 px-6 py-2.5 rounded-full font-sans text-xs uppercase tracking-widest font-bold transition-all duration-200">Book Appointment</button>
 </div>
 
 <button className="lg:hidden p-2 text-primary hover:bg-primary/5 rounded-lg active:scale-95 transition-all" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
