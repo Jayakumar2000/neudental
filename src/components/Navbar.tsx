@@ -32,7 +32,7 @@ const navItems = [
 
 return (
 <>
-<div className="bg-primary text-white text-[12px] font-sans py-2 px-6 md:px-10 lg:px-16 text-center flex flex-col sm:flex-row justify-center items-center gap-2 border-b border-white/10 select-none">
+<div className="bg-primary text-white text-[12px] font-sans py-2 px-6 md:px-10 lg:px-16 text-center hidden sm:flex sm:flex-row justify-center items-center gap-2 border-b border-white/10 select-none">
 <span className="inline-flex items-center gap-1.5 font-medium">
 <span className="w-2 h-2 rounded-full bg-[#10B981] animate-ping" />
 <span className="text-emerald-400 font-bold">MILESTONE:</span>
@@ -43,7 +43,7 @@ neudental is now an officially Registered Trademark&reg;
 </div>
 
 <header className="sticky top-0 w-full z-40 bg-white/95 backdrop-blur-md border-b border-cool-gray/10 transition-all premium-shadow">
-<div className="flex items-center justify-between px-6 md:px-10 lg:px-10 xl:px-16 py-4 max-w-[1280px] mx-auto w-full">
+<div className="flex items-center justify-between px-6 md:px-10 lg:px-10 xl:px-16 pt-4 pb-2.5 max-w-[1280px] mx-auto w-full">
 <a href="#" onClick={handleLogoClick} className="flex items-center select-none group shrink-0" aria-label={`${BRAND.name} — ${BRAND.tagline}`}>
 <BrandLogo
 markClassName="h-10 w-auto sm:h-11 md:h-12"
