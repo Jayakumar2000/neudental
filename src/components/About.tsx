@@ -76,7 +76,7 @@ From ultra-low radiation high-resolution digital imaging to micro-jet scaler tec
 </div>
 </div>
 {/* Meet the Doctor + Clinic Tour — one flowing composition, not two boxed-off panes */}
-<div className="max-w-5xl mx-auto pt-8">
+<div id="our-doctor" className="max-w-5xl mx-auto pt-8 scroll-mt-24">
 <div className="text-center max-w-2xl mx-auto mb-10">
 <span className="text-secondary font-sans text-xs font-bold tracking-[0.2em] uppercase flex items-center justify-center gap-2">
 <Camera className="w-4 h-4 text-secondary" /> Step Inside neudental
