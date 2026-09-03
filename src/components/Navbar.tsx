@@ -26,7 +26,6 @@ onNavigateSection(href.slice(1));
 };
 
 const navItems = [
-{ name: 'Our Story', href: '#about' },
 { name: 'Treatments', href: '#services' },
 { name: 'Symptom Checker', href: '' },
 { name: 'Contact & Timing', href: '#location' },
@@ -45,7 +44,7 @@ neudental is now an officially Registered Trademark&reg;
 </div>
 
 <header className="sticky top-0 w-full z-40 bg-white/95 backdrop-blur-md border-b border-cool-gray/10 transition-all premium-shadow">
-<div className="flex items-center justify-between px-6 md:px-10 lg:px-6 xl:px-16 py-4 max-w-[1280px] mx-auto w-full">
+<div className="flex items-center justify-between px-6 md:px-10 lg:px-10 xl:px-16 py-4 max-w-[1280px] mx-auto w-full">
 <a href="#" onClick={handleLogoClick} className="flex items-center select-none group shrink-0" aria-label={`${BRAND.name} — ${BRAND.tagline}`}>
 <BrandLogo
 markClassName="h-10 w-auto sm:h-11 md:h-12"
@@ -54,7 +53,7 @@ taglineClassName="text-[9px] sm:text-[10px] text-cool-gray tracking-wide font-sa
 />
 </a>
 
-<nav className="hidden lg:flex items-center gap-3 xl:gap-8 shrink-0">
+<nav className="hidden lg:flex items-center gap-5 xl:gap-10 shrink-0">
 {navItems.map((item) => {
 if (item.name === 'Treatments') {
 return (
@@ -84,7 +83,7 @@ return (<a key={item.name} href={item.href} onClick={(e) => handleLinkClick(e, i
 })}
 </nav>
 
-<div className="hidden md:flex items-center gap-3 xl:gap-4 shrink-0">
+<div className="hidden md:flex items-center gap-4 xl:gap-6 shrink-0">
 <a href="tel:+919342367446" className="hidden xl:flex items-center gap-2 text-primary font-bold hover:text-secondary font-sans transition-colors" title="Click to dial Chennai neudental support">
 <div className="w-9 h-9 rounded-full bg-primary/5 flex items-center justify-center text-primary shrink-0"><Phone className="w-4 h-4 text-secondary" /></div>
 <div className="text-left leading-none whitespace-nowrap"><span className="text-[10px] block opacity-60 uppercase font-bold tracking-wider">Quick Helpline</span><span className="text-sm font-bold font-sans">+91 93423 67446</span></div>
