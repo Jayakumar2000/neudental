@@ -1,6 +1,14 @@
 import React from 'react';
 import { DOCTORS } from '../data';
-import { HeartPulse, ShieldCheck, Cpu, GraduationCap, Camera } from 'lucide-react';
+import { GraduationCap, Camera, Award, Users, Activity, Sparkles, CalendarDays } from 'lucide-react';
+
+const TRUST_STATS = [
+  { icon: Award, value: '5+', label: 'Years of Trusted Dental Care' },
+  { icon: Users, value: '3,000+', label: 'Happy Patients Treated' },
+  { icon: Activity, value: '5,000+', label: 'Procedures Completed' },
+  { icon: Sparkles, value: '99.8%', label: 'Sterilization Success Rate' },
+  { icon: CalendarDays, value: '7 Days', label: "A Week, Always Open For You" },
+];
 
 interface GalleryPhoto {
   src: string;
@@ -45,35 +53,15 @@ Premium, Personalized Medical Care
 Led by Dr. Swetha, <strong className="text-primary font-bold">neudental</strong> is a newly opened modern dental clinic in Kodungaiyur. We combine high-grade gentle precision with elite research-backed clinical safety.
 </p>
 </div>
-{/* Bento Grid Highlights */}
-<div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20 max-w-5xl mx-auto">
-<div className="p-8 rounded-2xl bg-surface-container-low border border-cool-gray/5 flex flex-col justify-between hover:border-secondary/20 transition-all">
-<HeartPulse className="w-8 h-8 text-secondary mb-4" />
-<div>
-<h3 className="font-serif font-bold text-lg text-primary mb-2">Patient-Focused Ethos</h3>
-<p className="font-sans text-sm text-on-surface-variant leading-relaxed">
-Every treatment plan is customized based on absolute clinical requirements. We prioritize functional dental wellness with a commitment to zero over-treatment.
-</p>
+{/* Trust Stats Strip */}
+<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-y-10 gap-x-6 max-w-5xl mx-auto mb-20">
+{TRUST_STATS.map((stat, i) => (
+<div key={stat.label} className={`text-center px-4 ${i > 0 ? 'lg:border-l lg:border-cool-gray/10' : ''}`}>
+<stat.icon className="w-7 h-7 text-secondary mx-auto mb-3" />
+<p className="font-serif text-3xl md:text-4xl font-bold text-primary leading-none">{stat.value}</p>
+<p className="font-sans text-[11px] md:text-xs font-bold uppercase tracking-wider text-cool-gray mt-3 leading-snug">{stat.label}</p>
 </div>
-</div>
-<div className="p-8 rounded-2xl bg-surface-container-low border border-cool-gray/5 flex flex-col justify-between hover:border-secondary/20 transition-all">
-<ShieldCheck className="w-8 h-8 text-secondary mb-4" />
-<div>
-<h3 className="font-serif font-bold text-lg text-primary mb-2">Class-B Safety Standards</h3>
-<p className="font-sans text-sm text-on-surface-variant leading-relaxed">
-We employ continuous vacuum Class-B autoclave technology alongside sterile individual pouch wrapping to guarantee 100% pathogen-free, medical-grade tools.
-</p>
-</div>
-</div>
-<div className="p-8 rounded-2xl bg-surface-container-low border border-cool-gray/5 flex flex-col justify-between hover:border-secondary/20 transition-all">
-<Cpu className="w-8 h-8 text-secondary mb-4" />
-<div>
-<h3 className="font-serif font-bold text-lg text-primary mb-2">State-Of-The-Art Equipment</h3>
-<p className="font-sans text-sm text-on-surface-variant leading-relaxed">
-From ultra-low radiation high-resolution digital imaging to micro-jet scaler tech and automated rotary endodontic lines, precision guides every step.
-</p>
-</div>
-</div>
+))}
 </div>
 {/* Meet the Doctor + Clinic Tour — one flowing composition, not two boxed-off panes */}
 <div id="our-doctor" className="max-w-5xl mx-auto pt-8 scroll-mt-24">
