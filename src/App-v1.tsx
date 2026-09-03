@@ -84,7 +84,7 @@ export default function App() {
   if (symptomCheckerOpen) {
     return (
       <div className="min-h-screen bg-white">
-        <Navbar onSelectTreatment={handleNavbarSelectTreatment} onScrollToBooking={handleScrollToBooking} onLogoClick={handleCloseSymptomChecker} onNavigateSection={navigateToSection} onOpenSymptomChecker={handleOpenSymptomChecker} />
+        <Navbar onSelectTreatment={handleNavbarSelectTreatment} onScrollToBooking={handleScrollToBooking} onLogoClick={handleCloseSymptomChecker} onNavigateSection={navigateToSection} />
         <div className="max-w-[1280px] mx-auto w-full px-6 md:px-10 lg:px-16 pt-8">
           <button onClick={handleCloseSymptomChecker} className="inline-flex items-center gap-2 text-on-surface-variant hover:text-secondary font-sans text-sm font-medium transition-colors cursor-pointer">
             <ArrowLeft size={20} />
@@ -100,7 +100,7 @@ export default function App() {
   if (activeTreatmentSubpageId) {
     return (
       <div className="min-h-screen bg-white">
-        <Navbar onSelectTreatment={handleNavbarSelectTreatment} onScrollToBooking={handleScrollToBooking} onLogoClick={handleCloseTreatmentView} onNavigateSection={navigateToSection} onOpenSymptomChecker={handleOpenSymptomChecker} />
+        <Navbar onSelectTreatment={handleNavbarSelectTreatment} onScrollToBooking={handleScrollToBooking} onLogoClick={handleCloseTreatmentView} onNavigateSection={navigateToSection} />
         <TreatmentDetailView treatmentId={activeTreatmentSubpageId} onBack={handleCloseTreatmentView} onNavigateToTreatment={handleNavbarSelectTreatment} />
         <Footer onNavigateSection={navigateToSection} />
       </div>
@@ -109,7 +109,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-white">
-      <Navbar onSelectTreatment={handleNavbarSelectTreatment} onScrollToBooking={handleScrollToBooking} onLogoClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} onNavigateSection={navigateToSection} onOpenSymptomChecker={handleOpenSymptomChecker} />
+      <Navbar onSelectTreatment={handleNavbarSelectTreatment} onScrollToBooking={handleScrollToBooking} onLogoClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} onNavigateSection={navigateToSection} />
       <Hero onScrollToBooking={handleScrollToBooking} />
       <About />
       <Services onSelectTreatment={handleSelectTreatment} onViewDetailSubpage={handleNavbarSelectTreatment} selectedTreatmentId={preSelectedTreatmentId} />

@@ -8,10 +8,9 @@ onScrollToBooking: () => void;
 onSelectTreatment: (treatmentId: string) => void;
 onLogoClick?: () => void;
 onNavigateSection: (sectionId: string) => void;
-onOpenSymptomChecker: () => void;
 }
 
-export default function Navbar({ onScrollToBooking, onSelectTreatment, onLogoClick, onNavigateSection, onOpenSymptomChecker }: NavbarProps) {
+export default function Navbar({ onScrollToBooking, onSelectTreatment, onLogoClick, onNavigateSection }: NavbarProps) {
 const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
 const handleLogoClick = (e: React.MouseEvent) => {
@@ -26,9 +25,9 @@ onNavigateSection(href.slice(1));
 };
 
 const navItems = [
+{ name: 'Our Doctor', href: '#about' },
 { name: 'Treatments', href: '#services' },
-{ name: 'Symptom Checker', href: '' },
-{ name: 'Contact & Timing', href: '#location' },
+{ name: 'Location & Timing', href: '#location' },
 ];
 
 return (
@@ -53,7 +52,7 @@ taglineClassName="text-[9px] sm:text-[10px] text-cool-gray tracking-wide font-sa
 />
 </a>
 
-<nav className="hidden lg:flex items-center gap-5 xl:gap-10 shrink-0">
+<nav className="hidden lg:flex items-center gap-8 shrink-0">
 {navItems.map((item) => {
 if (item.name === 'Treatments') {
 return (
@@ -76,14 +75,12 @@ return (
 </div>
 );
 }
-if (item.name === 'Symptom Checker') {
-return (<button key={item.name} type="button" onClick={onOpenSymptomChecker} className="shrink-0 whitespace-nowrap text-on-surface-variant hover:text-secondary text-sm font-sans font-medium hover:scale-105 transition-all duration-200 cursor-pointer">{item.name}</button>);
-}
 return (<a key={item.name} href={item.href} onClick={(e) => handleLinkClick(e, item.href)} className="shrink-0 whitespace-nowrap text-on-surface-variant hover:text-secondary text-sm font-sans font-medium hover:scale-105 transition-all duration-200">{item.name}</a>);
 })}
 </nav>
 
-<div className="hidden md:flex items-center gap-4 xl:gap-6 shrink-0">
+<div className="hidden md:flex items-center gap-5 shrink-0">
+<div className="hidden xl:block w-px h-7 bg-cool-gray/15" />
 <a href="tel:+919342367446" className="hidden xl:flex items-center gap-2 text-primary font-bold hover:text-secondary font-sans transition-colors" title="Click to dial Chennai neudental support">
 <div className="w-9 h-9 rounded-full bg-primary/5 flex items-center justify-center text-primary shrink-0"><Phone className="w-4 h-4 text-secondary" /></div>
 <div className="text-left leading-none whitespace-nowrap"><span className="text-[10px] block opacity-60 uppercase font-bold tracking-wider">Quick Helpline</span><span className="text-sm font-bold font-sans">+91 93423 67446</span></div>
@@ -111,9 +108,6 @@ return (
 </div>
 </div>
 );
-}
-if (item.name === 'Symptom Checker') {
-return (<button key={item.name} type="button" onClick={() => { setMobileMenuOpen(false); onOpenSymptomChecker(); }} className="text-primary hover:text-secondary text-base font-sans font-semibold py-2 border-b border-cool-gray/5 text-left cursor-pointer">{item.name}</button>);
 }
 return (<a key={item.name} href={item.href} className="text-primary hover:text-secondary text-base font-sans font-semibold py-2 border-b border-cool-gray/5" onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, item.href); }}>{item.name}</a>);
 })}
