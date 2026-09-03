@@ -13,12 +13,13 @@ import Footer from './components/Footer';
 import TreatmentDetailView from './components/TreatmentDetailView';
 import AdminView from './components/AdminView';
 import { FAQS } from './data';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, ArrowLeft } from 'lucide-react';
 import type { FAQItem } from './types';
 
 export default function App() {
   const [preSelectedTreatmentId, setPreSelectedTreatmentId] = useState<string>('checkup');
   const [activeTreatmentSubpageId, setActiveTreatmentSubpageId] = useState<string | null>(null);
+  const [symptomCheckerOpen, setSymptomCheckerOpen] = useState(false);
   const [faqOpenId, setFaqOpenId] = useState<string | null>(null);
 
   if (typeof window !== 'undefined' && window.location.pathname.replace(/\/+$/, '') === '/admin') {
@@ -36,6 +37,7 @@ export default function App() {
       return;
     }
     setActiveTreatmentSubpageId(null);
+    setSymptomCheckerOpen(false);
     // Wait for the home page to actually render before scrolling to it.
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -52,6 +54,7 @@ export default function App() {
   };
 
   const handleNavbarSelectTreatment = (treatmentId: string) => {
+    setSymptomCheckerOpen(false);
     setPreSelectedTreatmentId(treatmentId);
     setActiveTreatmentSubpageId(treatmentId);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -62,10 +65,42 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleOpenSymptomChecker = () => {
+    setActiveTreatmentSubpageId(null);
+    setSymptomCheckerOpen(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleCloseSymptomChecker = () => {
+    setSymptomCheckerOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleSymptomCheckerSelectTreatment = (treatmentId: string) => {
+    setSymptomCheckerOpen(false);
+    handleSelectTreatment(treatmentId);
+  };
+
+  if (symptomCheckerOpen) {
+    return (
+      <div className="min-h-screen bg-white">
+        <Navbar onSelectTreatment={handleNavbarSelectTreatment} onScrollToBooking={handleScrollToBooking} onLogoClick={handleCloseSymptomChecker} onNavigateSection={navigateToSection} onOpenSymptomChecker={handleOpenSymptomChecker} />
+        <div className="max-w-[1280px] mx-auto w-full px-6 md:px-10 lg:px-16 pt-8">
+          <button onClick={handleCloseSymptomChecker} className="inline-flex items-center gap-2 text-on-surface-variant hover:text-secondary font-sans text-sm font-medium transition-colors cursor-pointer">
+            <ArrowLeft size={20} />
+            Back to Home
+          </button>
+        </div>
+        <SymptomChecker onSelectTreatment={handleSymptomCheckerSelectTreatment} />
+        <Footer onNavigateSection={navigateToSection} />
+      </div>
+    );
+  }
+
   if (activeTreatmentSubpageId) {
     return (
       <div className="min-h-screen bg-white">
-        <Navbar onSelectTreatment={handleNavbarSelectTreatment} onScrollToBooking={handleScrollToBooking} onLogoClick={handleCloseTreatmentView} onNavigateSection={navigateToSection} />
+        <Navbar onSelectTreatment={handleNavbarSelectTreatment} onScrollToBooking={handleScrollToBooking} onLogoClick={handleCloseTreatmentView} onNavigateSection={navigateToSection} onOpenSymptomChecker={handleOpenSymptomChecker} />
         <TreatmentDetailView treatmentId={activeTreatmentSubpageId} onBack={handleCloseTreatmentView} onNavigateToTreatment={handleNavbarSelectTreatment} />
         <Footer onNavigateSection={navigateToSection} />
       </div>
@@ -74,7 +109,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-white">
-      <Navbar onSelectTreatment={handleNavbarSelectTreatment} onScrollToBooking={handleScrollToBooking} onLogoClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} onNavigateSection={navigateToSection} />
+      <Navbar onSelectTreatment={handleNavbarSelectTreatment} onScrollToBooking={handleScrollToBooking} onLogoClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} onNavigateSection={navigateToSection} onOpenSymptomChecker={handleOpenSymptomChecker} />
       <Hero onScrollToBooking={handleScrollToBooking} />
       <About />
       <Services onSelectTreatment={handleSelectTreatment} onViewDetailSubpage={handleNavbarSelectTreatment} selectedTreatmentId={preSelectedTreatmentId} />
@@ -83,7 +118,6 @@ export default function App() {
           <BookingForm preSelectedTreatmentId={preSelectedTreatmentId} />
         </div>
       </section>
-      <SymptomChecker onSelectTreatment={handleSelectTreatment} />
       <Testimonials />
       <LocationDetails onScrollToBooking={handleScrollToBooking} />
       <section className="py-20 bg-white">

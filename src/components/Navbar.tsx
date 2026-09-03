@@ -8,9 +8,10 @@ onScrollToBooking: () => void;
 onSelectTreatment: (treatmentId: string) => void;
 onLogoClick?: () => void;
 onNavigateSection: (sectionId: string) => void;
+onOpenSymptomChecker: () => void;
 }
 
-export default function Navbar({ onScrollToBooking, onSelectTreatment, onLogoClick, onNavigateSection }: NavbarProps) {
+export default function Navbar({ onScrollToBooking, onSelectTreatment, onLogoClick, onNavigateSection, onOpenSymptomChecker }: NavbarProps) {
 const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
 const handleLogoClick = (e: React.MouseEvent) => {
@@ -27,6 +28,7 @@ onNavigateSection(href.slice(1));
 const navItems = [
 { name: 'Our Story', href: '#about' },
 { name: 'Treatments', href: '#services' },
+{ name: 'Symptom Checker', href: '' },
 { name: 'Contact & Timing', href: '#location' },
 ];
 
@@ -75,6 +77,9 @@ return (
 </div>
 );
 }
+if (item.name === 'Symptom Checker') {
+return (<button key={item.name} type="button" onClick={onOpenSymptomChecker} className="text-on-surface-variant hover:text-secondary text-sm font-sans font-medium hover:scale-105 transition-all duration-200 cursor-pointer">{item.name}</button>);
+}
 return (<a key={item.name} href={item.href} onClick={(e) => handleLinkClick(e, item.href)} className="text-on-surface-variant hover:text-secondary text-sm font-sans font-medium hover:scale-105 transition-all duration-200">{item.name}</a>);
 })}
 </nav>
@@ -107,6 +112,9 @@ return (
 </div>
 </div>
 );
+}
+if (item.name === 'Symptom Checker') {
+return (<button key={item.name} type="button" onClick={() => { setMobileMenuOpen(false); onOpenSymptomChecker(); }} className="text-primary hover:text-secondary text-base font-sans font-semibold py-2 border-b border-cool-gray/5 text-left cursor-pointer">{item.name}</button>);
 }
 return (<a key={item.name} href={item.href} className="text-primary hover:text-secondary text-base font-sans font-semibold py-2 border-b border-cool-gray/5" onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, item.href); }}>{item.name}</a>);
 })}
