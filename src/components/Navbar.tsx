@@ -59,7 +59,7 @@ taglineClassName="text-[9px] sm:text-[10px] text-cool-gray tracking-wide font-sa
 if (item.name === 'Treatments') {
 return (
 <div key={item.name} className="relative group/dropdown shrink-0">
-<button type="button" aria-haspopup="true" className="flex items-center gap-1.5 whitespace-nowrap text-on-surface-variant hover:text-secondary focus-visible:text-secondary text-sm font-sans font-medium transition-all duration-200 cursor-pointer py-2 outline-none">
+<button type="button" aria-haspopup="true" onClick={() => onNavigateSection('services')} className="flex items-center gap-1.5 whitespace-nowrap text-on-surface-variant hover:text-secondary focus-visible:text-secondary text-sm font-sans font-medium transition-all duration-200 cursor-pointer py-2 outline-none">
 <span>Treatments Offered</span>
 <ChevronDown className="w-3.5 h-3.5 transition-transform duration-200 group-hover/dropdown:rotate-180 group-focus-within/dropdown:rotate-180" />
 </button>
@@ -102,7 +102,7 @@ return (<a key={item.name} href={item.href} onClick={(e) => handleLinkClick(e, i
 if (item.name === 'Treatments') {
 return (
 <div key={item.name} className="flex flex-col border-b border-cool-gray/5 pb-2">
-<span className="text-primary text-sm font-sans font-bold uppercase tracking-wider py-1.5 select-none text-cool-gray">Treatments Offered</span>
+<button type="button" onClick={() => { setMobileMenuOpen(false); onNavigateSection('services'); }} className="text-primary text-sm font-sans font-bold uppercase tracking-wider py-1.5 text-left text-cool-gray cursor-pointer">Treatments Offered</button>
 <div className="grid grid-cols-2 gap-1.5 pl-2 pt-1">
 {TREATMENTS.map((treat) => (
 <button key={treat.id} onClick={() => { onSelectTreatment(treat.id); setMobileMenuOpen(false); }} className="text-stone-700 hover:text-secondary text-[11px] font-sans font-medium text-left py-2 hover:bg-secondary/5 px-2 rounded-lg transition-colors cursor-pointer block truncate">• {treat.name}</button>

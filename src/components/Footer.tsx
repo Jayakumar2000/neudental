@@ -6,9 +6,10 @@ import { TREATMENTS } from '../data';
 interface FooterProps {
 onNavigateSection: (sectionId: string) => void;
 onOpenBlogs: () => void;
+onSelectTreatment: (treatmentId: string) => void;
 }
 
-export default function Footer({ onNavigateSection, onOpenBlogs }: FooterProps) {
+export default function Footer({ onNavigateSection, onOpenBlogs, onSelectTreatment }: FooterProps) {
 const handleSectionClick = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
 e.preventDefault();
 onNavigateSection(sectionId);
@@ -45,7 +46,7 @@ TN State Dental Council Registered
 <h4 className="text-xs font-bold uppercase tracking-widest text-[#E0F2F1] mb-6">Treatments Offered</h4>
 <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3 text-xs text-white/70 font-medium">
 {TREATMENTS.map((treat) => (
-<li key={treat.id}><a href="#services" onClick={(e) => handleSectionClick(e, 'services')} className="hover:text-[#E0F2F1] transition-colors">{treat.name}</a></li>
+<li key={treat.id}><a href="#services" onClick={(e) => { e.preventDefault(); onSelectTreatment(treat.id); }} className="hover:text-[#E0F2F1] transition-colors">{treat.name}</a></li>
 ))}
 </ul>
 </div>

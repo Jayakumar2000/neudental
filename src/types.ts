@@ -2,7 +2,7 @@
 export interface Treatment {
   id: string;
   name: string;
-  category: 'preventive' | 'restorative' | 'specialized' | 'cosmetic';
+  category: 'preventive' | 'restorative' | 'cosmetic-ortho' | 'specialized' | 'pediatric';
   description: string;
   seoKeywords: string[];
   duration: string;

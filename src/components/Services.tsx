@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { TREATMENTS } from '../data';
 import { Treatment } from '../types';
-import { ShieldAlert, Sparkles, Scissors, Smile, Check, Clock, ArrowRight, Search, Activity, Scan, Shield, Heart, Crown, GitBranch, Star, Anchor } from 'lucide-react';
+import { ShieldAlert, Sparkles, Scissors, Smile, Check, Clock, ArrowRight, Search, Activity, Scan, Shield, Heart, Crown, GitBranch, Star, Anchor, Sun, Layers, Zap, Baby } from 'lucide-react';
 
 interface ServicesProps {
 onSelectTreatment: (treatmentId: string) => void;
@@ -9,8 +9,17 @@ selectedTreatmentId: string;
 onViewDetailSubpage?: (treatmentId: string) => void;
 }
 
+const CATEGORIES = [
+{ key: 'all', label: 'All Treatments' },
+{ key: 'preventive', label: 'Preventive' },
+{ key: 'restorative', label: 'Restorative' },
+{ key: 'cosmetic-ortho', label: 'Cosmetic & Ortho' },
+{ key: 'specialized', label: 'Specialized' },
+{ key: 'pediatric', label: 'Kids Dentistry' },
+] as const;
+
 export default function Services({ onSelectTreatment, selectedTreatmentId, onViewDetailSubpage }: ServicesProps) {
-const [activeCategory, setActiveCategory] = useState<'all' | 'preventive' | 'restorative' | 'specialized' | 'cosmetic'>('all');
+const [activeCategory, setActiveCategory] = useState<(typeof CATEGORIES)[number]['key']>('all');
 const [selectedTreatment, setSelectedTreatment] = useState<Treatment | null>(TREATMENTS.find(t => t.id === selectedTreatmentId) || TREATMENTS[0]);
 
 useEffect(() => {
@@ -33,9 +42,15 @@ case 'GitBranch': return <GitBranch className="w-5 h-5" />;
 case 'Star': return <Star className="w-5 h-5" />;
 case 'Anchor': return <Anchor className="w-5 h-5" />;
 case 'Smile': return <Smile className="w-5 h-5" />;
+case 'Sun': return <Sun className="w-5 h-5" />;
+case 'Layers': return <Layers className="w-5 h-5" />;
+case 'Zap': return <Zap className="w-5 h-5" />;
+case 'Baby': return <Baby className="w-5 h-5" />;
 default: return <Smile className="w-5 h-5" />;
 }
 };
+
+const getCategoryLabel = (key: string) => CATEGORIES.find((c) => c.key === key)?.label ?? key;
 
 const filteredTreatments = activeCategory === 'all' ? TREATMENTS : TREATMENTS.filter(t => t.category === activeCategory);
 
@@ -49,9 +64,9 @@ return (
 <p className="font-sans text-base text-on-surface-variant mt-4 leading-relaxed">From routine checkups and cleaning to advanced orthodontics and permanent implants, explore our full spectrum of specialized dental treatments.</p>
 </div>
 <div className="flex flex-wrap items-center justify-center gap-2 mb-12">
-{['all', 'preventive', 'restorative', 'specialized', 'cosmetic'].map((cat) => (
-<button key={cat} onClick={() => setActiveCategory(cat as any)} className={`px-5 py-2.5 rounded-full font-sans text-xs uppercase tracking-wider font-bold transition-all duration-200 cursor-pointer ${activeCategory === cat ? 'bg-primary text-white shadow-lg shadow-primary/10' : 'bg-white border border-cool-gray/20 text-on-surface hover:border-primary'}`}>
-{cat === 'all' ? 'All Treatments' : cat}
+{CATEGORIES.map((cat) => (
+<button key={cat.key} onClick={() => setActiveCategory(cat.key)} className={`px-5 py-2.5 rounded-full font-sans text-xs uppercase tracking-wider font-bold transition-all duration-200 cursor-pointer ${activeCategory === cat.key ? 'bg-primary text-white shadow-lg shadow-primary/10' : 'bg-white border border-cool-gray/20 text-on-surface hover:border-primary'}`}>
+{cat.label}
 </button>
 ))}
 </div>
@@ -61,7 +76,7 @@ return (
 <div key={treatment.id} onClick={() => setSelectedTreatment(treatment)} className={`p-6 rounded-2xl border text-left cursor-pointer transition-all duration-300 ${selectedTreatment?.id === treatment.id ? 'bg-white border-secondary premium-shadow ring-2 ring-secondary/10' : 'bg-white/80 hover:bg-white border-cool-gray/10 hover:border-cool-gray/30'}`}>
 <div className="flex items-center justify-between mb-4">
 <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${selectedTreatment?.id === treatment.id ? 'bg-secondary text-white' : 'bg-secondary/5 text-secondary'}`}>{getIcon(treatment.iconName)}</div>
-<span className="text-[10px] uppercase tracking-wider font-sans font-bold text-secondary bg-secondary/5 px-2.5 py-1 rounded-full">{treatment.category}</span>
+<span className="text-[10px] uppercase tracking-wider font-sans font-bold text-secondary bg-secondary/5 px-2.5 py-1 rounded-full">{getCategoryLabel(treatment.category)}</span>
 </div>
 <h4 className="font-serif font-bold text-base md:text-lg text-primary mb-2">{treatment.name}</h4>
 <p className="font-sans text-xs text-on-surface-variant line-clamp-2 leading-relaxed mb-4">{treatment.description}</p>
@@ -77,7 +92,7 @@ return (
 </div>
 )}
 <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/15 pb-4 mb-4">
-<div><span className="text-mint font-sans text-[11px] uppercase tracking-widest font-bold">{selectedTreatment.category} Treatment Info</span><h3 className="font-serif font-bold text-xl sm:text-2xl text-white mt-1">{selectedTreatment.name}</h3></div>
+<div><span className="text-mint font-sans text-[11px] uppercase tracking-widest font-bold">{getCategoryLabel(selectedTreatment.category)} Treatment Info</span><h3 className="font-serif font-bold text-xl sm:text-2xl text-white mt-1">{selectedTreatment.name}</h3></div>
 </div>
 <p className="font-sans text-sm text-white/80 leading-relaxed mb-6">{selectedTreatment.description}</p>
 <div className="grid grid-cols-2 gap-4 p-4 rounded-xl bg-white/10 border border-white/10 mb-6 text-xs">
