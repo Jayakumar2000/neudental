@@ -70,7 +70,7 @@ return (
 ))}
 </div>
 {selectedTreatment && (
-<div className="lg:col-span-5 bg-gradient-to-br from-primary via-primary to-secondary rounded-3xl p-8 premium-shadow sticky top-36">
+<div className="lg:col-span-5 bg-gradient-to-br from-primary via-primary to-secondary rounded-3xl p-8 premium-shadow sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto">
 {selectedTreatment.highlightUrl && (
 <div className="aspect-[1.8] rounded-xl overflow-hidden mb-6 select-none bg-white/10 border border-white/10">
 <img alt={selectedTreatment.name} className="w-full h-full object-cover" src={selectedTreatment.highlightUrl} />
