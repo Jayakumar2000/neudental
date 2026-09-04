@@ -45,7 +45,7 @@ neudental is now an officially Registered Trademark&reg;
 </div>
 
 <header className="sticky top-0 w-full z-40 bg-white/95 backdrop-blur-md border-b border-cool-gray/10 transition-all premium-shadow">
-<div className="flex items-center justify-between px-6 md:px-10 lg:px-10 xl:px-16 pt-4 pb-2.5 max-w-[1280px] mx-auto w-full">
+<div className="flex items-center justify-between px-6 md:px-10 lg:px-10 xl:px-16 py-3 max-w-[1280px] mx-auto w-full">
 <a href="#" onClick={handleLogoClick} className="flex items-center select-none group shrink-0" aria-label={`${BRAND.name} — ${BRAND.tagline}`}>
 <BrandLogo
 markClassName="h-10 w-auto sm:h-11 md:h-12"
@@ -84,9 +84,9 @@ return (<a key={item.name} href={item.href} onClick={(e) => handleLinkClick(e, i
 </nav>
 
 <div className="hidden md:flex items-center gap-4 shrink-0">
-<a href="tel:+919342367446" className="shrink-0 whitespace-nowrap flex items-center gap-2.5 bg-gradient-to-r from-primary to-secondary text-white shadow shadow-primary/10 hover:shadow-lg hover:shadow-secondary/20 hover:-translate-y-0.5 active:translate-y-0 pl-4 pr-5 py-2.5 rounded-full transition-all duration-200" title="Click to dial Chennai neudental support">
+<a href="tel:+919342367446" className="shrink-0 whitespace-nowrap flex items-center gap-2 bg-gradient-to-r from-primary to-secondary text-white shadow shadow-primary/10 hover:shadow-lg hover:shadow-secondary/20 hover:-translate-y-0.5 active:translate-y-0 pl-3.5 pr-4 py-1.5 rounded-full transition-all duration-200" title="Click to dial Chennai neudental support">
 <Phone className="w-4 h-4 shrink-0" />
-<div className="text-left leading-none"><span className="text-[9px] block opacity-80 uppercase font-bold tracking-wider">Call Our Doctor</span><span className="text-sm font-bold font-sans">+91 93423 67446</span></div>
+<div className="text-left"><span className="text-[9px] block opacity-80 uppercase font-bold tracking-wider leading-tight">Call Our Doctor</span><span className="text-sm font-bold font-sans leading-tight block">+91 93423 67446</span></div>
 </a>
 </div>
 
