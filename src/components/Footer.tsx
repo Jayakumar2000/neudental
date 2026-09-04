@@ -1,5 +1,11 @@
 import React from 'react';
-import { Phone, MapPin, Mail, ShieldAlert, Sparkles } from 'lucide-react';
+import { Phone, MapPin, Mail, ShieldAlert, Sparkles, Facebook, Instagram, Youtube } from 'lucide-react';
+
+const SOCIAL_LINKS = [
+{ name: 'Facebook', href: 'https://www.facebook.com/profile.php?id=61589206920105', icon: Facebook },
+{ name: 'Instagram', href: 'https://www.instagram.com/neudental_clinic/', icon: Instagram },
+{ name: 'YouTube', href: 'https://www.youtube.com/channel/UCfyFaSu7_EJshABsfOuBbWw', icon: Youtube },
+];
 import BrandLogo, { BRAND } from './BrandLogo';
 import { TREATMENTS } from '../data';
 
@@ -80,7 +86,21 @@ Door No. 13, Plot No. 26, 1st Main Road, Vasuki Nagar, Kodungaiyur, Chennai, Tam
 </span>
 </div>
 </li>
+<li className="flex items-start gap-2.5">
+<Mail className="w-4.5 h-4.5 text-mint shrink-0 mt-0.5" />
+<div>
+<span className="block text-[10px] text-white/50 text-bold uppercase">Email:</span>
+<a href="mailto:neudental26@gmail.com" className="text-[#E0F2F1] font-bold text-sm tracking-wide break-all">neudental26@gmail.com</a>
+</div>
+</li>
 </ul>
+<div className="flex items-center gap-3 mt-6">
+{SOCIAL_LINKS.map((social) => (
+<a key={social.name} href={social.href} target="_blank" rel="noopener noreferrer" aria-label={`neudental on ${social.name}`} className="w-9 h-9 rounded-full bg-white/10 hover:bg-mint hover:text-primary text-white flex items-center justify-center transition-colors">
+<social.icon className="w-4 h-4" />
+</a>
+))}
+</div>
 </div>
 </div>
 {/* Sub copyright row */}
