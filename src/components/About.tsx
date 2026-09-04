@@ -72,7 +72,7 @@ Excellence You Can See In The Numbers
 Your Smile Deserves The Right Dentist
 </h3>
 <p className="font-sans text-sm text-on-surface-variant mt-3 leading-relaxed">
-{CLINIC_PHOTOS.length} real photos from our Kodungaiyur practice, and the surgeon behind every treatment.
+A modern, fully-equipped dental practice in the heart of Kodungaiyur — take a look inside, and meet the surgeon behind every treatment.
 </p>
 </div>
 
