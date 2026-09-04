@@ -55,7 +55,7 @@ export default function TreatmentDetailView({ treatmentId, onBack, onNavigateToT
           <p className="font-sans text-base md:text-lg text-on-surface-variant max-w-2xl mt-4 leading-relaxed">{treatment.description}</p>
           <div className="flex flex-wrap items-center gap-3 mt-6">
             <span className="inline-flex items-center gap-2 bg-white border border-cool-gray/15 rounded-full px-4 py-2 text-xs font-sans font-bold text-primary premium-shadow">Duration: {treatment.duration}</span>
-            <span className="inline-flex items-center gap-2 bg-white border border-cool-gray/15 rounded-full px-4 py-2 text-xs font-sans font-bold text-primary premium-shadow">From {treatment.priceRange}</span>
+            <span className="inline-flex items-center gap-2 bg-white border border-cool-gray/15 rounded-full px-4 py-2 text-xs font-sans font-bold text-primary premium-shadow">From ₹{treatment.startingPrice.toLocaleString('en-IN')}</span>
           </div>
         </div>
       </div>
@@ -122,7 +122,7 @@ export default function TreatmentDetailView({ treatmentId, onBack, onNavigateToT
                   className="p-4 bg-white border border-cool-gray/10 rounded-xl hover:border-secondary hover:premium-shadow transition-all text-left cursor-pointer"
                 >
                   <span className="font-sans text-sm font-bold text-primary block">{t.name}</span>
-                  <span className="font-sans text-xs text-cool-gray mt-1 block">{t.priceRange}</span>
+                  <span className="font-sans text-xs text-cool-gray mt-1 block">From ₹{t.startingPrice.toLocaleString('en-IN')}</span>
                 </button>
               ))}
             </div>

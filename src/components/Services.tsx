@@ -97,7 +97,7 @@ return (
 <p className="font-sans text-sm text-white/80 leading-relaxed mb-6">{selectedTreatment.description}</p>
 <div className="grid grid-cols-2 gap-4 p-4 rounded-xl bg-white/10 border border-white/10 mb-6 text-xs">
 <div className="flex items-center gap-2"><Clock className="w-4 h-4 text-white/60" /><div><p className="text-white/60 font-medium">Duration</p><p className="font-bold text-white">{selectedTreatment.duration}</p></div></div>
-<div className="flex items-center gap-2"><IndianRupee className="w-4 h-4 text-white/60" /><div><p className="text-white/60 font-medium">Starting Price</p><p className="font-bold text-white">{selectedTreatment.priceRange}</p></div></div>
+<div className="flex items-center gap-2"><IndianRupee className="w-4 h-4 text-white/60" /><div><p className="text-white/60 font-medium">Starting Price</p><p className="font-bold text-white">₹{selectedTreatment.startingPrice.toLocaleString('en-IN')}</p></div></div>
 </div>
 <div className="space-y-3 mb-8">
 <p className="text-xs font-bold uppercase tracking-wider text-white">Key Treatment Protocols:</p>
