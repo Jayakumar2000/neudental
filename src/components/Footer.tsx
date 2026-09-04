@@ -4,9 +4,10 @@ import BrandLogo, { BRAND } from './BrandLogo';
 
 interface FooterProps {
 onNavigateSection: (sectionId: string) => void;
+onOpenBlogs: () => void;
 }
 
-export default function Footer({ onNavigateSection }: FooterProps) {
+export default function Footer({ onNavigateSection, onOpenBlogs }: FooterProps) {
 const handleSectionClick = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
 e.preventDefault();
 onNavigateSection(sectionId);
@@ -54,9 +55,10 @@ TN State Dental Council Registered
 <div>
 <h4 className="text-xs font-bold uppercase tracking-widest text-[#E0F2F1] mb-6">Patient Navigation</h4>
 <ul className="space-y-3 text-xs text-white/70 font-medium">
-<li><a href="#about" onClick={(e) => handleSectionClick(e, 'about')} className="hover:text-[#E0F2F1] transition-colors">Our Story</a></li>
-<li><a href="#services" onClick={(e) => handleSectionClick(e, 'services')} className="hover:text-[#E0F2F1] transition-colors">Treatments Catalog</a></li>
-<li><a href="#location" onClick={(e) => handleSectionClick(e, 'location')} className="hover:text-[#E0F2F1] transition-colors">Clinical Session Location</a></li>
+<li><a href="#our-doctor" onClick={(e) => handleSectionClick(e, 'our-doctor')} className="hover:text-[#E0F2F1] transition-colors">Our Doctor</a></li>
+<li><a href="#services" onClick={(e) => handleSectionClick(e, 'services')} className="hover:text-[#E0F2F1] transition-colors">Treatments Offered</a></li>
+<li><button type="button" onClick={onOpenBlogs} className="hover:text-[#E0F2F1] transition-colors cursor-pointer text-left">Blogs</button></li>
+<li><a href="#location" onClick={(e) => handleSectionClick(e, 'location')} className="hover:text-[#E0F2F1] transition-colors">Location &amp; Timing</a></li>
 </ul>
 </div>
 {/* Column 4 Direct support contact */}

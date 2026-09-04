@@ -65,3 +65,13 @@ export interface FAQItem {
   answer: string;
   category: 'general' | 'treatment' | 'insurance' | 'appointment';
 }
+
+export interface BlogPost {
+  id: string;
+  title: string;
+  excerpt: string;
+  category: string;
+  date: string;
+  readTime: string;
+  content: string[];
+}

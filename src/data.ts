@@ -1,6 +1,6 @@
 // neudental v1 - Static Data
 // NOTE: For the complete version with full SEO descriptions, refer to Google AI Studio project
-import { Treatment, Doctor, Testimonial, Symptom, FAQItem } from './types';
+import { Treatment, Doctor, Testimonial, Symptom, FAQItem, BlogPost } from './types';
 
 export const TREATMENTS: Treatment[] = [
   { id: 'checkup', name: 'Regular Check-up', category: 'preventive', description: 'Comprehensive dental examination to assess your oral health and detect any issues early.', seoKeywords: ['dental checkup Kodungaiyur', 'dental exam Chennai'], duration: '30-45 minutes', priceRange: '₹300-₹500', startingPrice: 300, iconName: 'Search', features: ['Oral examination', 'X-ray review', 'Treatment planning', 'Oral hygiene advice'] },
@@ -55,3 +55,49 @@ export const FAQS: FAQItem[] = [
 
 // Alias for backward compatibility with components using DOCTORS (plural)
 export const DOCTORS = [DOCTOR];
+
+export const BLOGS: BlogPost[] = [
+  {
+    id: 'oral-hygiene-after-root-canal',
+    title: '5 Simple Habits to Protect Your Smile After a Root Canal',
+    excerpt: 'A root canal saves your tooth, but the days right after matter just as much as the procedure itself. Here is what actually helps recovery go smoothly.',
+    category: 'Patient Care',
+    date: 'August 2026',
+    readTime: '4 min read',
+    content: [
+      'A root canal has one job: save a tooth that would otherwise need to come out. Once the infected pulp is removed and the tooth is sealed, most of the hard work is already done. What happens in the next few days, though, still makes a real difference to how comfortable your recovery is.',
+      'First, expect mild soreness for a day or two. This is normal and usually responds well to the pain relief your dentist prescribes. Avoid chewing directly on the treated tooth until any temporary filling has been replaced with a permanent crown or restoration.',
+      'Stick to soft, lukewarm foods for the first 24 hours, and steer clear of anything very hard, sticky, or crunchy on that side of your mouth. Continue brushing and flossing as usual everywhere else in your mouth. Skipping oral hygiene near the treated tooth out of caution is a common mistake, gentle brushing is still safe and important.',
+      'If you notice swelling, a bad taste that will not go away, or pain that gets worse instead of better after a few days, contact your dentist. These are the exceptions rather than the rule, but they are worth checking on quickly rather than waiting it out.',
+      'Finally, book your follow-up for the permanent crown or filling as soon as it is recommended. A tooth left with only a temporary seal for too long is more vulnerable to reinfection, undoing the very problem the root canal was meant to fix.',
+    ],
+  },
+  {
+    id: 'why-regular-checkups-matter',
+    title: 'Why Regular Dental Checkups Matter More Than You Think',
+    excerpt: "Most dental problems don't announce themselves with pain until they've already become serious. Here's why a six-month checkup is one of the highest-value habits for your health.",
+    category: 'Preventive Care',
+    date: 'July 2026',
+    readTime: '3 min read',
+    content: [
+      'It is easy to assume a dental visit is only necessary when something hurts. In reality, some of the most common dental problems, early cavities, the first stages of gum disease, and cracked fillings, cause little to no pain until they have progressed significantly.',
+      'A routine checkup lets your dentist catch these issues while they are still small, simple, and inexpensive to treat. A cavity caught early might need a small filling; the same cavity left unchecked for a year could mean a root canal or an extraction.',
+      'Checkups also include a professional cleaning that removes hardened plaque (tartar) that a toothbrush at home simply cannot reach. Left in place, this buildup is one of the leading causes of gum disease, which has been linked to broader health concerns well beyond the mouth.',
+      'A six-month visit is also a chance to ask questions, about sensitivity, whitening, a nagging habit like teeth grinding, or anything else you have been putting off mentioning. Prevention is almost always more comfortable, faster, and cheaper than treatment after the fact.',
+    ],
+  },
+  {
+    id: 'painless-laser-dentistry-explained',
+    title: 'Understanding Painless Laser Dentistry: What to Expect',
+    excerpt: 'Laser-assisted treatment is one of the biggest reasons modern dental visits feel nothing like they used to. Here is a plain-language look at how it works.',
+    category: 'Modern Dentistry',
+    date: 'June 2026',
+    readTime: '4 min read',
+    content: [
+      'Laser dentistry uses a focused beam of light instead of traditional drills for many common procedures, including cavity treatment, gum reshaping, and some soft-tissue work. For patients, the appeal is straightforward: many of these procedures can be done with less discomfort, less bleeding, and a noticeably calmer experience overall.',
+      'The reason it feels different comes down to precision. A laser can target only the affected tissue with very fine control, which often means less vibration, less pressure, and in many cases, less need for local anesthesia than a conventional approach would require.',
+      'Recovery tends to be faster too. Because the laser seals small blood vessels and nerve endings as it works, many patients experience less swelling and bleeding afterward compared to traditional instruments, which can mean a shorter, more comfortable healing period.',
+      'Laser treatment is not the right fit for every single procedure, your dentist will always recommend whichever method is safest and most effective for your specific case. But for the procedures where it applies, it is a big part of why the phrase "painless dentistry" has become a realistic promise rather than just a marketing line.',
+    ],
+  },
+];

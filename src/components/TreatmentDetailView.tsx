@@ -1,4 +1,7 @@
 // neudental v1 - TreatmentDetailView Component
+// Not currently routed to anywhere -- phase 1 shows treatment info via the
+// Services bento snapshot instead. Kept in place for the phase 2 rebuild of
+// dedicated per-treatment resource pages.
 import React from 'react';
 import { ArrowLeft, Phone, Check, Clock, ShieldCheck, Zap, BadgeCheck } from 'lucide-react';
 import { TREATMENTS } from '../data';
