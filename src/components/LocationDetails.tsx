@@ -19,7 +19,7 @@ return (
 <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-stretch max-w-6xl mx-auto">
 <div className="lg:col-span-5 flex flex-col gap-6 justify-between">
 <div className="bg-white p-8 rounded-2xl border border-cool-gray/10 premium-shadow">
-<h3 className="font-serif font-bold text-lg text-primary mb-6 flex items-center gap-2"><Clock className="w-5 h-5 text-secondary" /> Clinical Sessions Hours</h3>
+<h3 className="font-serif font-bold text-lg text-primary mb-6 flex items-center gap-2"><Clock className="w-5 h-5 text-secondary" /> Clinic Timings</h3>
 <div className="space-y-4 font-sans text-sm">
 <div className="flex justify-between items-start pb-3">
 <div><span className="font-bold text-primary block">Monday - Sunday:</span><span className="text-xs text-cool-gray">Open all 7 days, dual-sessions clinical service</span></div>
@@ -30,16 +30,16 @@ return (
 <div className="bg-white p-8 rounded-2xl border border-cool-gray/10 premium-shadow">
 <h3 className="font-serif font-bold text-lg text-primary mb-6 flex items-center gap-2"><MapPin className="w-5 h-5 text-secondary" /> Address &amp; Navigation</h3>
 <div className="space-y-4 font-sans text-sm">
-<p className="text-on-surface-variant font-medium leading-relaxed leading-6 select-all">Door No. 13, Plot No. 26, 1st Main Road, <br />Vasuki Nagar, Kodungaiyur, <br />Chennai, Tamil Nadu - 600118</p>
+<p className="text-on-surface-variant font-medium leading-relaxed leading-6 select-all">Door No. 13, Plot No. 26, 1st Main Road, Vasuki Nagar, Kodungaiyur, Chennai, Tamil Nadu - 600118</p>
 <div className="p-4 bg-emerald-50 text-emerald-900 rounded-xl text-xs flex gap-2 border border-emerald-100 font-sans"><HelpCircle className="w-4.5 h-4.5 text-emerald-600 shrink-0 mt-0.5" /><div><strong className="block font-bold">Local Community Landmarks:</strong>Near Vasugi Park and Sidco Bus Stop - just 100 meters away. Parking facility available.</div></div>
-<div className="pt-2"><a href={directionUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 bg-primary hover:bg-secondary text-white text-xs uppercase tracking-widest font-bold px-6 py-3.5 rounded-xl transition-all duration-200"><Navigation className="w-4 h-4 fill-current" /> Get GPS Directions <ExternalLink className="w-3 h-3" /></a></div>
+<div className="pt-2"><a href={directionUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 bg-primary hover:bg-secondary text-white text-xs uppercase tracking-widest font-bold px-6 py-3.5 rounded-xl transition-all duration-200"><Navigation className="w-4 h-4 fill-current" /> Get GPS Directions</a></div>
 </div>
 </div>
 </div>
 <div className="lg:col-span-7 bg-white rounded-3xl p-4 border border-cool-gray/10 premium-shadow flex flex-col justify-between overflow-hidden">
 <div className="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-cool-gray/10 pb-4 mb-4 gap-3">
 <div><h4 className="font-serif text-2xl md:text-3xl font-bold text-primary">Map view of neudental Clinic</h4></div>
-<a href={googleMapsUrl} target="_blank" rel="noreferrer" className="text-xs text-secondary font-bold hover:underline inline-flex items-center gap-1 font-sans">Open in Google Maps App <ExternalLink className="w-3.5 h-3.5" /></a>
+<a href={googleMapsUrl} target="_blank" rel="noreferrer" className="text-xs text-secondary font-bold hover:underline inline-flex items-center gap-1 font-sans">Open in Google Maps <ExternalLink className="w-3.5 h-3.5" /></a>
 </div>
 <div className="w-full grow min-h-[350px] rounded-2xl overflow-hidden border border-cool-gray/15 select-none bg-cool-gray/5 relative">
 <iframe title="Google map exact directions neudental clinic chennai" src={`https://maps.google.com/maps?q=${clinicLat},${clinicLng}&z=17&output=embed`} className="w-full h-full border-none absolute inset-0" allowFullScreen={true} loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
