@@ -69,7 +69,7 @@ Excellence You Can See In The Numbers
 <Camera className="w-4 h-4 text-secondary" /> Step Inside neudental
 </span>
 <h3 className="font-serif text-2xl md:text-3xl font-bold text-primary mt-3 leading-tight">
-Real Clinic, Real Doctor
+Your Smile Deserves The Right Dentist
 </h3>
 <p className="font-sans text-sm text-on-surface-variant mt-3 leading-relaxed">
 {CLINIC_PHOTOS.length} real photos from our Kodungaiyur practice, and the surgeon behind every treatment.

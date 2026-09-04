@@ -32,11 +32,11 @@ Best Dental Clinic in Kodungaiyur, Chennai
 </span>
 </div>
 <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-5xl text-primary leading-tight font-bold tracking-tight">
-Gentle Dentistry. <br />
-<span className="text-secondary italic font-light">For Every Age, From Day One.</span>
+Expert Dental Care <br />
+<span className="text-secondary italic font-light">in Kodungaiyur, Chennai</span>
 </h1>
 <p className="font-sans text-base md:text-lg text-on-surface-variant max-w-xl leading-relaxed">
-Painless, laser-assisted care with a conservative, tooth-first approach — from a child's first checkup to a <strong>Root Canal</strong> or <strong>Implant</strong>, by Dr. Swetha BDS, FGDS.
+Gentle, comfortable dentistry for every age — from a child's first checkup to a <strong>Root Canal</strong> or <strong>Implant</strong>, by Dr. Swetha BDS, FGDS.
 </p>
 <div className="flex flex-col sm:flex-row gap-4 pt-2 w-full sm:w-auto">
 <button onClick={onScrollToBooking} className="bg-primary text-white hover:bg-secondary cursor-pointer shadow-xl shadow-primary/10 hover:shadow-secondary/20 hover:-translate-y-0.5 active:translate-y-0 px-8 py-4 rounded-xl font-sans text-sm tracking-wider uppercase font-bold transition-all duration-200">Book Appointment</button>
