@@ -94,7 +94,8 @@ Door No. 13, Plot No. 26, 1st Main Road, Vasuki Nagar, Kodungaiyur, Chennai, Tam
 </div>
 </li>
 </ul>
-<div className="flex items-center gap-3 mt-6">
+<span className="block text-[10px] text-white/50 text-bold uppercase mt-6">Socials</span>
+<div className="flex items-center gap-3 mt-2">
 {SOCIAL_LINKS.map((social) => (
 <a key={social.name} href={social.href} target="_blank" rel="noopener noreferrer" aria-label={`neudental on ${social.name}`} className="w-9 h-9 rounded-full bg-white/10 hover:bg-mint hover:text-primary text-white flex items-center justify-center transition-colors">
 <social.icon className="w-4 h-4" />
