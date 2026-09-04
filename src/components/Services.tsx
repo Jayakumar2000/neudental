@@ -70,29 +70,29 @@ return (
 ))}
 </div>
 {selectedTreatment && (
-<div className="lg:col-span-5 bg-white rounded-3xl p-8 border border-cool-gray/10 premium-shadow sticky top-36">
+<div className="lg:col-span-5 bg-gradient-to-br from-primary via-primary to-secondary rounded-3xl p-8 premium-shadow sticky top-36">
 {selectedTreatment.highlightUrl && (
-<div className="aspect-[1.8] rounded-xl overflow-hidden mb-6 select-none bg-cool-gray/5 border border-cool-gray/10">
+<div className="aspect-[1.8] rounded-xl overflow-hidden mb-6 select-none bg-white/10 border border-white/10">
 <img alt={selectedTreatment.name} className="w-full h-full object-cover" src={selectedTreatment.highlightUrl} />
 </div>
 )}
-<div className="flex flex-wrap items-center justify-between gap-2 border-b border-cool-gray/10 pb-4 mb-4">
-<div><span className="text-secondary font-sans text-[11px] uppercase tracking-widest font-bold">{selectedTreatment.category} Treatment Info</span><h3 className="font-serif font-bold text-xl sm:text-2xl text-primary mt-1">{selectedTreatment.name}</h3></div>
+<div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/15 pb-4 mb-4">
+<div><span className="text-mint font-sans text-[11px] uppercase tracking-widest font-bold">{selectedTreatment.category} Treatment Info</span><h3 className="font-serif font-bold text-xl sm:text-2xl text-white mt-1">{selectedTreatment.name}</h3></div>
 </div>
-<p className="font-sans text-sm text-on-surface-variant leading-relaxed mb-6">{selectedTreatment.description}</p>
-<div className="grid grid-cols-2 gap-4 p-4 rounded-xl bg-surface-alt border border-cool-gray/5 mb-6 text-xs">
-<div className="flex items-center gap-2"><Clock className="w-4 h-4 text-cool-gray" /><div><p className="text-cool-gray font-medium">Duration</p><p className="font-bold text-primary">{selectedTreatment.duration}</p></div></div>
-<div className="flex items-center gap-2"><ShieldAlert className="w-4 h-4 text-cool-gray" /><div><p className="text-cool-gray font-medium">Safety Standard</p><p className="font-bold text-primary">Class-B Sterilized</p></div></div>
+<p className="font-sans text-sm text-white/80 leading-relaxed mb-6">{selectedTreatment.description}</p>
+<div className="grid grid-cols-2 gap-4 p-4 rounded-xl bg-white/10 border border-white/10 mb-6 text-xs">
+<div className="flex items-center gap-2"><Clock className="w-4 h-4 text-white/60" /><div><p className="text-white/60 font-medium">Duration</p><p className="font-bold text-white">{selectedTreatment.duration}</p></div></div>
+<div className="flex items-center gap-2"><ShieldAlert className="w-4 h-4 text-white/60" /><div><p className="text-white/60 font-medium">Safety Standard</p><p className="font-bold text-white">Class-B Sterilized</p></div></div>
 </div>
 <div className="space-y-3 mb-8">
-<p className="text-xs font-bold uppercase tracking-wider text-primary">Key Treatment Protocols:</p>
+<p className="text-xs font-bold uppercase tracking-wider text-white">Key Treatment Protocols:</p>
 {selectedTreatment.features.map((feat) => (
-<div key={feat} className="flex items-start gap-2.5 text-xs text-on-surface-variant"><div className="w-4 h-4 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5"><Check className="w-3 h-3" /></div><span className="leading-normal">{feat}</span></div>
+<div key={feat} className="flex items-start gap-2.5 text-xs text-white/80"><div className="w-4 h-4 rounded-full bg-mint/90 text-primary flex items-center justify-center shrink-0 mt-0.5"><Check className="w-3 h-3" /></div><span className="leading-normal">{feat}</span></div>
 ))}
 </div>
 <div className="space-y-3">
-<button onClick={() => onSelectTreatment(selectedTreatment.id)} className="w-full bg-primary text-white hover:bg-secondary cursor-pointer py-4 rounded-xl font-sans text-xs uppercase tracking-widest font-bold transition-all duration-200">Pre-Select &amp; Reserve Appointment</button>
-{onViewDetailSubpage && (<button onClick={() => onViewDetailSubpage(selectedTreatment.id)} className="w-full bg-white border border-secondary/20 hover:bg-secondary/5 text-secondary cursor-pointer py-3.5 rounded-xl font-sans text-xs uppercase tracking-widest font-bold transition-all duration-200 flex items-center justify-center gap-1.5"><span>View Comprehensive Patient Guide</span><ArrowRight className="w-3.5 h-3.5" /></button>)}
+<button onClick={() => onSelectTreatment(selectedTreatment.id)} className="w-full bg-white text-primary hover:bg-mint cursor-pointer py-4 rounded-xl font-sans text-xs uppercase tracking-widest font-bold transition-all duration-200">Book Appointment</button>
+{onViewDetailSubpage && (<button onClick={() => onViewDetailSubpage(selectedTreatment.id)} className="w-full bg-white/10 border border-white/20 hover:bg-white/15 text-white cursor-pointer py-3.5 rounded-xl font-sans text-xs uppercase tracking-widest font-bold transition-all duration-200 flex items-center justify-center gap-1.5"><span>View Comprehensive Patient Guide</span><ArrowRight className="w-3.5 h-3.5" /></button>)}
 </div>
 </div>
 )}

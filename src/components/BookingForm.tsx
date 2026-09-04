@@ -87,7 +87,7 @@ export default function BookingForm({ preSelectedTreatmentId, onClose }: Booking
 
   return (
     <div className="bg-white rounded-3xl p-6 md:p-8 border border-cool-gray/10 premium-shadow">
-      <div className="flex items-center gap-2 mb-6"><CalendarCheck className="w-6 h-6 text-secondary" /><h3 className="font-serif font-bold text-xl md:text-2xl text-primary">Priority Slot Reservation</h3></div>
+      <div className="flex items-center gap-2 mb-6"><CalendarCheck className="w-6 h-6 text-secondary" /><h3 className="font-serif font-bold text-xl md:text-2xl text-primary">Book Appointment</h3></div>
       <p className="font-sans text-xs text-on-surface-variant leading-relaxed mb-6">Book your appointment with Dr. Swetha instantly. We adhere rigidly to schedule times to eliminate hospital waiting lines.</p>
       {successMsg && <div className="mb-6 p-4 rounded-xl bg-emerald-50 text-emerald-800 text-xs font-medium font-sans border-l-4 border-emerald-500">{successMsg}</div>}
       {errorMsg && <div className="mb-6 p-4 rounded-xl bg-rose-50 text-rose-800 text-xs font-medium font-sans border-l-4 border-rose-500">{errorMsg}</div>}
@@ -101,7 +101,7 @@ export default function BookingForm({ preSelectedTreatmentId, onClose }: Booking
         <div className="space-y-1"><label className="text-xs font-display font-medium text-primary uppercase">Appointment Date</label><input type="date" required min={todayStr} value={date} onChange={(e) => setDate(e.target.value)} className="w-full px-4 py-3 bg-[#F8FAFC] border-0 border-b-2 border-cool-gray/20 focus:border-secondary focus:ring-0 outline-none text-sm text-primary font-sans rounded-t" /></div>
         <div className="space-y-2"><label className="text-xs font-display font-medium text-primary uppercase block">Select Preferred Hour</label><div className="space-y-3">{timeSlots.map((group) => (<div key={group.label} className="bg-[#F8FAFC] p-3 rounded-xl border border-cool-gray/5"><span className="text-[10px] text-cool-gray uppercase font-bold tracking-wider block mb-2">{group.label}</span><div className="flex flex-wrap gap-1.5">{group.times.map((slot) => <button type="button" key={slot} onClick={() => setTimeSlot(slot)} className={`px-3 py-1.5 rounded-lg font-sans text-xs font-semibold cursor-pointer transition-all ${timeSlot === slot ? 'bg-secondary text-white shadow-md' : 'bg-white border border-cool-gray/10 hover:border-cool-gray/30 text-on-surface'}`}>{slot}</button>)}</div></div>))}</div></div>
         <div className="space-y-1"><label className="text-xs font-display font-medium text-primary uppercase">Notes (Optional)</label><textarea placeholder="Symptoms or additional notes" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} className="w-full px-4 py-3 bg-[#F8FAFC] border-0 border-b-2 border-cool-gray/20 focus:border-secondary focus:ring-0 outline-none text-sm text-primary font-sans rounded-t resize-none" /></div>
-        <button type="submit" className="w-full bg-primary hover:bg-secondary text-white py-4 cursor-pointer rounded-xl font-sans text-xs uppercase tracking-widest font-bold transition-all duration-200">Confirm My Clinical Slot</button>
+        <button type="submit" className="w-full bg-primary hover:bg-secondary text-white py-4 cursor-pointer rounded-xl font-sans text-xs uppercase tracking-widest font-bold transition-all duration-200">Book Appointment</button>
       </form>
       {myBookings.length > 0 && (
         <div className="mt-12 pt-8 border-t border-cool-gray/10">

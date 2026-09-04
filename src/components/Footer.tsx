@@ -68,14 +68,14 @@ TN State Dental Council Registered
 <li className="flex items-start gap-2.5">
 <Phone className="w-4.5 h-4.5 text-mint shrink-0 mt-0.5" />
 <div>
-<span className="block text-[10px] text-white/50 text-bold uppercase">Call Patient Care:</span>
+<span className="block text-[10px] text-white/50 text-bold uppercase">Talk to Dentist:</span>
 <a href="tel:+919342367446" className="text-[#E0F2F1] font-bold text-sm tracking-wide">+91 93423 67446</a>
 </div>
 </li>
 <li className="flex items-start gap-2.5">
 <MapPin className="w-4.5 h-4.5 text-mint shrink-0 mt-0.5" />
 <div>
-<span className="block text-[10px] text-white/50 text-bold uppercase">Physical Address:</span>
+<span className="block text-[10px] text-white/50 text-bold uppercase">Clinic Location:</span>
 <span className="leading-snug select-all text-white/80 block mt-0.5">
 Door No 13, Plot No 26, 1st Main Road, Vasuki Nagar, Kodungaiyur, Chennai, Tamil Nadu - 600118
 </span>
@@ -90,7 +90,7 @@ Door No 13, Plot No 26, 1st Main Road, Vasuki Nagar, Kodungaiyur, Chennai, Tamil
 {new Date().getFullYear()} {BRAND.legalName}. All rights reserved.
 </p>
 <div className="flex gap-6 font-semibold select-none">
-<a href="#booking-section" onClick={(e) => handleSectionClick(e, 'booking-section')} className="hover:text-[#E0F2F1] transition-colors">Book Priority Slot</a>
+<a href="#booking-section" onClick={(e) => handleSectionClick(e, 'booking-section')} className="hover:text-[#E0F2F1] transition-colors">Book Appointment</a>
 <span className="text-white/10">|</span>
 <a href="#location" onClick={(e) => handleSectionClick(e, 'location')} className="hover:text-[#E0F2F1] transition-colors">Clinical Timings</a>
 <span className="text-white/10">|</span>
