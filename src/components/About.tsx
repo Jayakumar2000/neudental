@@ -6,8 +6,8 @@ const TRUST_STATS = [
   { icon: Award, value: '5+', label: 'Years of Trusted Dental Care' },
   { icon: Users, value: '3,000+', label: 'Happy Patients Treated' },
   { icon: Activity, value: '5,000+', label: 'Procedures Completed' },
+  { icon: Home, value: '200+', label: 'Home Visit Patients Treated' },
   { icon: Sparkles, value: '99.8%', label: 'Sterilization Success Rate' },
-  { icon: Home, value: '50+', label: 'Home Visit Patients Treated' },
 ];
 
 interface GalleryPhoto {
