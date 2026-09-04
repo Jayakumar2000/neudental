@@ -62,12 +62,11 @@ return (
 <ChevronDown className="w-3.5 h-3.5 transition-transform duration-200 group-hover/dropdown:rotate-180 group-focus-within/dropdown:rotate-180" />
 </button>
 <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 invisible opacity-0 translate-y-2 group-hover/dropdown:visible group-hover/dropdown:opacity-100 group-hover/dropdown:translate-y-0 group-focus-within/dropdown:visible group-focus-within/dropdown:opacity-100 group-focus-within/dropdown:translate-y-0 transition-all duration-200 z-50">
-<div className="w-[320px] bg-white border border-cool-gray/10 rounded-2xl shadow-xl p-3 grid grid-cols-1 gap-0.5 max-h-[480px] overflow-y-auto">
-<p className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-cool-gray border-b border-cool-gray/5 mb-1.5">Services Catalog</p>
+<div className="w-[760px] bg-white border border-cool-gray/10 rounded-2xl shadow-xl p-4 grid grid-cols-4 gap-2">
 {TREATMENTS.map((treat) => (
-<button key={treat.id} onClick={() => { onSelectTreatment(treat.id); }} className="flex items-start gap-2.5 p-2 rounded-xl hover:bg-secondary/5 text-left text-[#1E293B] hover:text-secondary transition-all cursor-pointer group/item hover:translate-x-0.5">
+<button key={treat.id} onClick={() => { onSelectTreatment(treat.id); }} className="flex items-start gap-2 p-2.5 rounded-xl hover:bg-secondary/5 text-left text-[#1E293B] hover:text-secondary transition-all cursor-pointer group/item hover:translate-x-0.5">
 <span className="text-secondary/80 group-hover/item:text-secondary shrink-0 mt-1"><span className="block w-1.5 h-1.5 rounded-full bg-secondary/30 group-hover/item:bg-secondary transition-all" /></span>
-<div className="leading-tight"><span className="text-xs font-semibold block font-sans">{treat.name}</span><span className="text-[10px] text-cool-gray line-clamp-1 block leading-normal mt-0.5 font-sans font-normal">{treat.description}</span></div>
+<div className="leading-tight"><span className="text-xs font-semibold block font-sans">{treat.name}</span><span className="text-[10px] text-cool-gray line-clamp-2 block leading-normal mt-0.5 font-sans font-normal">{treat.description}</span></div>
 </button>
 ))}
 </div>
