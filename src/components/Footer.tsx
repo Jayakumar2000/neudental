@@ -1,6 +1,7 @@
 import React from 'react';
 import { Phone, MapPin, Mail, ShieldAlert, Sparkles } from 'lucide-react';
 import BrandLogo, { BRAND } from './BrandLogo';
+import { TREATMENTS } from '../data';
 
 interface FooterProps {
 onNavigateSection: (sectionId: string) => void;
@@ -39,16 +40,13 @@ TN State Dental Council Registered
 </p>
 </div>
 </div>
-{/* Column 2 Services short links */}
+{/* Column 2 Treatments short links */}
 <div>
-<h4 className="text-xs font-bold uppercase tracking-widest text-[#E0F2F1] mb-6">Our Services</h4>
-<ul className="space-y-3 text-xs text-white/70 font-medium">
-<li><a href="#services" onClick={(e) => handleSectionClick(e, 'services')} className="hover:text-[#E0F2F1] transition-colors">Painless Root Canal (RCT)</a></li>
-<li><a href="#services" onClick={(e) => handleSectionClick(e, 'services')} className="hover:text-[#E0F2F1] transition-colors">Invisalign Clear Aligners</a></li>
-<li><a href="#services" onClick={(e) => handleSectionClick(e, 'services')} className="hover:text-[#E0F2F1] transition-colors">Biocompatible Dental Implants</a></li>
-<li><a href="#services" onClick={(e) => handleSectionClick(e, 'services')} className="hover:text-[#E0F2F1] transition-colors">Aerosol Dental Scaling</a></li>
-<li><a href="#services" onClick={(e) => handleSectionClick(e, 'services')} className="hover:text-[#E0F2F1] transition-colors">Composite Teeth Fillings</a></li>
-<li><a href="#services" onClick={(e) => handleSectionClick(e, 'services')} className="hover:text-[#E0F2F1] transition-colors">Wisdom Tooth Extractions</a></li>
+<h4 className="text-xs font-bold uppercase tracking-widest text-[#E0F2F1] mb-6">Treatments Offered</h4>
+<ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3 text-xs text-white/70 font-medium">
+{TREATMENTS.map((treat) => (
+<li key={treat.id}><a href="#services" onClick={(e) => handleSectionClick(e, 'services')} className="hover:text-[#E0F2F1] transition-colors">{treat.name}</a></li>
+))}
 </ul>
 </div>
 {/* Column 3 Quick Links */}
