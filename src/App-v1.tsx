@@ -193,12 +193,14 @@ export default function App() {
       <About />
       <Services onSelectTreatment={handleSelectTreatment} selectedTreatmentId={preSelectedTreatmentId} />
       <section id="booking-section" className="py-14 lg:py-20 bg-gray-50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-start">
-          <div className="order-2 lg:order-1">
-            <BookingTrustPanel />
-          </div>
-          <div className="order-1 lg:order-2">
-            <BookingForm preSelectedTreatmentId={preSelectedTreatmentId} />
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white rounded-3xl border border-cool-gray/10 premium-shadow overflow-hidden grid grid-cols-1 lg:grid-cols-2 divide-y divide-cool-gray/10 lg:divide-y-0 lg:divide-x">
+            <div className="order-2 lg:order-1">
+              <BookingTrustPanel />
+            </div>
+            <div className="order-1 lg:order-2">
+              <BookingForm preSelectedTreatmentId={preSelectedTreatmentId} bare />
+            </div>
           </div>
         </div>
       </section>
