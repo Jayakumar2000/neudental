@@ -78,19 +78,19 @@ TN State Dental Council Registered
 </div>
 </li>
 <li className="flex items-start gap-2.5">
+<Mail className="w-4.5 h-4.5 text-mint shrink-0 mt-0.5" />
+<div>
+<span className="block text-[10px] text-white/50 text-bold uppercase">Email:</span>
+<a href="mailto:neudental26@gmail.com" className="text-[#E0F2F1] font-bold text-sm tracking-wide break-all">neudental26@gmail.com</a>
+</div>
+</li>
+<li className="flex items-start gap-2.5">
 <MapPin className="w-4.5 h-4.5 text-mint shrink-0 mt-0.5" />
 <div>
 <span className="block text-[10px] text-white/50 text-bold uppercase">Clinic Location:</span>
 <span className="leading-snug select-all text-white/80 block mt-0.5">
 Door No. 13, Plot No. 26, 1st Main Road, Vasuki Nagar, Kodungaiyur, Chennai, Tamil Nadu - 600118
 </span>
-</div>
-</li>
-<li className="flex items-start gap-2.5">
-<Mail className="w-4.5 h-4.5 text-mint shrink-0 mt-0.5" />
-<div>
-<span className="block text-[10px] text-white/50 text-bold uppercase">Email:</span>
-<a href="mailto:neudental26@gmail.com" className="text-[#E0F2F1] font-bold text-sm tracking-wide break-all">neudental26@gmail.com</a>
 </div>
 </li>
 </ul>
