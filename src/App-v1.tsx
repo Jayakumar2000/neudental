@@ -8,6 +8,10 @@ import Services from './components/Services';
 import SymptomChecker from './components/SymptomChecker';
 import BookingForm from './components/BookingForm';
 import BookingTrustPanel from './components/BookingTrustPanel';
+import { BookingVariant1, BookingVariant2, BookingVariant3, BookingVariant4 } from './components/BookingSectionVariants';
+
+// PROTOTYPE ONLY: swap this to preview each design variant locally.
+const BOOKING_VARIANT: 1 | 2 | 3 | 4 = 4;
 import Testimonials from './components/Testimonials';
 import LocationDetails from './components/LocationDetails';
 import Footer from './components/Footer';
@@ -193,16 +197,10 @@ export default function App() {
       <About />
       <Services onSelectTreatment={handleSelectTreatment} selectedTreatmentId={preSelectedTreatmentId} />
       <section id="booking-section" className="py-14 lg:py-20 bg-gray-50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-3xl border border-cool-gray/10 premium-shadow overflow-hidden grid grid-cols-1 lg:grid-cols-2 divide-y divide-cool-gray/10 lg:divide-y-0 lg:divide-x">
-            <div className="order-2 lg:order-1">
-              <BookingTrustPanel />
-            </div>
-            <div className="order-1 lg:order-2">
-              <BookingForm preSelectedTreatmentId={preSelectedTreatmentId} bare />
-            </div>
-          </div>
-        </div>
+        {BOOKING_VARIANT === 1 && <BookingVariant1 />}
+        {BOOKING_VARIANT === 2 && <BookingVariant2 />}
+        {BOOKING_VARIANT === 3 && <BookingVariant3 />}
+        {BOOKING_VARIANT === 4 && <BookingVariant4 />}
       </section>
       <Testimonials />
       <LocationDetails onScrollToBooking={handleScrollToBooking} />
