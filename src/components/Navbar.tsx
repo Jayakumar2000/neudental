@@ -28,8 +28,8 @@ onNavigateSection(href.slice(1));
 const navItems = [
 { name: 'Our Doctor', href: '#our-doctor' },
 { name: 'Treatments', href: '#services' },
-{ name: 'Blogs', href: '' },
 { name: 'Location & Timing', href: '#location' },
+{ name: 'Blogs', href: '' },
 ];
 
 return (
@@ -83,13 +83,11 @@ return (<a key={item.name} href={item.href} onClick={(e) => handleLinkClick(e, i
 })}
 </nav>
 
-<div className="hidden md:flex items-center gap-5 shrink-0">
-<div className="hidden xl:block w-px h-7 bg-cool-gray/15" />
-<a href="tel:+919342367446" className="hidden xl:flex items-center gap-2 text-primary font-bold hover:text-secondary font-sans transition-colors" title="Click to dial Chennai neudental support">
-<div className="w-9 h-9 rounded-full bg-primary/5 flex items-center justify-center text-primary shrink-0"><Phone className="w-4 h-4 text-secondary" /></div>
-<div className="text-left leading-none whitespace-nowrap"><span className="text-[10px] block opacity-60 uppercase font-bold tracking-wider">Quick Helpline</span><span className="text-sm font-bold font-sans">+91 93423 67446</span></div>
+<div className="hidden md:flex items-center gap-4 shrink-0">
+<a href="tel:+919342367446" className="shrink-0 whitespace-nowrap flex items-center gap-2.5 bg-gradient-to-r from-primary to-secondary text-white shadow shadow-primary/10 hover:shadow-lg hover:shadow-secondary/20 hover:-translate-y-0.5 active:translate-y-0 pl-4 pr-5 py-2.5 rounded-full transition-all duration-200" title="Click to dial Chennai neudental support">
+<Phone className="w-4 h-4 shrink-0" />
+<div className="text-left leading-none"><span className="text-[9px] block opacity-80 uppercase font-bold tracking-wider">Call Our Doctor</span><span className="text-sm font-bold font-sans">+91 93423 67446</span></div>
 </a>
-<button id="cta_nav_book_button" onClick={onScrollToBooking} className="shrink-0 whitespace-nowrap bg-primary text-white hover:bg-secondary border border-transparent shadow shadow-primary/10 hover:shadow-lg hover:shadow-secondary/20 hover:-translate-y-0.5 active:translate-y-0 px-6 py-2.5 rounded-full font-sans text-xs uppercase tracking-widest font-bold transition-all duration-200">Book Appointment</button>
 </div>
 
 <button className="lg:hidden p-2 text-primary hover:bg-primary/5 rounded-lg active:scale-95 transition-all" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
