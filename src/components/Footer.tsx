@@ -76,7 +76,7 @@ TN State Dental Council Registered
 <div>
 <span className="block text-[10px] text-white/50 text-bold uppercase">Clinic Location:</span>
 <span className="leading-snug select-all text-white/80 block mt-0.5">
-Door No 13, Plot No 26, 1st Main Road, Vasuki Nagar, Kodungaiyur, Chennai, Tamil Nadu - 600118
+Door No. 13, Plot No. 26, 1st Main Road, Vasuki Nagar, Kodungaiyur, Chennai, Tamil Nadu - 600118
 </span>
 </div>
 </li>
