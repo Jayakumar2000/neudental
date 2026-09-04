@@ -1,6 +1,6 @@
 // neudental v1 - Root Application Component
 // See README.md for full setup instructions
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import About from './components/About';
@@ -17,16 +17,50 @@ import { FAQS } from './data';
 import { ChevronDown, ChevronUp, ArrowLeft } from 'lucide-react';
 import type { FAQItem } from './types';
 
+// Blog subpages get a real URL (/blogs, /blogs/{blog-id}) via manual
+// history.pushState + a popstate listener below, since the app has no
+// router. Vercel's catch-all rewrite (vercel.json) serves index.html for
+// any path, so this is what turns that path into the right view.
+function parseBlogRoute(pathname: string): { blogsOpen: boolean; blogId: string | null } {
+  const clean = pathname.replace(/\/+$/, '') || '/';
+  const detailMatch = clean.match(/^\/blogs\/([^/]+)$/);
+  if (detailMatch) return { blogsOpen: true, blogId: detailMatch[1] };
+  if (clean === '/blogs') return { blogsOpen: true, blogId: null };
+  return { blogsOpen: false, blogId: null };
+}
+
+const initialBlogRoute = typeof window !== 'undefined' ? parseBlogRoute(window.location.pathname) : { blogsOpen: false, blogId: null };
+
 export default function App() {
   const [preSelectedTreatmentId, setPreSelectedTreatmentId] = useState<string>('checkup');
   const [symptomCheckerOpen, setSymptomCheckerOpen] = useState(false);
-  const [blogsOpen, setBlogsOpen] = useState(false);
-  const [activeBlogId, setActiveBlogId] = useState<string | null>(null);
+  const [blogsOpen, setBlogsOpen] = useState(initialBlogRoute.blogsOpen);
+  const [activeBlogId, setActiveBlogId] = useState<string | null>(initialBlogRoute.blogId);
   const [faqOpenId, setFaqOpenId] = useState<string | null>(null);
 
   if (typeof window !== 'undefined' && window.location.pathname.replace(/\/+$/, '') === '/admin') {
     return <AdminView />;
   }
+
+  const goToPath = (path: string) => {
+    if (typeof window === 'undefined') return;
+    const currentPath = window.location.pathname.replace(/\/+$/, '') || '/';
+    if (currentPath !== path) {
+      window.history.pushState(null, '', path);
+    }
+  };
+
+  // Keep state in sync with the browser's own back/forward navigation.
+  useEffect(() => {
+    const handlePopState = () => {
+      const route = parseBlogRoute(window.location.pathname);
+      setSymptomCheckerOpen(false);
+      setBlogsOpen(route.blogsOpen);
+      setActiveBlogId(route.blogId);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   // Scrolls to a section that lives on the home page. If we're currently on a
   // subpage (so the section isn't mounted yet), close that view first and
@@ -41,6 +75,7 @@ export default function App() {
     setSymptomCheckerOpen(false);
     setBlogsOpen(false);
     setActiveBlogId(null);
+    goToPath('/');
     // Wait for the home page to actually render before scrolling to it.
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -63,11 +98,13 @@ export default function App() {
     setBlogsOpen(false);
     setActiveBlogId(null);
     setSymptomCheckerOpen(true);
+    goToPath('/');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleCloseSymptomChecker = () => {
     setSymptomCheckerOpen(false);
+    goToPath('/');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -80,22 +117,26 @@ export default function App() {
     setSymptomCheckerOpen(false);
     setActiveBlogId(null);
     setBlogsOpen(true);
+    goToPath('/blogs');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleCloseBlogs = () => {
     setBlogsOpen(false);
     setActiveBlogId(null);
+    goToPath('/');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSelectBlog = (blogId: string) => {
     setActiveBlogId(blogId);
+    goToPath(`/blogs/${blogId}`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleBackToBlogsList = () => {
     setActiveBlogId(null);
+    goToPath('/blogs');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
