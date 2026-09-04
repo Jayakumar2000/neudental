@@ -8,7 +8,7 @@ const googleMapsUrl = "https://www.google.com/maps/place/Neudental+Clinic+(Forme
 const directionUrl = `https://www.google.com/maps/dir/?api=1&destination=${clinicLat},${clinicLng}`;
 
 return (
-<section id="location" className="py-24 bg-surface-alt px-6 md:px-10 lg:px-16 border-b border-cool-gray/5">
+<section id="location" className="py-14 lg:py-20 bg-surface-alt px-6 md:px-10 lg:px-16 border-b border-cool-gray/5">
 <div className="max-w-[1280px] mx-auto w-full">
 <div className="text-center max-w-2xl mx-auto mb-16">
 <span className="text-secondary font-sans text-xs font-bold tracking-[0.2em] uppercase">Visit Our Practice</span>

@@ -38,7 +38,7 @@ export default function About() {
 const doc = DOCTORS[0];
 
 return (
-<section id="about" className="py-24 bg-white px-6 md:px-10 lg:px-16">
+<section id="about" className="py-14 lg:py-20 bg-white px-6 md:px-10 lg:px-16">
 <div className="max-w-[1280px] mx-auto w-full">
 {/* Section Title */}
 <div className="text-center max-w-2xl mx-auto mb-14">

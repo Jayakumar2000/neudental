@@ -55,7 +55,7 @@ const getCategoryLabel = (key: string) => CATEGORIES.find((c) => c.key === key)?
 const filteredTreatments = activeCategory === 'all' ? TREATMENTS : TREATMENTS.filter(t => t.category === activeCategory);
 
 return (
-<section id="services" className="py-24 bg-surface-alt px-6 md:px-10 lg:px-16">
+<section id="services" className="py-14 lg:py-20 bg-surface-alt px-6 md:px-10 lg:px-16">
 <div className="max-w-[1280px] mx-auto w-full">
 <div className="text-center max-w-2xl mx-auto mb-16">
 <span className="text-secondary font-sans text-xs font-bold tracking-[0.2em] uppercase">Comprehensive Clinical Care</span>

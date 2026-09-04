@@ -191,14 +191,14 @@ export default function App() {
       <Hero onScrollToBooking={handleScrollToBooking} />
       <About />
       <Services onSelectTreatment={handleSelectTreatment} selectedTreatmentId={preSelectedTreatmentId} />
-      <section id="booking-section" className="py-20 bg-gray-50">
+      <section id="booking-section" className="py-14 lg:py-20 bg-gray-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <BookingForm preSelectedTreatmentId={preSelectedTreatmentId} />
         </div>
       </section>
       <Testimonials />
       <LocationDetails onScrollToBooking={handleScrollToBooking} />
-      <section className="py-20 bg-white">
+      <section className="py-14 lg:py-20 bg-white">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <span className="text-xs font-semibold tracking-widest text-blue-600 uppercase">FAQs</span>
