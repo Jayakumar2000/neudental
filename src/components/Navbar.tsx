@@ -13,6 +13,12 @@ onOpenBlogs: () => void;
 
 export default function Navbar({ onScrollToBooking, onSelectTreatment, onLogoClick, onNavigateSection, onOpenBlogs }: NavbarProps) {
 const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+const [treatmentsOpen, setTreatmentsOpen] = useState(false);
+
+const handleSelectTreatment = (treatmentId: string) => {
+setTreatmentsOpen(false);
+onSelectTreatment(treatmentId);
+};
 
 const handleLogoClick = (e: React.MouseEvent) => {
 e.preventDefault();
@@ -58,15 +64,15 @@ taglineClassName="text-[9px] sm:text-[10px] text-cool-gray tracking-wide font-sa
 {navItems.map((item) => {
 if (item.name === 'Treatments') {
 return (
-<div key={item.name} className="relative group/dropdown shrink-0">
-<button type="button" aria-haspopup="true" onClick={() => onNavigateSection('services')} className="flex items-center gap-1.5 whitespace-nowrap text-on-surface-variant hover:text-secondary focus-visible:text-secondary text-sm font-sans font-medium transition-all duration-200 cursor-pointer py-2 outline-none">
+<div key={item.name} className="relative shrink-0" onMouseEnter={() => setTreatmentsOpen(true)} onMouseLeave={() => setTreatmentsOpen(false)}>
+<button type="button" aria-haspopup="true" aria-expanded={treatmentsOpen} onClick={() => onNavigateSection('services')} onFocus={() => setTreatmentsOpen(true)} className="flex items-center gap-1.5 whitespace-nowrap text-on-surface-variant hover:text-secondary focus-visible:text-secondary text-sm font-sans font-medium transition-all duration-200 cursor-pointer py-2 outline-none">
 <span>Treatments Offered</span>
-<ChevronDown className="w-3.5 h-3.5 transition-transform duration-200 group-hover/dropdown:rotate-180 group-focus-within/dropdown:rotate-180" />
+<ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${treatmentsOpen ? 'rotate-180' : ''}`} />
 </button>
-<div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 invisible opacity-0 translate-y-2 group-hover/dropdown:visible group-hover/dropdown:opacity-100 group-hover/dropdown:translate-y-0 group-focus-within/dropdown:visible group-focus-within/dropdown:opacity-100 group-focus-within/dropdown:translate-y-0 transition-all duration-200 z-50">
+<div className={`absolute top-full left-1/2 -translate-x-1/2 pt-2 transition-all duration-200 z-50 ${treatmentsOpen ? 'visible opacity-100 translate-y-0' : 'invisible opacity-0 translate-y-2 pointer-events-none'}`}>
 <div className="w-[760px] bg-white border border-cool-gray/10 rounded-2xl shadow-xl p-4 grid grid-cols-4 gap-2">
 {TREATMENTS.map((treat) => (
-<button key={treat.id} onClick={() => { onSelectTreatment(treat.id); }} className="flex items-start gap-2 p-2.5 rounded-xl hover:bg-secondary/5 text-left text-[#1E293B] hover:text-secondary transition-all cursor-pointer group/item hover:translate-x-0.5">
+<button key={treat.id} onClick={() => handleSelectTreatment(treat.id)} className="flex items-start gap-2 p-2.5 rounded-xl hover:bg-secondary/5 text-left text-[#1E293B] hover:text-secondary transition-all cursor-pointer group/item hover:translate-x-0.5">
 <span className="text-secondary/80 group-hover/item:text-secondary shrink-0 mt-1"><span className="block w-1.5 h-1.5 rounded-full bg-secondary/30 group-hover/item:bg-secondary transition-all" /></span>
 <div className="leading-tight"><span className="text-xs font-semibold block font-sans">{treat.name}</span><span className="text-[10px] text-cool-gray line-clamp-2 block leading-normal mt-0.5 font-sans font-normal">{treat.description}</span></div>
 </button>
