@@ -62,10 +62,10 @@ export default function Testimonials() {
 
           <div className="space-y-1.5">
             <span className="text-sm font-sans font-medium text-cool-gray block uppercase tracking-widest">Post-Procedure Comfort</span>
-            <p className="text-base font-bold text-primary">No Pain Guarantee</p>
-            <p className="font-sans text-xs text-on-surface-variant px-4">
-              98% of patients report zero pain following root canals (RCT).
-            </p>
+            <strong className="text-4xl font-display font-extrabold text-primary block">98%</strong>
+            <span className="font-sans text-xs text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full font-semibold">
+              Zero Pain After RCT
+            </span>
           </div>
         </div>
 
