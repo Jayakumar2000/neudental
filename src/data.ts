@@ -30,7 +30,7 @@ export const DOCTOR: Doctor = {
   name: 'Dr. Swetha',
   title: 'BDS, FGDS',
   specialty: 'Dental Surgeon & Clinical Director',
-  experience: '5+ years of clinical experience',
+  experience: 'KSR Dental College',
   education: 'Saveetha Dental University',
   bio: 'Dr. Swetha is a dedicated dental professional with 5+ years of experience in general and cosmetic dentistry. A proud alumna of Saveetha Dental University, she specializes in providing gentle, comprehensive dental care using the latest technology. Her patient-first approach ensures every treatment is comfortable, transparent, and of the highest clinical standard.',
   imageAlt: 'Dr. Swetha - Lead Dentist at neudental',
