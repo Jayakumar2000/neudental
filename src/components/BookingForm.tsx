@@ -89,7 +89,7 @@ export default function BookingForm({ preSelectedTreatmentId, onClose, bare = fa
   return (
     <div className={bare ? 'p-6 md:p-8 lg:p-10' : 'bg-white rounded-3xl p-6 md:p-8 border border-cool-gray/10 premium-shadow'}>
       <div className="flex items-center gap-2 mb-6"><CalendarCheck className="w-6 h-6 text-secondary" /><h3 className="font-serif font-bold text-xl md:text-2xl text-primary">Dentist Appointment Booking</h3></div>
-      <p className="font-sans text-xs text-on-surface-variant leading-relaxed mb-6">Book your appointment with Dr. Swetha instantly. We adhere rigidly to schedule times to eliminate hospital waiting lines.</p>
+      <p className="font-sans text-xs text-on-surface-variant leading-relaxed mb-6">Book your appointment with Neudental instantly. We adhere rigidly to schedule times to eliminate clinic waiting lines.</p>
       {successMsg && <div className="mb-6 p-4 rounded-xl bg-emerald-50 text-emerald-800 text-xs font-medium font-sans border-l-4 border-emerald-500">{successMsg}</div>}
       {errorMsg && <div className="mb-6 p-4 rounded-xl bg-rose-50 text-rose-800 text-xs font-medium font-sans border-l-4 border-rose-500">{errorMsg}</div>}
       <form onSubmit={handleBooking} className="space-y-5">
