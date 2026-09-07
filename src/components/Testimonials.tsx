@@ -34,7 +34,7 @@ export default function Testimonials() {
           </h2>
           <div className="w-12 h-1 bg-secondary mx-auto mt-6" />
           <p className="font-sans text-base text-on-surface-variant mt-4 leading-relaxed">
-            Read transparent, unedited stories path-checked directly from Google Maps reviews of our Kodungaiyur practice.
+            Read transparent, unedited stories path-checked directly from Google Maps, Justdial and Practo reviews of our Kodungaiyur practice.
           </p>
         </div>
 

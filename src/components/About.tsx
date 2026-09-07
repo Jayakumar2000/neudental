@@ -91,7 +91,7 @@ className="w-full h-full object-cover object-top"
 </div>
 <div className="flex-1 text-center sm:text-left">
 <span className="text-secondary font-sans text-xs tracking-wider uppercase font-bold font-display block mb-1">
-{doc.title} &middot; {doc.specialty}
+{doc.specialty}
 </span>
 <h4 className="font-serif text-xl sm:text-2xl font-bold text-primary">
 {doc.name}, {doc.title}
