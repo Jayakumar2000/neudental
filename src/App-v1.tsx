@@ -15,10 +15,10 @@ import BlogsListView from './components/BlogsListView';
 import BlogDetailView from './components/BlogDetailView';
 import AdminView from './components/AdminView';
 import { FAQS } from './data';
-import { GalleryVariantMarquee, GalleryVariantSlider } from './components/ClinicGalleryVariants';
+import { GalleryVariantMarquee, GalleryVariantSlider, GalleryVariantBigCards } from './components/ClinicGalleryVariants';
 
 // PROTOTYPE ONLY: swap this to preview each gallery variant locally.
-const GALLERY_VARIANT: 'marquee' | 'slider' | 'faq' = 'slider';
+const GALLERY_VARIANT: 'marquee' | 'slider' | 'bigcards' | 'faq' = 'bigcards';
 import { ChevronDown, ChevronUp, ArrowLeft } from 'lucide-react';
 import type { FAQItem } from './types';
 
@@ -236,6 +236,7 @@ export default function App() {
         </div>
         {GALLERY_VARIANT === 'marquee' && <GalleryVariantMarquee />}
         {GALLERY_VARIANT === 'slider' && <GalleryVariantSlider />}
+        {GALLERY_VARIANT === 'bigcards' && <GalleryVariantBigCards />}
       </section>
       )}
       <Footer onNavigateSection={navigateToSection} onOpenBlogs={handleOpenBlogs} onSelectTreatment={handleViewTreatmentInServices} />
