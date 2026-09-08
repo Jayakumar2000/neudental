@@ -90,8 +90,8 @@ export function GalleryVariantBigCards() {
   }, []);
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="relative aspect-[16/9] md:aspect-[21/9] rounded-3xl overflow-hidden premium-shadow border border-cool-gray/10">
+    <div className="max-w-xs sm:max-w-sm mx-auto px-4">
+      <div className="relative aspect-[2/3] rounded-3xl overflow-hidden premium-shadow border border-cool-gray/10">
         {GALLERY_SLIDES.map((slide, i) => (
           <img
             key={slide.src}
@@ -101,10 +101,10 @@ export function GalleryVariantBigCards() {
           />
         ))}
         <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/10 to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 p-6 md:p-8">
-          <p className="font-serif font-bold text-2xl md:text-4xl text-white leading-tight">{GALLERY_SLIDES[index].caption}</p>
+        <div className="absolute inset-x-0 bottom-0 p-6">
+          <p className="font-serif font-bold text-xl md:text-2xl text-white leading-tight">{GALLERY_SLIDES[index].caption}</p>
         </div>
-        <div className="absolute top-5 right-5 md:top-6 md:right-6 flex items-center gap-2">
+        <div className="absolute top-5 right-5 flex items-center gap-2">
           {GALLERY_SLIDES.map((slide, i) => (
             <button
               key={slide.src}
