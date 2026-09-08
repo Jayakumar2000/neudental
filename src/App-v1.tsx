@@ -7,6 +7,7 @@ import About from './components/About';
 import Services from './components/Services';
 import SymptomChecker from './components/SymptomChecker';
 import BookingForm from './components/BookingForm';
+import DoctorTrustBanner from './components/DoctorTrustBanner';
 import Testimonials from './components/Testimonials';
 import LocationDetails from './components/LocationDetails';
 import Footer from './components/Footer';
@@ -192,8 +193,11 @@ export default function App() {
       <About />
       <Services onSelectTreatment={handleSelectTreatment} selectedTreatmentId={preSelectedTreatmentId} />
       <section id="booking-section" className="py-14 lg:py-20 bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <BookingForm preSelectedTreatmentId={preSelectedTreatmentId} />
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white rounded-3xl border border-cool-gray/10 premium-shadow overflow-hidden">
+            <DoctorTrustBanner />
+            <BookingForm preSelectedTreatmentId={preSelectedTreatmentId} bare />
+          </div>
         </div>
       </section>
       <Testimonials />
