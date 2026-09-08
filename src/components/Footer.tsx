@@ -39,7 +39,7 @@ and biocompatible implant operations with advanced patient-first technology.
 <div className="pt-2 text-xs text-mint/95 space-y-1">
 <p className="flex items-center gap-1.5 font-bold">
 <span className="inline-block w-2 h-2 rounded-full bg-emerald-400" />
-Class-B Sterilization Standard
+Member of Indian Dental Association
 </p>
 <p className="flex items-center gap-1.5 font-bold">
 <span className="inline-block w-2 h-2 rounded-full bg-emerald-400" />

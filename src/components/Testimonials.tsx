@@ -10,6 +10,12 @@ const SOURCE_LOGOS: Partial<Record<string, string>> = {
   justdial: '/logos/justdial-icon.png',
 };
 
+const SOURCE_LABELS: Partial<Record<string, string>> = {
+  google: 'Google',
+  practo: 'Practo',
+  justdial: 'Justdial',
+};
+
 export default function Testimonials() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -139,7 +145,7 @@ export default function Testimonials() {
                     {test.name}
                   </h4>
                   <p className="text-[10px] text-cool-gray font-medium mt-0.5">
-                    {test.role}
+                    {test.sourceLogo && SOURCE_LABELS[test.sourceLogo] ? `via ${SOURCE_LABELS[test.sourceLogo]} Review` : test.role}
                   </p>
                   <p className="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded inline-block mt-1">
                     ✓ {test.treatmentRecceived}
