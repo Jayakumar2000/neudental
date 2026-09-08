@@ -35,7 +35,7 @@ export const DOCTOR: Doctor = {
   bio: 'Dr. Swetha is a dedicated dental professional with 5+ years of experience in general and cosmetic dentistry. A proud alumna of Saveetha Dental University, she specializes in providing gentle, comprehensive dental care using the latest technology. Her patient-first approach ensures every treatment is comfortable, transparent, and of the highest clinical standard.',
   imageAlt: 'Dr. Swetha - Lead Dentist at neudental',
   avatarUrl: '',
-  skills: ['Root Canal Treatment', 'Smile Design', 'Clear Aligners', 'Dental Implants', 'Cosmetic Dentistry'],
+  skills: ['Root Canal Treatment', 'Smile Designing', 'Clear Aligners', 'Dental Implants', 'Cosmetic Dentistry'],
 };
 
 export const TESTIMONIALS: Testimonial[] = [

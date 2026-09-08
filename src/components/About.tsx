@@ -94,7 +94,7 @@ className="w-full h-full object-cover object-top"
 {doc.specialty}
 </span>
 <h4 className="font-serif text-xl sm:text-2xl font-bold text-primary">
-{doc.name}, {doc.title}
+{doc.name}, <span className="text-[17px] sm:text-[21px]">{doc.title}</span>
 </h4>
 <p className="font-sans text-sm font-medium text-cool-gray mt-1 flex items-center justify-center sm:justify-start gap-1.5">
 <GraduationCap className="w-4 h-4 text-secondary inline shrink-0" /> {doc.education} &middot; {doc.experience}
