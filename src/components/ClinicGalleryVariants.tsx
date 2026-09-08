@@ -83,15 +83,23 @@ export function GalleryVariantSlider() {
 // ---------------------------------------------------------------------------
 export function GalleryVariantBigCards() {
   const [index, setIndex] = useState(0);
+  const total = GALLERY_SLIDES.length;
+  const prevIndex = (index - 1 + total) % total;
+  const nextIndex = (index + 1) % total;
 
   useEffect(() => {
-    const timer = setInterval(() => setIndex((prev) => (prev + 1) % GALLERY_SLIDES.length), 4000);
+    const timer = setInterval(() => setIndex((prev) => (prev + 1) % total), 4000);
     return () => clearInterval(timer);
-  }, []);
+  }, [total]);
 
   return (
-    <div className="max-w-xs sm:max-w-sm mx-auto px-4">
-      <div className="relative aspect-[2/3] rounded-3xl overflow-hidden premium-shadow border border-cool-gray/10">
+    <div className="flex items-center justify-center px-4">
+      {/* Previous photo, blurred peek -- hints there's a stack behind the main card */}
+      <div className="w-14 sm:w-20 aspect-[2/3] rounded-2xl overflow-hidden -mr-3 sm:-mr-5 shrink-0 blur-[2px] opacity-50 scale-95 transition-all duration-700">
+        <img src={GALLERY_SLIDES[prevIndex].src} alt="" aria-hidden="true" className="w-full h-full object-cover" />
+      </div>
+
+      <div className="relative z-10 w-[220px] sm:w-[280px] aspect-[2/3] rounded-3xl overflow-hidden premium-shadow border border-cool-gray/10 shrink-0">
         {GALLERY_SLIDES.map((slide, i) => (
           <img
             key={slide.src}
@@ -115,6 +123,11 @@ export function GalleryVariantBigCards() {
             />
           ))}
         </div>
+      </div>
+
+      {/* Next photo, blurred peek */}
+      <div className="w-14 sm:w-20 aspect-[2/3] rounded-2xl overflow-hidden -ml-3 sm:-ml-5 shrink-0 blur-[2px] opacity-50 scale-95 transition-all duration-700">
+        <img src={GALLERY_SLIDES[nextIndex].src} alt="" aria-hidden="true" className="w-full h-full object-cover" />
       </div>
     </div>
   );
