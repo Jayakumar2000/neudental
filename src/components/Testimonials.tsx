@@ -110,7 +110,7 @@ export default function Testimonials() {
               {/* Bottom bio info */}
               <div className="flex items-center gap-3.5 pt-4 border-t border-cool-gray/5 mt-4">
                 {/* Avatar */}
-                <div className="w-10 h-10 rounded-full overflow-hidden select-none bg-cool-gray/10 border border-cool-gray/5 relative flex items-center justify-center shrink-0">
+                <div className="w-12 h-12 rounded-full overflow-hidden select-none bg-cool-gray/10 border border-cool-gray/15 relative flex items-center justify-center shrink-0">
                   {test.imgUrl ? (
                     <img
                       alt={test.imgAlt}
@@ -123,7 +123,7 @@ export default function Testimonials() {
                     />
                   ) : null}
                   {test.sourceLogo && SOURCE_LOGOS[test.sourceLogo] ? (
-                    <div className="w-full h-full bg-white flex items-center justify-center p-2">
+                    <div className="w-full h-full bg-white flex items-center justify-center p-1">
                       <img src={SOURCE_LOGOS[test.sourceLogo]} alt={`Review sourced from ${test.sourceLogo}`} className="w-full h-full object-contain" />
                     </div>
                   ) : (
