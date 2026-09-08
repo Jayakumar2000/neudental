@@ -15,10 +15,10 @@ import BlogsListView from './components/BlogsListView';
 import BlogDetailView from './components/BlogDetailView';
 import AdminView from './components/AdminView';
 import { FAQS } from './data';
-import { GalleryVariantMarquee, GalleryVariantSlider, GalleryVariantBigCards } from './components/ClinicGalleryVariants';
+import { ClinicGalleryCarousel } from './components/ClinicGalleryVariants';
 
-// PROTOTYPE ONLY: swap this to preview each gallery variant locally.
-const GALLERY_VARIANT: 'marquee' | 'slider' | 'bigcards' | 'faq' = 'bigcards';
+// PROTOTYPE ONLY: set to true to preview the clinic gallery in place of FAQ.
+const SHOW_GALLERY_PROTOTYPE = true;
 import { ChevronDown, ChevronUp, ArrowLeft } from 'lucide-react';
 import type { FAQItem } from './types';
 
@@ -206,7 +206,7 @@ export default function App() {
       </section>
       <Testimonials />
       <LocationDetails onScrollToBooking={handleScrollToBooking} />
-      {GALLERY_VARIANT === 'faq' && (
+      {!SHOW_GALLERY_PROTOTYPE && (
       <section className="py-14 lg:py-20 bg-white">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -227,16 +227,14 @@ export default function App() {
         </div>
       </section>
       )}
-      {GALLERY_VARIANT !== 'faq' && (
+      {SHOW_GALLERY_PROTOTYPE && (
       <section className="py-14 lg:py-20 bg-white overflow-hidden">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-12">
           <span className="text-xs font-semibold tracking-widest text-blue-600 uppercase">Our Clinic</span>
           <h2 className="mt-2 text-3xl font-serif font-bold text-gray-900">Take a Look Inside neudental</h2>
           <p className="mt-3 text-sm text-on-surface-variant">A closer look at our clinic, and soon, the patients and doctor behind every smile.</p>
         </div>
-        {GALLERY_VARIANT === 'marquee' && <GalleryVariantMarquee />}
-        {GALLERY_VARIANT === 'slider' && <GalleryVariantSlider />}
-        {GALLERY_VARIANT === 'bigcards' && <GalleryVariantBigCards />}
+        <ClinicGalleryCarousel />
       </section>
       )}
       <Footer onNavigateSection={navigateToSection} onOpenBlogs={handleOpenBlogs} onSelectTreatment={handleViewTreatmentInServices} />
