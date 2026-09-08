@@ -11,6 +11,29 @@ interface BookingFormProps {
   bare?: boolean;
 }
 
+// The clinic operates in India, so "today" and "past slot" must be judged in
+// IST regardless of the visitor's own browser/OS timezone.
+function getISTNow() {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Kolkata',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hour12: false,
+  }).formatToParts(new Date());
+  const map: Record<string, string> = {};
+  parts.forEach((p) => { map[p.type] = p.value; });
+  const hour = map.hour === '24' ? 0 : parseInt(map.hour, 10);
+  return { dateStr: `${map.year}-${map.month}-${map.day}`, minutesSinceMidnight: hour * 60 + parseInt(map.minute, 10) };
+}
+
+function slotToMinutes(slot: string): number {
+  const [time, meridiem] = slot.split(' ');
+  const [hStr, mStr] = time.split(':');
+  let h = parseInt(hStr, 10);
+  if (meridiem === 'PM' && h !== 12) h += 12;
+  if (meridiem === 'AM' && h === 12) h = 0;
+  return h * 60 + parseInt(mStr, 10);
+}
+
 export default function BookingForm({ preSelectedTreatmentId, onClose, bare = false }: BookingFormProps) {
   const [patientName, setPatientName] = useState('');
   const [phone, setPhone] = useState('');
@@ -24,8 +47,16 @@ export default function BookingForm({ preSelectedTreatmentId, onClose, bare = fa
   const [myBookings, setMyBookings] = useState<Appointment[]>([]);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [, forceTick] = useState(0);
 
   useEffect(() => { if (preSelectedTreatmentId) setTreatmentId(preSelectedTreatmentId); }, [preSelectedTreatmentId]);
+
+  // Re-render every minute so slots that just moved into the past grey out
+  // live, instead of only updating on the next unrelated state change.
+  useEffect(() => {
+    const id = setInterval(() => forceTick((t) => t + 1), 60000);
+    return () => clearInterval(id);
+  }, []);
 
   useEffect(() => {
     ensureAnonymousAuth()
@@ -57,7 +88,17 @@ export default function BookingForm({ preSelectedTreatmentId, onClose, bare = fa
     { label: 'Evening Slots (5:00 PM - 9:30 PM)', times: ['05:00 PM', '05:30 PM', '06:00 PM', '06:30 PM', '07:00 PM', '07:30 PM', '08:00 PM', '08:30 PM', '09:00 PM', '09:30 PM'] }
   ];
 
-  const todayStr = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD, matches <input type="date">
+  const istNow = getISTNow();
+  const todayStr = istNow.dateStr; // YYYY-MM-DD IST, matches <input type="date">
+  const isToday = date === todayStr;
+  const isSlotPast = (slot: string) => isToday && slotToMinutes(slot) <= istNow.minutesSinceMidnight;
+
+  // If the date changes (or the clock ticks past it), drop a selection that's
+  // no longer bookable instead of silently submitting a past slot.
+  useEffect(() => {
+    if (timeSlot && isSlotPast(timeSlot)) setTimeSlot('');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [date, istNow.dateStr, istNow.minutesSinceMidnight]);
 
   const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,6 +109,8 @@ export default function BookingForm({ preSelectedTreatmentId, onClose, bare = fa
     if (!phone.trim() || phone.length < 10) { setErrorMsg('Valid 10-digit mobile number is required.'); return; }
     if (!date) { setErrorMsg('Please select a valid treatment date.'); return; }
     if (date < todayStr) { setErrorMsg('Please select a future appointment date.'); return; }
+    if (!timeSlot) { setErrorMsg('Please select an available time slot.'); return; }
+    if (isSlotPast(timeSlot)) { setErrorMsg('That time slot has already passed. Please choose another.'); return; }
     const selectedDateObj = new Date(date);
     const dayOfWeek = selectedDateObj.getDay();
     if (dayOfWeek === 0 && timeSlots[1].times.includes(timeSlot)) { setErrorMsg('neudental evening sessions are CLOSED on Sundays. Please select a morning slot.'); return; }
@@ -100,7 +143,7 @@ export default function BookingForm({ preSelectedTreatmentId, onClose, bare = fa
         </div>
         <div className="space-y-1"><label className="text-xs font-display font-medium text-primary uppercase">Target Treatment Course</label><select value={treatmentId} onChange={(e) => setTreatmentId(e.target.value)} className="w-full px-4 py-3 bg-[#F8FAFC] border-0 border-b-2 border-cool-gray/20 focus:border-secondary focus:ring-0 outline-none text-sm text-primary font-sans rounded-t">{TREATMENTS.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></div>
         <div className="space-y-1"><label className="text-xs font-display font-medium text-primary uppercase">Appointment Date</label><input type="date" required min={todayStr} value={date} onChange={(e) => setDate(e.target.value)} className="w-full px-4 py-3 bg-[#F8FAFC] border-0 border-b-2 border-cool-gray/20 focus:border-secondary focus:ring-0 outline-none text-sm text-primary font-sans rounded-t" /></div>
-        <div className="space-y-2"><label className="text-xs font-display font-medium text-primary uppercase block">Select Preferred Hour</label><div className="space-y-3">{timeSlots.map((group) => (<div key={group.label} className="bg-[#F8FAFC] p-3 rounded-xl border border-cool-gray/5"><span className="text-[10px] text-cool-gray uppercase font-bold tracking-wider block mb-2">{group.label}</span><div className="flex flex-wrap gap-1.5">{group.times.map((slot) => <button type="button" key={slot} onClick={() => setTimeSlot(slot)} className={`px-3 py-1.5 rounded-lg font-sans text-xs font-semibold cursor-pointer transition-all ${timeSlot === slot ? 'bg-secondary text-white shadow-md' : 'bg-white border border-cool-gray/10 hover:border-cool-gray/30 text-on-surface'}`}>{slot}</button>)}</div></div>))}</div></div>
+        <div className="space-y-2"><label className="text-xs font-display font-medium text-primary uppercase block">Select Preferred Hour</label><div className="space-y-3">{timeSlots.map((group) => (<div key={group.label} className="bg-[#F8FAFC] p-3 rounded-xl border border-cool-gray/5"><span className="text-[10px] text-cool-gray uppercase font-bold tracking-wider block mb-2">{group.label}</span><div className="flex flex-wrap gap-1.5">{group.times.map((slot) => { const disabled = isSlotPast(slot); return <button type="button" key={slot} disabled={disabled} title={disabled ? 'This time has already passed today' : undefined} onClick={() => setTimeSlot(slot)} className={`px-3 py-1.5 rounded-lg font-sans text-xs font-semibold transition-all ${disabled ? 'bg-cool-gray/5 border border-cool-gray/10 text-cool-gray/50 line-through cursor-not-allowed' : timeSlot === slot ? 'bg-secondary text-white shadow-md cursor-pointer' : 'bg-white border border-cool-gray/10 hover:border-cool-gray/30 text-on-surface cursor-pointer'}`}>{slot}</button>; })}</div></div>))}</div></div>
         <div className="space-y-1"><label className="text-xs font-display font-medium text-primary uppercase">Notes (Optional)</label><textarea placeholder="Symptoms or additional notes" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} className="w-full px-4 py-3 bg-[#F8FAFC] border-0 border-b-2 border-cool-gray/20 focus:border-secondary focus:ring-0 outline-none text-sm text-primary font-sans rounded-t resize-none" /></div>
         <button type="submit" className="w-full bg-primary hover:bg-secondary text-white py-4 cursor-pointer rounded-xl font-sans text-xs uppercase tracking-widest font-bold transition-all duration-200">Book Appointment</button>
       </form>
