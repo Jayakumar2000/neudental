@@ -31,9 +31,18 @@ const found = TREATMENTS.find(t => t.id === selectedTreatmentId);
 if (found) { setSelectedTreatment(found); setActiveCategory('all'); }
 }, [selectedTreatmentId]);
 
-useEffect(() => { setStackIndex(0); }, [activeCategory]);
+// Tapping a tile in the icon-grid overview jumps the deck below straight to
+// that treatment, switching to "All Treatments" first so the index lines up.
+const jumpToTreatment = (treatmentId: string) => {
+setActiveCategory('all');
+const idx = TREATMENTS.findIndex((t) => t.id === treatmentId);
+setStackIndex(idx >= 0 ? idx : 0);
+requestAnimationFrame(() => {
+document.getElementById('treatments-deck')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+};
 
-const getIcon = (name: string) => {
+const getIcon = (name: string, customSize = 'w-[76px] h-[76px] shrink-0') => {
 switch (name) {
 case 'Search': return <Search className="w-5 h-5" />;
 case 'Sparkles': return <Sparkles className="w-5 h-5" />;
@@ -52,22 +61,22 @@ case 'Sun': return <Sun className="w-5 h-5" />;
 case 'Layers': return <Layers className="w-5 h-5" />;
 case 'Zap': return <Zap className="w-5 h-5" />;
 case 'Baby': return <Baby className="w-5 h-5" />;
-case 'IconWisdomToothExtraction': return <IconWisdomToothExtraction className="w-[76px] h-[76px] shrink-0" />;
-case 'IconCrownsAndBridges': return <IconCrownsAndBridges className="w-[76px] h-[76px] shrink-0" />;
-case 'IconCavityFilling': return <IconCavityFilling className="w-[76px] h-[76px] shrink-0" />;
-case 'IconDentures': return <IconDentures className="w-[76px] h-[76px] shrink-0" />;
-case 'IconTeethWhitening': return <IconTeethWhitening className="w-[76px] h-[76px] shrink-0" />;
-case 'IconRegularCheckup': return <IconRegularCheckup className="w-[76px] h-[76px] shrink-0" />;
-case 'IconDentalCleaning': return <IconDentalCleaning className="w-[76px] h-[76px] shrink-0" />;
-case 'IconDentalImaging': return <IconDentalImaging className="w-[76px] h-[76px] shrink-0" />;
-case 'IconBraces': return <IconBraces className="w-[76px] h-[76px] shrink-0" />;
-case 'IconRootCanal': return <IconRootCanal className="w-[76px] h-[76px] shrink-0" />;
-case 'IconGumDisease': return <IconGumDisease className="w-[76px] h-[76px] shrink-0" />;
-case 'IconToothDrill': return <IconToothDrill className="w-[76px] h-[76px] shrink-0" />;
-case 'IconDentalSurgery': return <IconDentalSurgery className="w-[76px] h-[76px] shrink-0" />;
-case 'IconTools': return <IconTools className="w-[76px] h-[76px] shrink-0" />;
-case 'IconDentalCare': return <IconDentalCare className="w-[76px] h-[76px] shrink-0" />;
-case 'IconCrownSmile': return <IconCrownSmile className="w-[76px] h-[76px] shrink-0" />;
+case 'IconWisdomToothExtraction': return <IconWisdomToothExtraction className={customSize} />;
+case 'IconCrownsAndBridges': return <IconCrownsAndBridges className={customSize} />;
+case 'IconCavityFilling': return <IconCavityFilling className={customSize} />;
+case 'IconDentures': return <IconDentures className={customSize} />;
+case 'IconTeethWhitening': return <IconTeethWhitening className={customSize} />;
+case 'IconRegularCheckup': return <IconRegularCheckup className={customSize} />;
+case 'IconDentalCleaning': return <IconDentalCleaning className={customSize} />;
+case 'IconDentalImaging': return <IconDentalImaging className={customSize} />;
+case 'IconBraces': return <IconBraces className={customSize} />;
+case 'IconRootCanal': return <IconRootCanal className={customSize} />;
+case 'IconGumDisease': return <IconGumDisease className={customSize} />;
+case 'IconToothDrill': return <IconToothDrill className={customSize} />;
+case 'IconDentalSurgery': return <IconDentalSurgery className={customSize} />;
+case 'IconTools': return <IconTools className={customSize} />;
+case 'IconDentalCare': return <IconDentalCare className={customSize} />;
+case 'IconCrownSmile': return <IconCrownSmile className={customSize} />;
 default: return <Smile className="w-5 h-5" />;
 }
 };
@@ -99,7 +108,7 @@ does the job of telling patients how much the clinic actually offers. */}
 <div className="relative">
 <select
 value={activeCategory}
-onChange={(e) => setActiveCategory(e.target.value as (typeof CATEGORIES)[number]['key'])}
+onChange={(e) => { setActiveCategory(e.target.value as (typeof CATEGORIES)[number]['key']); setStackIndex(0); }}
 className="w-full appearance-none bg-white border border-cool-gray/20 text-on-surface font-sans text-sm font-bold rounded-xl px-4 py-3.5 pr-10 cursor-pointer"
 >
 {CATEGORIES.map((cat) => (<option key={cat.key} value={cat.key}>{cat.label}</option>))}
@@ -107,7 +116,22 @@ className="w-full appearance-none bg-white border border-cool-gray/20 text-on-su
 <ChevronDown className="w-4 h-4 text-on-surface-variant absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
 </div>
 </div>
-<div className="lg:hidden mb-12">
+{/* Mobile icon-grid overview: every treatment at a glance, icon + name,
+tapping one jumps the deck below straight to it. */}
+<div className="lg:hidden grid grid-cols-3 gap-3 mb-8">
+{TREATMENTS.map((treatment) => (
+<button
+key={treatment.id}
+type="button"
+onClick={() => jumpToTreatment(treatment.id)}
+className="bg-white border border-secondary/15 rounded-2xl p-3 flex flex-col items-center gap-2 text-center active:border-secondary/40 active:bg-secondary/5 transition-colors cursor-pointer"
+>
+<div className="w-14 h-14 flex items-center justify-center shrink-0">{getIcon(treatment.iconName, 'w-14 h-14 shrink-0')}</div>
+<span className="font-sans text-[11px] font-bold text-primary leading-tight">{treatment.name}</span>
+</button>
+))}
+</div>
+<div id="treatments-deck" className="lg:hidden mb-12">
 <div className="relative h-[460px]" style={{ perspective: '1200px' }}>
 {filteredTreatments.map((treatment, i) => {
 const depth = i - stackIndex;
