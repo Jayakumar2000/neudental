@@ -30,7 +30,7 @@ return (
 variant="light"
 markClassName="h-10 w-auto"
 wordmarkClassName="h-[20px] w-auto"
-taglineClassName="text-[9px] text-[#A5F3FC] uppercase tracking-widest font-bold leading-none mt-1"
+showTagline={false}
 />
 <p className="text-xs text-white/70 leading-relaxed pt-2">
 Providing comprehensive dental treatments including Painless RCT, Invisalign clear alignments,
