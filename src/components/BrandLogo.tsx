@@ -7,7 +7,7 @@ import React from 'react';
 
 export const BRAND = {
   name: 'neudental',
-  legalName: 'neudental dental clinic',
+  legalName: 'neudental clinic',
   tagline: 'Modern Dental Care for Confident Smiles',
   phone: '+91 93423 67446',
   phoneHref: 'tel:+919342367446',
