@@ -80,8 +80,8 @@ A modern, fully-equipped dental practice in the heart of Kodungaiyur — take a 
 {/* Doctor Bio */}
 <div className="p-5 sm:p-8 md:p-10">
 <div className="flex flex-col sm:flex-row gap-5 sm:gap-6 md:gap-8">
-<div className="w-32 sm:w-56 md:w-64 mx-auto sm:mx-0 shrink-0">
-<div className="aspect-[2/3] rounded-2xl overflow-hidden bg-cool-gray/10 premium-shadow">
+<div className="w-full sm:w-56 md:w-64 shrink-0">
+<div className="aspect-[4/5] rounded-2xl overflow-hidden bg-cool-gray/10 premium-shadow">
 <img
 src="/doctor/dr-swetha.jpg"
 alt="Dr. Swetha U, Lead Dental Surgeon at neudental"
