@@ -78,9 +78,9 @@ A modern, fully-equipped dental practice in the heart of Kodungaiyur — take a 
 
 <div className="rounded-[2rem] border border-cool-gray/10 premium-shadow overflow-hidden bg-white">
 {/* Doctor Bio */}
-<div className="p-8 md:p-10">
-<div className="flex flex-col sm:flex-row gap-6 md:gap-8">
-<div className="w-full max-w-[220px] mx-auto sm:mx-0 sm:w-56 md:w-64 shrink-0">
+<div className="p-5 sm:p-8 md:p-10">
+<div className="flex flex-col sm:flex-row gap-5 sm:gap-6 md:gap-8">
+<div className="w-32 sm:w-56 md:w-64 mx-auto sm:mx-0 shrink-0">
 <div className="aspect-[2/3] rounded-2xl overflow-hidden bg-cool-gray/10 premium-shadow">
 <img
 src="/doctor/dr-swetha.jpg"
@@ -89,20 +89,20 @@ className="w-full h-full object-cover object-top"
 />
 </div>
 </div>
-<div className="flex-1 text-center sm:text-left">
+<div className="flex-1 text-left">
 <span className="text-secondary font-sans text-xs tracking-wider uppercase font-bold font-display block mb-1">
 {doc.specialty}
 </span>
 <h4 className="font-serif text-xl sm:text-2xl font-bold text-primary">
 {doc.name}, <span className="text-[14px] sm:text-[18px]">{doc.title}</span>
 </h4>
-<p className="font-sans text-sm font-medium text-cool-gray mt-1 flex items-center justify-center sm:justify-start gap-1.5">
-<GraduationCap className="w-4 h-4 text-secondary inline shrink-0" /> {doc.education} &amp; {doc.experience}
+<p className="font-sans text-sm font-medium text-cool-gray mt-1 flex items-start gap-1.5">
+<GraduationCap className="w-4 h-4 text-secondary shrink-0 mt-0.5" /> <span>{doc.education} &amp; {doc.experience}</span>
 </p>
 <p className="font-sans text-base text-on-surface-variant leading-relaxed mt-4">
 {doc.bio}
 </p>
-<div className="flex flex-wrap justify-center sm:justify-start gap-1.5 mt-5 pt-5 border-t border-cool-gray/10">
+<div className="flex flex-wrap justify-start gap-1.5 mt-5 pt-5 border-t border-cool-gray/10">
 {doc.skills.map((skill) => (
 <span key={skill} className="bg-surface-alt border border-cool-gray/20 text-on-surface text-sm px-2.5 py-1 rounded-full flex items-center gap-1">
 <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#10B981]" />
