@@ -14,6 +14,7 @@ import Footer from './components/Footer';
 import BlogsListView from './components/BlogsListView';
 import BlogDetailView from './components/BlogDetailView';
 import AdminView from './components/AdminView';
+import TreatmentDetailView from './components/TreatmentDetailView';
 import { FAQS } from './data';
 import { ChevronDown, ChevronUp, ArrowLeft, Phone } from 'lucide-react';
 import type { FAQItem } from './types';
@@ -149,6 +150,14 @@ export default function App() {
     goToPath('/blogs');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  // TEMP prototype-only preview hook -- not part of the real app routing,
+  // remove before merging. Lets us screenshot TreatmentDetailView (normally
+  // unrouted, phase 2 work) at /#preview-treatment-detail=<treatmentId>.
+  if (typeof window !== 'undefined' && window.location.hash.startsWith('#preview-treatment-detail')) {
+    const previewId = window.location.hash.split('=')[1] || 'checkup';
+    return <TreatmentDetailView treatmentId={previewId} onBack={() => {}} onNavigateToTreatment={() => {}} />;
+  }
 
   if (symptomCheckerOpen) {
     return (

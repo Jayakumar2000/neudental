@@ -1,13 +1,14 @@
 import React from 'react';
 import { DOCTORS } from '../data';
-import { GraduationCap, Camera, Award, Users, Activity, Sparkles, Home } from 'lucide-react';
+import { GraduationCap, Camera, Award, Users, Home } from 'lucide-react';
+import { IconProcedureRepair, IconMouthwashClean } from './icons/DentalIcons';
 
 const TRUST_STATS = [
-  { icon: Award, value: '5+', label: 'Years of Trusted Dental Care' },
-  { icon: Users, value: '3,000+', label: 'Happy Patients Treated' },
-  { icon: Activity, value: '5,000+', label: 'Procedures Completed' },
-  { icon: Home, value: '200+', label: 'Home Visits for Senior Citizens' },
-  { icon: Sparkles, value: '99.8%', label: 'Sterilization Success Rate' },
+  { icon: Award, value: '5+', label: 'Years of Trusted Dental Care', custom: false },
+  { icon: Users, value: '3,000+', label: 'Happy Patients Treated', custom: false },
+  { icon: IconProcedureRepair, value: '5,000+', label: 'Procedures Completed', custom: true },
+  { icon: Home, value: '200+', label: 'Home Visits for Senior Citizens', custom: false },
+  { icon: IconMouthwashClean, value: '99.8%', label: 'Sterilization Success Rate', custom: true },
 ];
 
 interface GalleryPhoto {
@@ -54,8 +55,8 @@ Excellence You Can See In The Numbers
 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6 max-w-6xl mx-auto mb-20">
 {TRUST_STATS.map((stat) => (
 <div key={stat.label} className="bg-surface-container-low border border-cool-gray/5 rounded-2xl p-6 text-center hover:border-secondary/20 hover:-translate-y-0.5 transition-all">
-<div className="w-11 h-11 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center mx-auto mb-4">
-<stat.icon className="w-5 h-5" />
+<div className={`w-11 h-11 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center mx-auto mb-4 ${stat.custom ? 'overflow-visible' : ''}`}>
+<stat.icon className={stat.custom ? 'w-[58px] h-[58px] shrink-0' : 'w-5 h-5'} />
 </div>
 <p className="font-serif text-2xl md:text-3xl font-bold text-primary leading-none">{stat.value}</p>
 <p className="font-sans text-[11px] font-bold uppercase tracking-wider text-cool-gray mt-3 leading-snug">{stat.label}</p>

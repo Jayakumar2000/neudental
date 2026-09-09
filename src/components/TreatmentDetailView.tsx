@@ -3,7 +3,8 @@
 // Services bento snapshot instead. Kept in place for the phase 2 rebuild of
 // dedicated per-treatment resource pages.
 import React from 'react';
-import { ArrowLeft, Phone, Check, Clock, ShieldCheck, Zap, BadgeCheck } from 'lucide-react';
+import { ArrowLeft, Phone, Check, Clock, BadgeCheck } from 'lucide-react';
+import { IconPainRelief, IconPrecisionCare } from './icons/DentalIcons';
 import { TREATMENTS } from '../data';
 import { Treatment } from '../types';
 import BookingForm from './BookingForm';
@@ -65,8 +66,8 @@ export default function TreatmentDetailView({ treatmentId, onBack, onNavigateToT
         {/* Treatment Highlights */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
           <div className="bg-surface-container-low border border-cool-gray/5 rounded-2xl p-6 flex items-start gap-4">
-            <div className="w-10 h-10 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center shrink-0">
-              <Zap size={20} />
+            <div className="w-10 h-10 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center shrink-0 overflow-visible">
+              <IconPainRelief className="w-[54px] h-[54px] shrink-0" />
             </div>
             <div>
               <h3 className="font-serif font-bold text-primary mb-1">Pain-Free Treatment</h3>
@@ -83,8 +84,8 @@ export default function TreatmentDetailView({ treatmentId, onBack, onNavigateToT
             </div>
           </div>
           <div className="bg-surface-container-low border border-cool-gray/5 rounded-2xl p-6 flex items-start gap-4">
-            <div className="w-10 h-10 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center shrink-0">
-              <ShieldCheck size={20} />
+            <div className="w-10 h-10 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center shrink-0 overflow-visible">
+              <IconPrecisionCare className="w-[54px] h-[54px] shrink-0" />
             </div>
             <div>
               <h3 className="font-serif font-bold text-primary mb-1">Expert Care</h3>
