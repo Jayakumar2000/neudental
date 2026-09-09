@@ -101,7 +101,7 @@ return (
 </div>
 <p className="text-[10px] text-white/50 font-sans -mt-4 mb-6">*Indicative starting price, not the final charge — actual cost is confirmed after clinical consultation.</p>
 <div className="space-y-3 mb-8">
-<p className="text-xs font-bold uppercase tracking-wider text-white">Key Treatment Protocols:</p>
+<p className="text-xs font-bold uppercase tracking-wider text-white">Key Treatment Highlights:</p>
 {selectedTreatment.features.map((feat) => (
 <div key={feat} className="flex items-start gap-2.5 text-xs text-white/80"><div className="w-4 h-4 rounded-full bg-mint/90 text-primary flex items-center justify-center shrink-0 mt-0.5"><Check className="w-3 h-3" /></div><span className="leading-normal">{feat}</span></div>
 ))}

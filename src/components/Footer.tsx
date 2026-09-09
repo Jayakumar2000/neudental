@@ -104,7 +104,8 @@ Door No. 13, Plot No. 26, 1st Main Road, Vasuki Nagar, Kodungaiyur, Chennai, Tam
 </div>
 </div>
 {/* Sub copyright row */}
-<div className="max-w-[1280px] mx-auto w-full pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-white/50">
+{/* lg:pr-44 clears the fixed WhatsApp button, which otherwise overlaps this row's right edge on common laptop widths */}
+<div className="max-w-[1280px] mx-auto w-full pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-white/50 lg:pr-44">
 <p className="font-sans font-medium">
 {new Date().getFullYear()} {BRAND.legalName}. All rights reserved.
 </p>
@@ -113,7 +114,7 @@ Door No. 13, Plot No. 26, 1st Main Road, Vasuki Nagar, Kodungaiyur, Chennai, Tam
 <span className="text-white/10">|</span>
 <a href="#location" onClick={(e) => handleSectionClick(e, 'location')} className="hover:text-[#E0F2F1] transition-colors">Clinical Timings</a>
 <span className="text-white/10">|</span>
-<span className="text-emerald-400 font-bold">100% Secure &amp; Sterilized</span>
+<span className="text-emerald-400 font-bold">100% Safe &amp; Sterilized Practice</span>
 </div>
 </div>
 </footer>
