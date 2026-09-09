@@ -23,7 +23,7 @@ export const TREATMENTS: Treatment[] = [
   { id: 'implants', name: 'Dental Implants', category: 'specialized', description: 'Permanent tooth replacement', seoKeywords: ['dental implants Chennai', 'tooth implant Kodungaiyur'], duration: '3-6 months', priceRange: '₹30000-₹50000', startingPrice: 30000, iconName: 'IconToothDrill', features: ['Titanium implants', 'Permanent solution', 'Natural feel', 'Bone preservation'] },
   { id: 'laser-dentistry', name: 'Laser Dentistry', category: 'specialized', description: 'Bloodless, suture-free procedures', seoKeywords: ['laser dentistry Chennai', 'painless laser treatment Kodungaiyur'], duration: '30-60 minutes', priceRange: '₹2000-₹8000', startingPrice: 2000, iconName: 'IconTools', features: ['Minimal discomfort', 'Reduced bleeding', 'Faster healing', 'Precision treatment'] },
   // Kids / Pediatric Dentistry
-  { id: 'kids-dentistry', name: 'Kids Dentistry', category: 'pediatric', description: 'Gentle, fear-free visits for children', seoKeywords: ['pediatric dentist Chennai', 'kids dentist Kodungaiyur'], duration: '20-40 minutes', priceRange: '₹1000-₹2000', startingPrice: 1000, iconName: 'Baby', features: ['Child-friendly approach', 'Preventive & restorative care', 'Cavity treatment', 'Dental habit guidance'] },
+  { id: 'kids-dentistry', name: 'Kids Dentistry', category: 'pediatric', description: 'Gentle, fear-free visits for children', seoKeywords: ['pediatric dentist Chennai', 'kids dentist Kodungaiyur'], duration: '20-40 minutes', priceRange: '₹1000-₹2000', startingPrice: 1000, iconName: 'IconDentalCare', features: ['Child-friendly approach', 'Preventive & restorative care', 'Cavity treatment', 'Dental habit guidance'] },
 ];
 
 export const DOCTOR: Doctor = {

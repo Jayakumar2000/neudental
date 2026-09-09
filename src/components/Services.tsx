@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { TREATMENTS } from '../data';
 import { Treatment } from '../types';
 import { ShieldAlert, Sparkles, Scissors, Smile, Check, Clock, ArrowRight, Search, Activity, Scan, Shield, Heart, Crown, GitBranch, Star, Anchor, Sun, Layers, Zap, Baby, IndianRupee } from 'lucide-react';
-import { IconWisdomToothExtraction, IconCrownsAndBridges, IconCavityFilling, IconDentures, IconTeethWhitening, IconRegularCheckup, IconDentalCleaning, IconDentalImaging, IconBraces, IconRootCanal, IconGumDisease, IconToothDrill, IconDentalSurgery, IconTools } from './icons/DentalIcons';
+import { IconWisdomToothExtraction, IconCrownsAndBridges, IconCavityFilling, IconDentures, IconTeethWhitening, IconRegularCheckup, IconDentalCleaning, IconDentalImaging, IconBraces, IconRootCanal, IconGumDisease, IconToothDrill, IconDentalSurgery, IconTools, IconDentalCare } from './icons/DentalIcons';
 
 interface ServicesProps {
 onSelectTreatment: (treatmentId: string) => void;
@@ -61,6 +61,7 @@ case 'IconGumDisease': return <IconGumDisease className="w-[76px] h-[76px] shrin
 case 'IconToothDrill': return <IconToothDrill className="w-[76px] h-[76px] shrink-0" />;
 case 'IconDentalSurgery': return <IconDentalSurgery className="w-[76px] h-[76px] shrink-0" />;
 case 'IconTools': return <IconTools className="w-[76px] h-[76px] shrink-0" />;
+case 'IconDentalCare': return <IconDentalCare className="w-[76px] h-[76px] shrink-0" />;
 default: return <Smile className="w-5 h-5" />;
 }
 };
