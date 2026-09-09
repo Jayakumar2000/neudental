@@ -215,7 +215,7 @@ export default function App() {
               return (
                 <div key={faq.id} className={`bg-white rounded-2xl border transition-all duration-300 overflow-hidden ${isOpen ? 'border-secondary/30 premium-shadow' : 'border-cool-gray/10 hover:border-cool-gray/25'}`}>
                   <button type="button" className="w-full flex items-center gap-4 px-6 py-5 text-left cursor-pointer" onClick={() => setFaqOpenId(isOpen ? null : faq.id)}>
-                    <span className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-serif font-bold text-sm transition-colors duration-300 ${isOpen ? 'bg-secondary text-white' : 'bg-secondary/10 text-secondary'}`}>{String(index + 1).padStart(2, '0')}</span>
+                    <span className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-sans font-extrabold text-xs tracking-wide tabular-nums transition-colors duration-300 ${isOpen ? 'bg-secondary text-white' : 'bg-secondary/10 text-secondary'}`}>{String(index + 1).padStart(2, '0')}</span>
                     <span className="font-sans font-bold text-sm sm:text-base text-primary flex-1">{faq.question}</span>
                     <ChevronDown className={`w-5 h-5 text-secondary shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
                   </button>
