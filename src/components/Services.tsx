@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { TREATMENTS } from '../data';
 import { Treatment } from '../types';
-import { ShieldAlert, Sparkles, Scissors, Smile, Check, Clock, ArrowRight, Search, Activity, Scan, Shield, Heart, Crown, GitBranch, Star, Anchor, Sun, Layers, Zap, Baby, IndianRupee } from 'lucide-react';
+import { ShieldAlert, Sparkles, Scissors, Smile, Check, Clock, ArrowRight, Search, Activity, Scan, Shield, Heart, Crown, GitBranch, Star, Anchor, Sun, Layers, Zap, Baby, IndianRupee, ChevronDown } from 'lucide-react';
 import { IconWisdomToothExtraction, IconCrownsAndBridges, IconCavityFilling, IconDentures, IconTeethWhitening, IconRegularCheckup, IconDentalCleaning, IconDentalImaging, IconBraces, IconRootCanal, IconGumDisease, IconToothDrill, IconDentalSurgery, IconTools, IconDentalCare, IconCrownSmile } from './icons/DentalIcons';
 
 interface ServicesProps {
@@ -86,14 +86,59 @@ return (
 <div className="w-12 h-1 bg-secondary mx-auto mt-6" />
 <p className="font-sans text-base text-on-surface-variant mt-4 leading-relaxed">From routine checkups and cleaning to advanced orthodontics and permanent implants, explore our full spectrum of specialized dental treatments.</p>
 </div>
-<div className="flex flex-wrap items-center justify-center gap-2 mb-12">
+{/* Mobile & tablet (<lg): compact category + treatment pickers instead of 16 stacked cards */}
+<div className="lg:hidden space-y-3 mb-8">
+<div className="relative">
+<select
+value={activeCategory}
+onChange={(e) => setActiveCategory(e.target.value as (typeof CATEGORIES)[number]['key'])}
+className="w-full appearance-none bg-white border border-cool-gray/20 text-on-surface font-sans text-sm font-bold rounded-xl px-4 py-3.5 pr-10 cursor-pointer"
+>
+{CATEGORIES.map((cat) => (<option key={cat.key} value={cat.key}>{cat.label}</option>))}
+</select>
+<ChevronDown className="w-4 h-4 text-on-surface-variant absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+</div>
+<div className="relative">
+<select
+value={filteredTreatments.some(t => t.id === selectedTreatment?.id) ? selectedTreatment?.id : ''}
+onChange={(e) => { const t = TREATMENTS.find(tr => tr.id === e.target.value); if (t) setSelectedTreatment(t); }}
+className="w-full appearance-none bg-secondary/5 border border-secondary/20 text-secondary font-sans text-sm font-bold rounded-xl px-4 py-3.5 pr-10 cursor-pointer"
+>
+{filteredTreatments.map((t) => (<option key={t.id} value={t.id}>{t.name}</option>))}
+</select>
+<ChevronDown className="w-4 h-4 text-secondary absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+</div>
+</div>
+{selectedTreatment && (
+<div className="lg:hidden bg-gradient-to-br from-primary via-primary to-secondary rounded-3xl p-6 premium-shadow mb-12">
+<span className="text-mint font-sans text-[11px] uppercase tracking-widest font-bold block mb-1">{getCategoryLabel(selectedTreatment.category)} Treatment Info</span>
+<h3 className="font-serif font-bold text-xl text-white mb-2">{selectedTreatment.name}</h3>
+<p className="font-sans text-sm text-white/80 leading-relaxed mb-5">{selectedTreatment.description}</p>
+<div className="grid grid-cols-2 gap-4 p-4 rounded-xl bg-white/10 border border-white/10 mb-5 text-xs">
+<div className="flex items-center gap-2"><Clock className="w-4 h-4 text-white/60" /><div><p className="text-white/60 font-medium">Duration</p><p className="font-bold text-white">{selectedTreatment.duration}</p></div></div>
+<div className="flex items-center gap-2"><IndianRupee className="w-4 h-4 text-white/60" /><div><p className="text-white/60 font-medium">Treatment Cost</p><p className="font-bold text-white">{selectedTreatment.startingPrice.toLocaleString('en-IN')}</p></div></div>
+</div>
+<div className="space-y-3 mb-6">
+<p className="text-xs font-bold uppercase tracking-wider text-white">Treatment Highlights:</p>
+{selectedTreatment.features.map((feat) => (
+<div key={feat} className="flex items-start gap-2.5 text-xs text-white/80"><div className="w-4 h-4 rounded-full bg-mint/90 text-primary flex items-center justify-center shrink-0 mt-0.5"><Check className="w-3 h-3" /></div><span className="leading-normal">{feat}</span></div>
+))}
+</div>
+<div className="space-y-3">
+<button onClick={() => onSelectTreatment(selectedTreatment.id)} className="w-full bg-white text-primary active:bg-mint cursor-pointer py-4 rounded-xl font-sans text-xs uppercase tracking-widest font-bold transition-all duration-200">Book Appointment</button>
+{onViewDetailSubpage && (<button onClick={() => onViewDetailSubpage(selectedTreatment.id)} className="w-full bg-white/10 border border-white/20 active:bg-white/15 text-white cursor-pointer py-3.5 rounded-xl font-sans text-xs uppercase tracking-widest font-bold transition-all duration-200 flex items-center justify-center gap-1.5"><span>View Comprehensive Patient Guide</span><ArrowRight className="w-3.5 h-3.5" /></button>)}
+</div>
+</div>
+)}
+{/* Desktop (lg+): category pills + full card grid + sticky summary panel */}
+<div className="hidden lg:flex flex-wrap items-center justify-center gap-2 mb-12">
 {CATEGORIES.map((cat) => (
 <button key={cat.key} onClick={() => setActiveCategory(cat.key)} className={`px-5 py-2.5 rounded-full font-sans text-xs uppercase tracking-wider font-bold transition-all duration-200 cursor-pointer ${activeCategory === cat.key ? 'bg-primary text-white shadow-lg shadow-primary/10' : 'bg-white border border-cool-gray/20 text-on-surface hover:border-primary'}`}>
 {cat.label}
 </button>
 ))}
 </div>
-<div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<div className="hidden lg:grid lg:grid-cols-12 gap-8 items-start">
 <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
 {filteredTreatments.map((treatment) => (
 <div key={treatment.id} onClick={() => setSelectedTreatment(treatment)} className={`p-6 rounded-2xl border text-left cursor-pointer transition-all duration-300 ${selectedTreatment?.id === treatment.id ? 'bg-white border-secondary premium-shadow ring-2 ring-secondary/10' : 'bg-white/80 hover:bg-white border-cool-gray/10 hover:border-cool-gray/30'}`}>

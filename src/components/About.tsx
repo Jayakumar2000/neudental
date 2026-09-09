@@ -52,8 +52,8 @@ Excellence You Can See In The Numbers
 </div>
 {/* Trust Stats Strip */}
 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6 max-w-6xl mx-auto mb-20">
-{TRUST_STATS.map((stat) => (
-<div key={stat.label} className="bg-surface-container-low border border-cool-gray/5 rounded-2xl p-6 text-center hover:border-secondary/20 hover:-translate-y-0.5 transition-all">
+{TRUST_STATS.map((stat, i) => (
+<div key={stat.label} className={`bg-surface-container-low border border-cool-gray/5 rounded-2xl p-6 text-center hover:border-secondary/20 hover:-translate-y-0.5 transition-all ${i === TRUST_STATS.length - 1 ? 'col-span-2 sm:col-span-1' : ''}`}>
 <div className="w-11 h-11 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center mx-auto mb-4">
 <stat.icon className="w-5 h-5" />
 </div>
@@ -99,12 +99,12 @@ className="w-full h-full object-cover object-top"
 <p className="font-sans text-sm font-medium text-cool-gray mt-1 flex items-center justify-center sm:justify-start gap-1.5">
 <GraduationCap className="w-4 h-4 text-secondary inline shrink-0" /> {doc.education} &amp; {doc.experience}
 </p>
-<p className="font-sans text-sm text-on-surface-variant leading-relaxed mt-4">
+<p className="font-sans text-base text-on-surface-variant leading-relaxed mt-4">
 {doc.bio}
 </p>
 <div className="flex flex-wrap justify-center sm:justify-start gap-1.5 mt-5 pt-5 border-t border-cool-gray/10">
 {doc.skills.map((skill) => (
-<span key={skill} className="bg-surface-alt border border-cool-gray/20 text-on-surface text-xs px-2.5 py-1 rounded-full flex items-center gap-1">
+<span key={skill} className="bg-surface-alt border border-cool-gray/20 text-on-surface text-sm px-2.5 py-1 rounded-full flex items-center gap-1">
 <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#10B981]" />
 {skill}
 </span>
