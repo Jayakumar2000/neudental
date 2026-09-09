@@ -32,7 +32,7 @@ onNavigateSection(href.slice(1));
 };
 
 const navItems = [
-{ name: 'Our Doctor', href: '#our-doctor' },
+{ name: 'About Us', href: '#our-doctor' },
 { name: 'Treatments', href: '#services' },
 { name: 'Location & Timing', href: '#location' },
 { name: 'Blogs', href: '' },

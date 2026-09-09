@@ -1,5 +1,5 @@
 import React from 'react';
-import { Star, BadgeCheck, CalendarDays } from 'lucide-react';
+import { Star, BadgeCheck, Users } from 'lucide-react';
 
 const FEATURED_ON = [
 { name: 'Google', logo: '/logos/google-icon.png', showLabel: true },
@@ -32,11 +32,11 @@ Best Dental Clinic in Kodungaiyur, Chennai
 </span>
 </div>
 <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-5xl text-primary leading-tight font-bold tracking-tight">
-Expert Dental Care <br />
+Advanced Dental Care <br />
 <span className="text-secondary italic font-light">in Kodungaiyur, Chennai</span>
 </h1>
 <p className="font-sans text-base md:text-lg text-on-surface-variant max-w-xl leading-relaxed">
-Gentle, comfortable dentistry for every age, near you in Kodungaiyur — from a child's first checkup to painless <strong>root canal treatment</strong> and lasting <strong>dental implants</strong>, personally led by Dr. Swetha at our Neudental Clinic.
+Gentle, comfortable dentistry for every age, starting from a child's first dental checkup to an advanced procedure like <strong>Root Canal</strong> or <strong>Implant</strong>, performed by Dr. Swetha.
 </p>
 <div className="flex flex-col sm:flex-row gap-4 pt-2 w-full sm:w-auto">
 <button onClick={onScrollToBooking} className="bg-primary text-white hover:bg-secondary cursor-pointer shadow-xl shadow-primary/10 hover:shadow-secondary/20 hover:-translate-y-0.5 active:translate-y-0 px-8 py-4 rounded-xl font-sans text-sm tracking-wider uppercase font-bold transition-all duration-200">Book Appointment</button>
@@ -60,7 +60,7 @@ Gentle, comfortable dentistry for every age, near you in Kodungaiyur — from a 
 <div className="absolute inset-0 bg-gradient-to-t from-primary/30 to-transparent" />
 </div>
 <div className="absolute -bottom-6 -left-6 bg-white p-5 rounded-2xl premium-shadow border border-cool-gray/10 hidden md:block max-w-[220px]">
-<div className="flex items-center gap-3"><div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center"><CalendarDays className="w-5 h-5" /></div><div className="leading-tight"><p className="text-lg font-bold text-primary font-sans">7 Days</p><p className="text-[11px] text-cool-gray font-sans font-medium uppercase tracking-wider">A Week, Always Open</p></div></div>
+<div className="flex items-center gap-3"><div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center"><Users className="w-5 h-5" /></div><div className="leading-tight"><p className="text-lg font-bold text-primary font-sans">3,000+</p><p className="text-[11px] text-cool-gray font-sans font-medium uppercase tracking-wider">Patients Treated</p></div></div>
 </div>
 <div className="absolute -top-6 -right-6 bg-white pl-3 pr-5 py-3.5 rounded-2xl premium-shadow border border-cool-gray/10 hidden md:flex items-center gap-3.5">
 <div className="w-12 h-12 rounded-full bg-surface-alt ring-1 ring-cool-gray/10 flex items-center justify-center shrink-0">

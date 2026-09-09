@@ -20,10 +20,20 @@ return (
 <div className="lg:col-span-5 flex flex-col gap-6 justify-between">
 <div className="bg-white p-8 rounded-2xl border border-cool-gray/10 premium-shadow">
 <h3 className="font-serif font-bold text-lg text-primary mb-6 flex items-center gap-2"><Clock className="w-5 h-5 text-secondary" /> Clinic Timings</h3>
-<div className="space-y-4 font-sans text-sm">
-<div className="flex justify-between items-start pb-3">
-<div><span className="font-bold text-primary block">Monday - Sunday:</span><span className="text-xs text-cool-gray">Open all 7 days, dual-sessions clinical service</span></div>
-<div className="text-right"><p className="font-semibold text-secondary whitespace-nowrap">10:00 AM - 02:00 PM</p><p className="font-semibold text-secondary mt-0.5 whitespace-nowrap">05:00 PM - 09:30 PM</p></div>
+<div className="font-sans text-sm">
+<div className="flex items-center justify-between pb-4 mb-4 border-b border-cool-gray/10">
+<span className="font-bold text-primary">Monday - Sunday</span>
+<span className="text-[10px] uppercase tracking-wider font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">Open All 7 Days</span>
+</div>
+<div className="space-y-3">
+<div className="flex items-center justify-between">
+<span className="text-xs font-bold uppercase tracking-wider text-cool-gray">Morning</span>
+<span className="font-semibold text-secondary whitespace-nowrap">10:00 AM - 02:00 PM</span>
+</div>
+<div className="flex items-center justify-between">
+<span className="text-xs font-bold uppercase tracking-wider text-cool-gray">Evening</span>
+<span className="font-semibold text-secondary whitespace-nowrap">05:00 PM - 09:30 PM</span>
+</div>
 </div>
 </div>
 </div>
@@ -38,7 +48,7 @@ return (
 </div>
 <div className="lg:col-span-7 bg-white rounded-3xl p-4 border border-cool-gray/10 premium-shadow flex flex-col justify-between overflow-hidden">
 <div className="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-cool-gray/10 pb-4 mb-4 gap-3">
-<div><h4 className="font-serif text-2xl md:text-3xl font-bold text-primary">Map view of neudental Clinic</h4></div>
+<div><h4 className="font-serif text-2xl md:text-3xl font-bold text-primary">Map view of Neudental Clinic</h4></div>
 <a href={googleMapsUrl} target="_blank" rel="noreferrer" className="text-xs text-secondary font-bold hover:underline inline-flex items-center gap-1 font-sans">Open in Google Maps <ExternalLink className="w-3.5 h-3.5" /></a>
 </div>
 <div className="w-full grow min-h-[350px] rounded-2xl overflow-hidden border border-cool-gray/15 select-none bg-cool-gray/5 relative">

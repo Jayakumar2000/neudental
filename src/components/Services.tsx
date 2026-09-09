@@ -59,7 +59,7 @@ return (
 <div className="max-w-[1280px] mx-auto w-full">
 <div className="text-center max-w-2xl mx-auto mb-16">
 <span className="text-secondary font-sans text-xs font-bold tracking-[0.2em] uppercase">Comprehensive Clinical Care</span>
-<h2 className="font-serif text-3xl md:text-4xl text-primary font-bold mt-3 leading-tight">Treatments Offered at neudental</h2>
+<h2 className="font-serif text-3xl md:text-4xl text-primary font-bold mt-3 leading-tight">Treatments Offered at Neudental</h2>
 <div className="w-12 h-1 bg-secondary mx-auto mt-6" />
 <p className="font-sans text-base text-on-surface-variant mt-4 leading-relaxed">From routine checkups and cleaning to advanced orthodontics and permanent implants, explore our full spectrum of specialized dental treatments.</p>
 </div>

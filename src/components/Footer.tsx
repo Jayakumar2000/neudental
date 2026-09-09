@@ -33,8 +33,8 @@ wordmarkClassName="h-[20px] w-auto"
 showTagline={false}
 />
 <p className="text-xs text-white/70 leading-relaxed pt-2">
-Providing comprehensive dental treatments including Painless RCT, Invisalign clear alignments,
-and biocompatible implant operations with advanced patient-first technology.
+Providing comprehensive dental treatments including Painless RCT, Invisalign,
+and dental implants, backed by advanced, patient-first technology.
 </p>
 <div className="pt-2 text-xs text-mint/95 space-y-1">
 <p className="flex items-center gap-1.5 font-bold">
