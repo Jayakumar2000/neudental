@@ -131,7 +131,7 @@ className="bg-white border border-secondary/15 rounded-2xl p-3 flex flex-col ite
 </button>
 ))}
 </div>
-<div id="treatments-deck" className="lg:hidden mb-12">
+<div id="treatments-deck" className="lg:hidden mb-2">
 <div className="relative h-[460px]" style={{ perspective: '1200px' }}>
 {filteredTreatments.map((treatment, i) => {
 const depth = i - stackIndex;
@@ -147,7 +147,7 @@ transform: `translateY(${depth * 18}px) scaleX(${1 - depth * 0.05})`,
 transformOrigin: 'top center',
 opacity: isFront ? 1 : depth === 1 ? 0.9 : 0.75,
 }}
-className={`absolute inset-0 rounded-3xl premium-shadow bg-gradient-to-br from-primary via-primary to-secondary transition-all duration-500 ease-out ${isFront ? 'p-6 overflow-y-auto' : 'p-6 cursor-pointer overflow-hidden'}`}
+className={`absolute inset-0 rounded-3xl premium-shadow bg-gradient-to-br from-primary via-primary to-secondary transition-all duration-500 ease-out ${isFront ? 'p-6 overflow-y-auto flex flex-col' : 'p-6 cursor-pointer overflow-hidden'}`}
 >
 <span className="text-mint font-sans text-[11px] uppercase tracking-widest font-bold block mb-1">{getCategoryLabel(treatment.category)} Treatment Info</span>
 <h3 className="font-serif font-bold text-xl text-white mb-2">{treatment.name}</h3>
@@ -163,7 +163,10 @@ className={`absolute inset-0 rounded-3xl premium-shadow bg-gradient-to-br from-p
 <div key={feat} className="flex items-start gap-2.5 text-xs text-white/80"><div className="w-4 h-4 rounded-full bg-mint/90 text-primary flex items-center justify-center shrink-0 mt-0.5"><Check className="w-3 h-3" /></div><span className="leading-normal">{feat}</span></div>
 ))}
 </div>
-<div className="space-y-3">
+{/* Pinned to the bottom of the fixed-height card via mt-auto so the CTA
+sits in the same place regardless of how many highlights a treatment
+has, instead of leaving dead space below it for shorter lists. */}
+<div className="space-y-3 mt-auto">
 <button onClick={() => onSelectTreatment(treatment.id)} className="w-full bg-white text-primary active:bg-mint cursor-pointer py-4 rounded-xl font-sans text-xs uppercase tracking-widest font-bold transition-all duration-200">Book Appointment</button>
 {onViewDetailSubpage && (<button onClick={() => onViewDetailSubpage(treatment.id)} className="w-full bg-white/10 border border-white/20 active:bg-white/15 text-white cursor-pointer py-3.5 rounded-xl font-sans text-xs uppercase tracking-widest font-bold transition-all duration-200 flex items-center justify-center gap-1.5"><span>View Comprehensive Patient Guide</span><ArrowRight className="w-3.5 h-3.5" /></button>)}
 </div>
@@ -172,7 +175,7 @@ className={`absolute inset-0 rounded-3xl premium-shadow bg-gradient-to-br from-p
 );
 })}
 </div>
-<div className="flex items-center justify-center gap-6 mt-12">
+<div className="flex items-center justify-center gap-6 mt-10">
 <button
 type="button"
 aria-label="Previous treatment"
