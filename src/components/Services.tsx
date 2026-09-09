@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { TREATMENTS } from '../data';
 import { Treatment } from '../types';
 import { ShieldAlert, Sparkles, Scissors, Smile, Check, Clock, ArrowRight, Search, Activity, Scan, Shield, Heart, Crown, GitBranch, Star, Anchor, Sun, Layers, Zap, Baby, IndianRupee } from 'lucide-react';
-import { IconWisdomToothExtraction, IconCrownsAndBridges, IconCavityFilling, IconDentures, IconTeethWhitening, IconRegularCheckup, IconDentalCleaning, IconDentalImaging, IconBraces, IconRootCanal, IconGumDisease } from './icons/DentalIcons';
+import { IconWisdomToothExtraction, IconCrownsAndBridges, IconCavityFilling, IconDentures, IconTeethWhitening, IconRegularCheckup, IconDentalCleaning, IconDentalImaging, IconBraces, IconRootCanal, IconGumDisease, IconToothDrill, IconDentalSurgery, IconTools } from './icons/DentalIcons';
 
 interface ServicesProps {
 onSelectTreatment: (treatmentId: string) => void;
@@ -58,9 +58,18 @@ case 'IconDentalImaging': return <IconDentalImaging className="w-[76px] h-[76px]
 case 'IconBraces': return <IconBraces className="w-[76px] h-[76px] shrink-0" />;
 case 'IconRootCanal': return <IconRootCanal className="w-[76px] h-[76px] shrink-0" />;
 case 'IconGumDisease': return <IconGumDisease className="w-[76px] h-[76px] shrink-0" />;
+case 'IconToothDrill': return <IconToothDrill className="w-[76px] h-[76px] shrink-0" />;
+case 'IconDentalSurgery': return <IconDentalSurgery className="w-[76px] h-[76px] shrink-0" />;
+case 'IconTools': return <IconTools className="w-[76px] h-[76px] shrink-0" />;
 default: return <Smile className="w-5 h-5" />;
 }
 };
+
+// Custom multi-color icons (from the dentistry icon pack) carry their own
+// fixed palette instead of inheriting currentColor, so they can't invert to
+// white the way the plain lucide icons do when a card is selected -- forcing
+// that would leave them sitting oddly on a solid teal square.
+const isCustomPackIcon = (name: string) => name.startsWith('Icon');
 
 const getCategoryLabel = (key: string) => CATEGORIES.find((c) => c.key === key)?.label ?? key;
 
@@ -87,7 +96,7 @@ return (
 {filteredTreatments.map((treatment) => (
 <div key={treatment.id} onClick={() => setSelectedTreatment(treatment)} className={`p-6 rounded-2xl border text-left cursor-pointer transition-all duration-300 ${selectedTreatment?.id === treatment.id ? 'bg-white border-secondary premium-shadow ring-2 ring-secondary/10' : 'bg-white/80 hover:bg-white border-cool-gray/10 hover:border-cool-gray/30'}`}>
 <div className="flex items-center justify-between mb-4">
-<div className={`w-14 h-14 rounded-xl flex items-center justify-center shrink-0 ${selectedTreatment?.id === treatment.id ? 'bg-secondary text-white' : 'bg-secondary/5 text-secondary'}`}>{getIcon(treatment.iconName)}</div>
+<div className={`w-14 h-14 rounded-xl flex items-center justify-center shrink-0 ${selectedTreatment?.id === treatment.id && !isCustomPackIcon(treatment.iconName) ? 'bg-secondary text-white' : 'bg-secondary/5 text-secondary'}`}>{getIcon(treatment.iconName)}</div>
 <span className="text-[10px] uppercase tracking-wider font-sans font-bold text-secondary bg-secondary/5 px-2.5 py-1 rounded-full">{getCategoryLabel(treatment.category)}</span>
 </div>
 <h4 className="font-serif font-bold text-base md:text-lg text-primary mb-2">{treatment.name}</h4>
