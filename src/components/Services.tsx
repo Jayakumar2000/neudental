@@ -47,7 +47,7 @@ case 'Sun': return <Sun className="w-5 h-5" />;
 case 'Layers': return <Layers className="w-5 h-5" />;
 case 'Zap': return <Zap className="w-5 h-5" />;
 case 'Baby': return <Baby className="w-5 h-5" />;
-case 'IconWisdomToothExtraction': return <IconWisdomToothExtraction className="w-5 h-5" />;
+case 'IconWisdomToothExtraction': return <IconWisdomToothExtraction className="w-[76px] h-[76px] shrink-0" />;
 default: return <Smile className="w-5 h-5" />;
 }
 };
@@ -77,7 +77,7 @@ return (
 {filteredTreatments.map((treatment) => (
 <div key={treatment.id} onClick={() => setSelectedTreatment(treatment)} className={`p-6 rounded-2xl border text-left cursor-pointer transition-all duration-300 ${selectedTreatment?.id === treatment.id ? 'bg-white border-secondary premium-shadow ring-2 ring-secondary/10' : 'bg-white/80 hover:bg-white border-cool-gray/10 hover:border-cool-gray/30'}`}>
 <div className="flex items-center justify-between mb-4">
-<div className={`w-12 h-12 rounded-xl flex items-center justify-center ${selectedTreatment?.id === treatment.id ? 'bg-secondary text-white' : 'bg-secondary/5 text-secondary'}`}>{getIcon(treatment.iconName)}</div>
+<div className={`w-14 h-14 rounded-xl flex items-center justify-center shrink-0 ${selectedTreatment?.id === treatment.id ? 'bg-secondary text-white' : 'bg-secondary/5 text-secondary'}`}>{getIcon(treatment.iconName)}</div>
 <span className="text-[10px] uppercase tracking-wider font-sans font-bold text-secondary bg-secondary/5 px-2.5 py-1 rounded-full">{getCategoryLabel(treatment.category)}</span>
 </div>
 <h4 className="font-serif font-bold text-base md:text-lg text-primary mb-2">{treatment.name}</h4>
