@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { TREATMENTS } from '../data';
 import { Treatment } from '../types';
 import { ShieldAlert, Sparkles, Scissors, Smile, Check, Clock, ArrowRight, Search, Activity, Scan, Shield, Heart, Crown, GitBranch, Star, Anchor, Sun, Layers, Zap, Baby, IndianRupee } from 'lucide-react';
-import { IconWisdomToothExtraction } from './icons/DentalIcons';
+import { IconWisdomToothExtraction, IconCrownsAndBridges } from './icons/DentalIcons';
 
 interface ServicesProps {
 onSelectTreatment: (treatmentId: string) => void;
@@ -48,6 +48,7 @@ case 'Layers': return <Layers className="w-5 h-5" />;
 case 'Zap': return <Zap className="w-5 h-5" />;
 case 'Baby': return <Baby className="w-5 h-5" />;
 case 'IconWisdomToothExtraction': return <IconWisdomToothExtraction className="w-[76px] h-[76px] shrink-0" />;
+case 'IconCrownsAndBridges': return <IconCrownsAndBridges className="w-[76px] h-[76px] shrink-0" />;
 default: return <Smile className="w-5 h-5" />;
 }
 };
