@@ -1,6 +1,6 @@
 import React from 'react';
 import { Star, BadgeCheck } from 'lucide-react';
-import { IconReport } from './icons/DentalIcons';
+import { IconUserPatient } from './icons/DentalIcons';
 
 const FEATURED_ON = [
 { name: 'Google', logo: '/logos/google-icon.png', showLabel: true },
@@ -61,7 +61,7 @@ Gentle, comfortable dentistry for every age, starting from a child's first denta
 <div className="absolute inset-0 bg-gradient-to-t from-primary/30 to-transparent" />
 </div>
 <div className="absolute -bottom-6 -left-6 bg-white p-5 rounded-2xl premium-shadow border border-cool-gray/10 hidden md:block max-w-[220px]">
-<div className="flex items-center gap-3"><div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 overflow-visible"><IconReport className="w-[54px] h-[54px] shrink-0" /></div><div className="leading-tight"><p className="text-lg font-bold text-primary font-sans">3,000+</p><p className="text-[11px] text-cool-gray font-sans font-medium uppercase tracking-wider">Patients Treated</p></div></div>
+<div className="flex items-center gap-3"><div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 overflow-visible"><IconUserPatient className="w-[54px] h-[54px] shrink-0" /></div><div className="leading-tight"><p className="text-lg font-bold text-primary font-sans">3,000+</p><p className="text-[11px] text-cool-gray font-sans font-medium uppercase tracking-wider">Patients Treated</p></div></div>
 </div>
 <div className="absolute -top-6 -right-6 bg-white pl-3 pr-5 py-3.5 rounded-2xl premium-shadow border border-cool-gray/10 hidden md:flex items-center gap-3.5">
 <div className="w-12 h-12 rounded-full bg-surface-alt ring-1 ring-cool-gray/10 flex items-center justify-center shrink-0">
