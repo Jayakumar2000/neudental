@@ -15,7 +15,7 @@ import BlogsListView from './components/BlogsListView';
 import BlogDetailView from './components/BlogDetailView';
 import AdminView from './components/AdminView';
 import { FAQS } from './data';
-import { ChevronDown, ChevronUp, ArrowLeft } from 'lucide-react';
+import { ChevronDown, ChevronUp, ArrowLeft, Phone } from 'lucide-react';
 import type { FAQItem } from './types';
 
 // Blog subpages get a real URL (/blogs, /blogs/{blog-id}) via manual
@@ -202,22 +202,39 @@ export default function App() {
       </section>
       <Testimonials />
       <LocationDetails onScrollToBooking={handleScrollToBooking} />
-      <section className="py-14 lg:py-20 bg-white">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <span className="text-xs font-semibold tracking-widest text-blue-600 uppercase">FAQs</span>
-            <h2 className="mt-2 text-3xl font-serif font-bold text-gray-900">Frequently Asked Questions</h2>
+      <section className="py-14 lg:py-20 bg-surface-alt px-6 md:px-10 lg:px-16 border-b border-cool-gray/5">
+        <div className="max-w-3xl mx-auto w-full">
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <span className="text-secondary font-sans text-xs font-bold tracking-[0.2em] uppercase">Common Questions</span>
+            <h2 className="font-serif text-3xl md:text-4xl text-primary font-bold mt-3 leading-tight">Frequently Asked Questions</h2>
+            <div className="w-12 h-1 bg-secondary mx-auto mt-6" />
           </div>
-          <div className="space-y-3">
-            {FAQS.map((faq: FAQItem) => (
-              <div key={faq.id} className="border border-gray-100 rounded-xl overflow-hidden">
-                <button className="w-full flex justify-between items-center px-6 py-4 text-left bg-white hover:bg-gray-50 transition-colors" onClick={() => setFaqOpenId(faqOpenId === faq.id ? null : faq.id)}>
-                  <span className="font-medium text-gray-900">{faq.question}</span>
-                  {faqOpenId === faq.id ? <ChevronUp className="w-5 h-5 text-blue-600 flex-shrink-0" /> : <ChevronDown className="w-5 h-5 text-gray-400 flex-shrink-0" />}
-                </button>
-                {faqOpenId === faq.id && <div className="px-6 py-4 bg-blue-50 text-gray-700 text-sm leading-relaxed">{faq.answer}</div>}
-              </div>
-            ))}
+          <div className="bg-white rounded-3xl border border-cool-gray/10 premium-shadow overflow-hidden divide-y divide-cool-gray/10">
+            {FAQS.map((faq: FAQItem) => {
+              const isOpen = faqOpenId === faq.id;
+              return (
+                <div key={faq.id} className={`border-l-4 transition-colors duration-300 ${isOpen ? 'border-secondary bg-secondary/5' : 'border-transparent'}`}>
+                  <button type="button" className="w-full flex items-center gap-4 px-6 py-5 text-left cursor-pointer" onClick={() => setFaqOpenId(isOpen ? null : faq.id)}>
+                    <span className="font-sans font-bold text-sm sm:text-base text-primary flex-1">{faq.question}</span>
+                    <span className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors duration-300 ${isOpen ? 'bg-secondary text-white' : 'bg-secondary/10 text-secondary'}`}>
+                      {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                    </span>
+                  </button>
+                  <div className={`grid transition-all duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
+                    <div className="overflow-hidden">
+                      <div className="px-6 pb-5 font-sans text-sm text-on-surface-variant leading-relaxed">{faq.answer}</div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white rounded-2xl border border-cool-gray/10 premium-shadow p-6">
+            <div className="text-center sm:text-left">
+              <p className="font-serif font-bold text-primary">Still have questions?</p>
+              <p className="font-sans text-xs text-on-surface-variant mt-1">Our team is happy to help — reach out directly.</p>
+            </div>
+            <a href="https://wa.me/919342367446" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 bg-primary hover:bg-secondary text-white text-xs uppercase tracking-widest font-bold px-6 py-3.5 rounded-xl transition-all duration-200 whitespace-nowrap shrink-0"><Phone className="w-4 h-4" /> Talk to Us</a>
           </div>
         </div>
       </section>
