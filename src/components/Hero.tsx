@@ -29,7 +29,7 @@ return (
 #1
 </span>
 <span className="font-sans text-xs font-bold tracking-wide text-primary uppercase">
-Chennai&apos;s Top-Rated Dental Clinic
+Most Trusted Dental Clinic in North Chennai
 </span>
 </div>
 <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-5xl text-primary leading-tight font-bold tracking-tight">
