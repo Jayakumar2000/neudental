@@ -1,5 +1,5 @@
 import React from 'react';
-import { Star, BadgeCheck } from 'lucide-react';
+import { Star } from 'lucide-react';
 import { IconUserPatient } from './icons/DentalIcons';
 
 const FEATURED_ON = [
@@ -25,11 +25,11 @@ return (
 <div className="max-w-[1280px] mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-start">
 <div className="lg:col-span-7 flex flex-col items-start gap-6">
 <div className="inline-flex items-center gap-3 bg-white pl-1.5 pr-4 py-1.5 rounded-full premium-shadow border border-secondary/15 select-none">
-<span className="flex items-center justify-center w-7 h-7 rounded-full bg-gradient-to-br from-secondary to-primary text-white shrink-0">
-<BadgeCheck className="w-4 h-4" strokeWidth={2.5} />
+<span className="flex items-center justify-center w-7 h-7 rounded-full bg-gradient-to-br from-secondary to-primary text-white shrink-0 text-xs font-extrabold font-sans">
+#1
 </span>
 <span className="font-sans text-xs font-bold tracking-wide text-primary uppercase">
-Most Trusted Dental Clinic in Chennai
+Chennai&apos;s Top-Rated Dental Clinic
 </span>
 </div>
 <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-5xl text-primary leading-tight font-bold tracking-tight">
@@ -37,7 +37,7 @@ Advanced Dental Care <br />
 <span className="text-secondary italic font-light">in Kodungaiyur, Chennai</span>
 </h1>
 <p className="font-sans text-base md:text-lg text-on-surface-variant max-w-xl leading-relaxed">
-Gentle, comfortable dentistry for every age, starting from a child's first dental checkup to an advanced procedure like <strong>Root Canal</strong> or <strong>Implant</strong>, performed by Dr. Swetha.
+Gentle, comfortable dentistry for every age, starting from a child's first dental checkup to an advanced procedure like <strong>Root Canal</strong> or <strong>Implant</strong>, performed by Dr. Swetha at Neudental.
 </p>
 <div className="flex flex-col sm:flex-row gap-4 pt-2 w-full sm:w-auto">
 <button onClick={onScrollToBooking} className="bg-primary text-white hover:bg-secondary cursor-pointer shadow-xl shadow-primary/10 hover:shadow-secondary/20 hover:-translate-y-0.5 active:translate-y-0 px-8 py-4 rounded-xl font-sans text-sm tracking-wider uppercase font-bold transition-all duration-200">Book Appointment</button>
