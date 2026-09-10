@@ -42,6 +42,7 @@ return (
 <div className="space-y-4 font-sans text-sm">
 <p className="text-on-surface-variant font-medium leading-relaxed leading-6 select-all">Door No. 13, Plot No. 26, 1st Main Road, Vasuki Nagar, Kodungaiyur, Chennai, Tamil Nadu - 600118</p>
 <div className="p-4 bg-emerald-50 text-emerald-900 rounded-xl text-xs flex gap-2 border border-emerald-100 font-sans"><HelpCircle className="w-4.5 h-4.5 text-emerald-600 shrink-0 mt-0.5" /><div><strong className="block font-bold">Local Community Landmarks:</strong>Near Vasugi Park and Sidco Bus Stop - just 100 meters away. Parking facility available.</div></div>
+<div className="p-4 bg-sky-50 text-sky-900 rounded-xl text-xs flex gap-2 border border-sky-100 font-sans"><Navigation className="w-4.5 h-4.5 text-sky-600 shrink-0 mt-0.5" /><div><strong className="block font-bold">Easily Reachable Within 5km:</strong>Perambur, Madhavaram, Kolathur, Vyasarpadi, Moolakadai, Korukkupet, Villivakkam &amp; Sowcarpet.</div></div>
 <div className="pt-2"><a href={directionUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 bg-primary hover:bg-secondary text-white text-xs uppercase tracking-widest font-bold px-6 py-3.5 rounded-xl transition-all duration-200"><Navigation className="w-4 h-4 fill-current" /> Get GPS Directions</a></div>
 </div>
 </div>
