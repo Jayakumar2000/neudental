@@ -1,5 +1,5 @@
 import React from 'react';
-import { Star } from 'lucide-react';
+import { Star, ShieldCheck } from 'lucide-react';
 import { IconUserPatient } from './icons/DentalIcons';
 
 const FEATURED_ON = [
@@ -25,8 +25,8 @@ return (
 <div className="max-w-[1280px] mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-start">
 <div className="lg:col-span-7 flex flex-col items-start gap-6">
 <div className="inline-flex items-center gap-3 bg-white pl-1.5 pr-4 py-1.5 rounded-full premium-shadow border border-secondary/15 select-none">
-<span className="flex items-center justify-center w-7 h-7 rounded-full bg-gradient-to-br from-secondary to-primary text-white shrink-0 text-xs font-extrabold font-sans">
-#1
+<span className="flex items-center justify-center w-7 h-7 rounded-full bg-gradient-to-br from-secondary to-primary text-white shrink-0">
+<ShieldCheck className="w-4 h-4" strokeWidth={2.5} />
 </span>
 <span className="font-sans text-xs font-bold tracking-wide text-primary uppercase">
 Most Trusted Dental Clinic in North Chennai
