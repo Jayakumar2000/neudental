@@ -22,7 +22,7 @@ return (
 <section className="relative overflow-hidden bg-gradient-to-br from-white via-surface-alt to-[#EEF5FC] py-10 lg:py-14 px-6 md:px-10 lg:px-16">
 <div className="absolute top-1/4 left-10 w-72 h-72 rounded-full bg-secondary/5 blur-3xl -z-10" />
 <div className="absolute bottom-10 right-10 w-96 h-96 rounded-full bg-mint/35 blur-3xl -z-10" />
-<div className="max-w-[1280px] mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+<div className="max-w-[1280px] mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-start">
 <div className="lg:col-span-7 flex flex-col items-start gap-6">
 <div className="inline-flex items-center gap-3 bg-white pl-1.5 pr-4 py-1.5 rounded-full premium-shadow border border-secondary/15 select-none">
 <span className="flex items-center justify-center w-7 h-7 rounded-full bg-gradient-to-br from-secondary to-primary text-white shrink-0">
@@ -45,17 +45,17 @@ Gentle, comfortable dentistry for every age, starting from a child's first denta
 </div>
 <div className="w-full pt-4 border-t border-cool-gray/10">
 <p className="font-sans text-[10px] font-bold uppercase tracking-widest text-cool-gray mb-2.5">Featured &amp; Reviewed On</p>
-<div className="flex items-center flex-nowrap sm:flex-wrap gap-2 sm:gap-2.5">
+<div className="flex items-center flex-nowrap sm:flex-wrap gap-1.5 sm:gap-2.5">
 {FEATURED_ON.map((item) => (
-<span key={item.name} className="inline-flex items-center gap-1.5 sm:gap-2 bg-white border border-cool-gray/15 rounded-full px-4 h-11 sm:h-10 shadow-sm shrink-0">
-<img src={item.logo} alt={item.name} className="h-[18px] sm:h-5 w-auto object-contain" />
-{item.showLabel && <span className="hidden sm:inline text-xs font-sans font-semibold text-on-surface-variant">{item.name}</span>}
+<span key={item.name} className="inline-flex items-center gap-1 sm:gap-2 bg-white border border-cool-gray/15 rounded-full px-3.5 h-11 sm:px-4 sm:h-10 shadow-sm shrink-0">
+<img src={item.logo} alt={item.name} className="h-4 sm:h-5 w-auto object-contain" />
+{item.showLabel && <span className="text-[11px] sm:text-xs font-sans font-semibold text-on-surface-variant">{item.name}</span>}
 </span>
 ))}
 </div>
 </div>
 </div>
-<div className="lg:col-span-5 relative mt-12 lg:mt-0">
+<div className="lg:col-span-5 relative">
 <div className="relative aspect-[4/5] w-full rounded-3xl overflow-hidden shadow-2xl border-4 border-white select-none group">
 <img alt="Dental treatment chair and operatory at neudental clinic" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="/clinic/Dental_Chair_Operatory_neudental_clinic.jpeg" />
 <div className="absolute inset-0 bg-gradient-to-t from-primary/30 to-transparent" />
