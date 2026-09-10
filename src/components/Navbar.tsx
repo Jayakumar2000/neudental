@@ -31,6 +31,16 @@ e.preventDefault();
 onNavigateSection(href.slice(1));
 };
 
+// Closing the mobile menu and scrolling to a section in the same click
+// handler scrolls while the (still in-flow, taller) open menu is on
+// screen -- the menu then collapses a frame later and shifts the page,
+// leaving the scroll landed past where it should. Deferring the actual
+// navigation to the next frame lets the menu-close re-render land first.
+const closeMobileMenuThen = (action: () => void) => {
+setMobileMenuOpen(false);
+requestAnimationFrame(() => requestAnimationFrame(action));
+};
+
 const navItems = [
 { name: 'About Us', href: '#our-doctor' },
 { name: 'Treatments', href: '#services' },
@@ -108,10 +118,10 @@ return (<a key={item.name} href={item.href} onClick={(e) => handleLinkClick(e, i
 if (item.name === 'Treatments') {
 return (
 <div key={item.name} className="flex flex-col border-b border-cool-gray/5 pb-2">
-<button type="button" onClick={() => { setMobileMenuOpen(false); onNavigateSection('services'); }} className="text-primary text-sm font-sans font-bold uppercase tracking-wider py-1.5 text-left text-cool-gray cursor-pointer">Treatments Offered</button>
+<button type="button" onClick={() => closeMobileMenuThen(() => onNavigateSection('services'))} className="text-primary text-sm font-sans font-bold uppercase tracking-wider py-1.5 text-left text-cool-gray cursor-pointer">Treatments Offered</button>
 <div className="grid grid-cols-2 gap-1.5 pl-2 pt-1">
 {TREATMENTS.map((treat) => (
-<button key={treat.id} onClick={() => { onSelectTreatment(treat.id); setMobileMenuOpen(false); }} className="text-stone-700 hover:text-secondary text-[11px] font-sans font-medium text-left py-2 hover:bg-secondary/5 px-2 rounded-lg transition-colors cursor-pointer block truncate">• {treat.name}</button>
+<button key={treat.id} onClick={() => closeMobileMenuThen(() => onSelectTreatment(treat.id))} className="text-stone-700 hover:text-secondary text-[11px] font-sans font-medium text-left py-2 hover:bg-secondary/5 px-2 rounded-lg transition-colors cursor-pointer block truncate">• {treat.name}</button>
 ))}
 </div>
 </div>
@@ -120,7 +130,7 @@ return (
 if (item.name === 'Blogs') {
 return (<button key={item.name} type="button" onClick={() => { setMobileMenuOpen(false); onOpenBlogs(); }} className="text-primary hover:text-secondary text-base font-sans font-semibold py-2 border-b border-cool-gray/5 text-left cursor-pointer">{item.name}</button>);
 }
-return (<a key={item.name} href={item.href} className="text-primary hover:text-secondary text-base font-sans font-semibold py-2 border-b border-cool-gray/5" onClick={(e) => { setMobileMenuOpen(false); handleLinkClick(e, item.href); }}>{item.name}</a>);
+return (<a key={item.name} href={item.href} className="text-primary hover:text-secondary text-base font-sans font-semibold py-2 border-b border-cool-gray/5" onClick={(e) => { e.preventDefault(); closeMobileMenuThen(() => onNavigateSection(item.href.slice(1))); }}>{item.name}</a>);
 })}
 </nav>
 <div className="flex flex-col gap-4 pt-4 border-t border-cool-gray/10">
@@ -128,7 +138,7 @@ return (<a key={item.name} href={item.href} className="text-primary hover:text-s
 <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary"><Phone className="w-5 h-5" /></div>
 <div><p className="text-xs text-cool-gray uppercase font-bold tracking-wider">Talk to Dentist</p><p className="text-sm font-bold text-primary font-sans">+91 93423 67446</p></div>
 </a>
-<button onClick={() => { setMobileMenuOpen(false); onScrollToBooking(); }} className="w-full bg-primary hover:bg-secondary text-white py-4 rounded-xl font-sans text-xs uppercase tracking-widest font-bold transition-all text-center">Book Appointment</button>
+<button onClick={() => closeMobileMenuThen(onScrollToBooking)} className="w-full bg-primary hover:bg-secondary text-white py-4 rounded-xl font-sans text-xs uppercase tracking-widest font-bold transition-all text-center">Book Appointment</button>
 </div>
 </div>
 )}

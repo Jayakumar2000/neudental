@@ -130,7 +130,7 @@ export default function TreatmentDetailView({ treatmentId, onBack, onNavigateToT
         )}
 
         {/* Booking Section */}
-        <div id="booking-section" className="bg-surface-alt rounded-3xl p-6 md:p-8 border border-cool-gray/10">
+        <div id="booking-section" className="bg-surface-alt rounded-3xl p-6 md:p-8 border border-cool-gray/10 scroll-mt-24">
           <div className="flex items-center gap-2 mb-2"><BadgeCheck className="w-5 h-5 text-secondary" /><h2 className="font-serif text-2xl font-bold text-primary">Book Appointment</h2></div>
           <p className="font-sans text-sm text-on-surface-variant mb-6">Schedule your appointment with Dr. Swetha at neudental</p>
           <BookingForm preSelectedTreatmentId={treatmentId} />

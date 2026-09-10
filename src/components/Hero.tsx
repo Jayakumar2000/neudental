@@ -45,11 +45,11 @@ Gentle, comfortable dentistry for every age, starting from a child's first denta
 </div>
 <div className="w-full pt-4 border-t border-cool-gray/10">
 <p className="font-sans text-[10px] font-bold uppercase tracking-widest text-cool-gray mb-2.5">Featured &amp; Reviewed On</p>
-<div className="flex items-center flex-wrap gap-2.5">
+<div className="flex items-center flex-nowrap sm:flex-wrap gap-2 sm:gap-2.5">
 {FEATURED_ON.map((item) => (
-<span key={item.name} className="inline-flex items-center gap-2 bg-white border border-cool-gray/15 rounded-full px-4 h-10 shadow-sm">
-<img src={item.logo} alt={item.name} className="h-5 w-auto object-contain" />
-{item.showLabel && <span className="text-xs font-sans font-semibold text-on-surface-variant">{item.name}</span>}
+<span key={item.name} className="inline-flex items-center gap-1.5 sm:gap-2 bg-white border border-cool-gray/15 rounded-full px-3 h-9 sm:px-4 sm:h-10 shadow-sm shrink-0">
+<img src={item.logo} alt={item.name} className="h-4 sm:h-5 w-auto object-contain" />
+{item.showLabel && <span className="hidden sm:inline text-xs font-sans font-semibold text-on-surface-variant">{item.name}</span>}
 </span>
 ))}
 </div>

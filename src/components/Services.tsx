@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { TREATMENTS } from '../data';
 import { Treatment } from '../types';
 import { ShieldAlert, Sparkles, Scissors, Smile, Check, Clock, ArrowRight, Search, Activity, Scan, Shield, Heart, Crown, GitBranch, Star, Anchor, Sun, Layers, Zap, Baby, IndianRupee, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
-import { IconWisdomToothExtraction, IconCrownsAndBridges, IconCavityFilling, IconDentures, IconTeethWhitening, IconRegularCheckup, IconDentalCleaning, IconDentalImaging, IconBraces, IconRootCanal, IconGumDisease, IconToothDrill, IconDentalSurgery, IconTools, IconDentalCare, IconCrownSmile } from './icons/DentalIcons';
+import { IconWisdomToothExtraction, IconCrownsAndBridges, IconCavityFilling, IconDentures, IconTeethWhitening, IconRegularCheckup, IconDentalCleaning, IconDentalImaging, IconBraces, IconRootCanal, IconGumDisease, IconToothDrill, IconDentalSurgery, IconTools, IconDentalCare, IconCrownSmile, IconDecay, IconToothache, IconToothExtraction } from './icons/DentalIcons';
 
 interface ServicesProps {
 onSelectTreatment: (treatmentId: string) => void;
@@ -27,15 +27,15 @@ const [selectedTreatment, setSelectedTreatment] = useState<Treatment | null>(TRE
 const [stackIndex, setStackIndex] = useState(0);
 
 useEffect(() => {
-const found = TREATMENTS.find(t => t.id === selectedTreatmentId);
-if (found) { setSelectedTreatment(found); setActiveCategory('all'); }
+const idx = TREATMENTS.findIndex(t => t.id === selectedTreatmentId);
+if (idx >= 0) { setSelectedTreatment(TREATMENTS[idx]); setActiveCategory('all'); setStackIndex(idx); }
 }, [selectedTreatmentId]);
 
 // Tapping a tile in the icon-grid overview jumps the deck below straight to
-// that treatment, switching to "All Treatments" first so the index lines up.
+// that treatment. The grid is filtered to the same category as the deck, so
+// the index is resolved against that same filtered list.
 const jumpToTreatment = (treatmentId: string) => {
-setActiveCategory('all');
-const idx = TREATMENTS.findIndex((t) => t.id === treatmentId);
+const idx = filteredTreatments.findIndex((t) => t.id === treatmentId);
 setStackIndex(idx >= 0 ? idx : 0);
 requestAnimationFrame(() => {
 document.getElementById('treatments-deck')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -77,6 +77,9 @@ case 'IconDentalSurgery': return <IconDentalSurgery className={customSize} />;
 case 'IconTools': return <IconTools className={customSize} />;
 case 'IconDentalCare': return <IconDentalCare className={customSize} />;
 case 'IconCrownSmile': return <IconCrownSmile className={customSize} />;
+case 'IconDecay': return <IconDecay className={customSize} />;
+case 'IconToothache': return <IconToothache className={customSize} />;
+case 'IconToothExtraction': return <IconToothExtraction className={customSize} />;
 default: return <Smile className="w-5 h-5" />;
 }
 };
@@ -92,7 +95,7 @@ const getCategoryLabel = (key: string) => CATEGORIES.find((c) => c.key === key)?
 const filteredTreatments = activeCategory === 'all' ? TREATMENTS : TREATMENTS.filter(t => t.category === activeCategory);
 
 return (
-<section id="services" className="py-14 lg:py-20 bg-surface-alt px-6 md:px-10 lg:px-16">
+<section id="services" className="py-14 lg:py-20 bg-surface-alt px-6 md:px-10 lg:px-16 scroll-mt-24">
 <div className="max-w-[1280px] mx-auto w-full">
 <div className="text-center max-w-2xl mx-auto mb-16">
 <span className="text-secondary font-sans text-xs font-bold tracking-[0.2em] uppercase">Comprehensive Clinical Care</span>
@@ -116,10 +119,10 @@ className="w-full appearance-none bg-white border border-cool-gray/20 text-on-su
 <ChevronDown className="w-4 h-4 text-on-surface-variant absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
 </div>
 </div>
-{/* Mobile icon-grid overview: every treatment at a glance, icon + name,
-tapping one jumps the deck below straight to it. */}
+{/* Mobile icon-grid overview: every treatment in the selected category at a
+glance, icon + name, tapping one jumps the deck below straight to it. */}
 <div className="lg:hidden grid grid-cols-3 gap-3 mb-8">
-{TREATMENTS.map((treatment) => (
+{filteredTreatments.map((treatment) => (
 <button
 key={treatment.id}
 type="button"
@@ -131,7 +134,7 @@ className="bg-white border border-secondary/15 rounded-2xl p-3 flex flex-col ite
 </button>
 ))}
 </div>
-<div id="treatments-deck" className="lg:hidden mb-2">
+<div id="treatments-deck" className="lg:hidden mb-2 scroll-mt-24">
 <div className="relative h-[460px]" style={{ perspective: '1200px' }}>
 {filteredTreatments.map((treatment, i) => {
 const depth = i - stackIndex;

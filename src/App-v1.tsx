@@ -192,7 +192,7 @@ export default function App() {
       <Hero onScrollToBooking={handleScrollToBooking} />
       <About />
       <Services onSelectTreatment={handleSelectTreatment} selectedTreatmentId={preSelectedTreatmentId} />
-      <section id="booking-section" className="py-14 lg:py-20 bg-gray-50">
+      <section id="booking-section" className="py-14 lg:py-20 bg-gray-50 scroll-mt-24">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white rounded-3xl border border-cool-gray/10 premium-shadow overflow-hidden">
             <DoctorTrustBanner />
