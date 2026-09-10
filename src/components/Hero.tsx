@@ -29,7 +29,7 @@ return (
 <BadgeCheck className="w-4 h-4" strokeWidth={2.5} />
 </span>
 <span className="font-sans text-xs font-bold tracking-wide text-primary uppercase">
-Best Dental Clinic in Kodungaiyur, Chennai
+Most Trusted Dental Clinic in Chennai
 </span>
 </div>
 <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-5xl text-primary leading-tight font-bold tracking-tight">
@@ -47,7 +47,7 @@ Gentle, comfortable dentistry for every age, starting from a child's first denta
 <p className="font-sans text-[10px] font-bold uppercase tracking-widest text-cool-gray mb-2.5">Featured &amp; Reviewed On</p>
 <div className="flex items-center flex-nowrap sm:flex-wrap gap-2 sm:gap-2.5">
 {FEATURED_ON.map((item) => (
-<span key={item.name} className="inline-flex items-center gap-1.5 sm:gap-2 bg-white border border-cool-gray/15 rounded-full px-3 h-9 sm:px-4 sm:h-10 shadow-sm shrink-0">
+<span key={item.name} className="inline-flex items-center gap-1.5 sm:gap-2 bg-white border border-cool-gray/15 rounded-full px-3 h-[39px] sm:px-4 sm:h-10 shadow-sm shrink-0">
 <img src={item.logo} alt={item.name} className="h-4 sm:h-5 w-auto object-contain" />
 {item.showLabel && <span className="hidden sm:inline text-xs font-sans font-semibold text-on-surface-variant">{item.name}</span>}
 </span>
