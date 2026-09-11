@@ -160,6 +160,7 @@ className={`absolute inset-0 rounded-3xl premium-shadow bg-gradient-to-br from-p
 <div className="flex items-center gap-2"><Clock className="w-4 h-4 text-white/60" /><div><p className="text-white/60 font-medium">Duration</p><p className="font-bold text-white">{treatment.duration}</p></div></div>
 <div className="flex items-center gap-2"><IndianRupee className="w-4 h-4 text-white/60" /><div><p className="text-white/60 font-medium">Treatment Cost</p><p className="font-bold text-white">{treatment.startingPrice.toLocaleString('en-IN')}</p></div></div>
 </div>
+<p className="text-[10px] text-white/50 font-sans -mt-3 mb-5">*Indicative starting price, not the final charge — actual cost is confirmed after clinical consultation.</p>
 <div className="space-y-3 mb-6">
 <p className="text-xs font-bold uppercase tracking-wider text-white">Treatment Highlights:</p>
 {treatment.features.map((feat) => (
