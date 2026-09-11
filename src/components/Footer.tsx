@@ -8,6 +8,7 @@ const SOCIAL_LINKS = [
 ];
 import BrandLogo, { BRAND } from './BrandLogo';
 import { TREATMENTS } from '../data';
+import { trackEvent } from '../lib/analytics';
 
 interface FooterProps {
 onNavigateSection: (sectionId: string) => void;
@@ -74,7 +75,7 @@ TN State Dental Council Registered
 <Phone className="w-4.5 h-4.5 text-mint shrink-0 mt-0.5" />
 <div>
 <span className="block text-[10px] text-white/50 text-bold uppercase">Talk to Dentist:</span>
-<a href="tel:+919342367446" className="text-[#E0F2F1] font-bold text-sm tracking-wide">+91 93423 67446</a>
+<a href="tel:+919342367446" onClick={() => trackEvent('call_click', { link_location: 'footer' })} className="text-[#E0F2F1] font-bold text-sm tracking-wide">+91 93423 67446</a>
 </div>
 </li>
 <li className="flex items-start gap-2.5">

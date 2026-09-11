@@ -4,6 +4,7 @@ import { Appointment } from '../types';
 import { Calendar, Clock, Sparkles, Check, Trash2, CalendarCheck, Phone, User, Activity } from 'lucide-react';
 import { collection, query, where, orderBy, onSnapshot, setDoc, doc, Timestamp, updateDoc } from 'firebase/firestore';
 import { db, OperationType, handleFirestoreError, ensureAnonymousAuth } from '../firebase';
+import { trackEvent } from '../lib/analytics';
 
 interface BookingFormProps {
   preSelectedTreatmentId: string;
@@ -118,6 +119,7 @@ export default function BookingForm({ preSelectedTreatmentId, onClose, bare = fa
     try {
       await setDoc(doc(db, 'appointments', docId), { id: docId, patientName: patientName.trim(), phone: phone.trim(), email: email.trim(), treatmentId, date, timeSlot, status: 'pending', notes: notes.trim(), userId, createdAt: Timestamp.now() });
       setSuccessMsg(`Slot requested for ${date} at ${timeSlot}, ${patientName}. Our team will confirm shortly by phone or WhatsApp.`);
+      trackEvent('generate_lead', { treatment_id: treatmentId });
       setPatientName(''); setPhone(''); setEmail(''); setNotes('');
     } catch (err) { handleFirestoreError(err, OperationType.CREATE, 'appointments'); setErrorMsg('Could not register your slot. Please try again.'); }
   };
