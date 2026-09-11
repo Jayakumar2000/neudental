@@ -197,6 +197,13 @@ After deployment, your site will be live at:
 
 ---
 
+## Managing Blog Content
+
+Blog posts live as plain data in `src/data.ts` and are edited directly on
+GitHub — no local setup, no CMS. See **[BLOG_GUIDE.md](./BLOG_GUIDE.md)**
+for the full step-by-step: slug rules, adding images, and how to publish,
+edit, or remove a post.
+
 ## Clinic Details
 
 - **Clinic**: neudental (formerly Bludental)
