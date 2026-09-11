@@ -24,12 +24,12 @@ return (
 <div className="absolute bottom-10 right-10 w-96 h-96 rounded-full bg-mint/35 blur-3xl -z-10" />
 <div className="max-w-[1280px] mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-start">
 <div className="lg:col-span-7 flex flex-col items-start gap-6">
-<div className="inline-flex items-center gap-3 bg-white pl-1.5 pr-4 py-1.5 rounded-full premium-shadow border border-secondary/15 select-none">
-<span className="flex items-center justify-center w-7 h-7 rounded-full bg-gradient-to-br from-secondary to-primary text-white shrink-0">
-<ShieldCheck className="w-4 h-4" strokeWidth={2.5} />
+<div className="inline-flex items-center gap-2 sm:gap-3 bg-white pl-1.5 pr-3 sm:pr-4 py-1.5 rounded-full premium-shadow border border-secondary/15 select-none">
+<span className="flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-br from-secondary to-primary text-white shrink-0">
+<ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={2.5} />
 </span>
-<span className="font-sans text-xs font-bold tracking-wide text-primary uppercase">
-Most Trusted Dental Clinic in North Chennai
+<span className="font-sans text-[10px] sm:text-xs font-bold tracking-normal sm:tracking-wide text-primary uppercase whitespace-nowrap">
+Most Trusted Dentistry in North Chennai
 </span>
 </div>
 <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-5xl text-primary leading-tight font-bold tracking-tight">
