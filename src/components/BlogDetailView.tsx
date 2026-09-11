@@ -28,7 +28,7 @@ export default function BlogDetailView({ blogId, onBack }: BlogDetailViewProps) 
   return (
     <article className="py-16 px-6 md:px-10 lg:px-16 bg-white">
       <div className="max-w-3xl mx-auto w-full">
-        <button onClick={onBack} className="inline-flex items-center gap-2 text-on-surface-variant hover:text-secondary font-sans text-sm font-medium mb-8 transition-colors cursor-pointer">
+        <button onClick={onBack} className="flex items-center gap-2 text-on-surface-variant hover:text-secondary font-sans text-sm font-medium mb-6 transition-colors cursor-pointer">
           <ArrowLeft size={20} />
           Back to Blog
         </button>
@@ -37,6 +37,9 @@ export default function BlogDetailView({ blogId, onBack }: BlogDetailViewProps) 
         <div className="flex items-center gap-5 text-xs text-cool-gray font-sans font-medium mt-4 pb-6 border-b border-cool-gray/10">
           <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> {post.date}</span>
           <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {post.readTime}</span>
+        </div>
+        <div className="w-full aspect-[16/9] rounded-2xl overflow-hidden mt-8">
+          <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
         </div>
         <div className="mt-8 space-y-5">
           {post.content.map((paragraph, i) => (

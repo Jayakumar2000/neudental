@@ -33,7 +33,7 @@ Most Trusted Dentistry in North Chennai
 </span>
 </div>
 <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-5xl text-primary leading-tight font-bold tracking-tight">
-Advanced Dental Care <br />
+Advanced Dental Clinic <br />
 <span className="text-secondary italic font-light">in Kodungaiyur, Chennai</span>
 </h1>
 <p className="font-sans text-base md:text-lg text-on-surface-variant max-w-xl leading-relaxed">
