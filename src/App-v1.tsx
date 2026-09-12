@@ -17,7 +17,7 @@ import AdminView from './components/AdminView';
 import { FAQS } from './data';
 import { ChevronDown, ChevronUp, ArrowLeft, Phone } from 'lucide-react';
 import type { FAQItem } from './types';
-import { trackConversion, trackPageView } from './lib/analytics';
+import { trackConversion } from './lib/analytics';
 
 // Blog subpages get a real URL (/blogs, /blogs/{blog-id}) via manual
 // history.pushState + a popstate listener below, since the app has no
@@ -49,7 +49,6 @@ export default function App() {
     const currentPath = window.location.pathname.replace(/\/+$/, '') || '/';
     if (currentPath !== path) {
       window.history.pushState(null, '', path);
-      trackPageView(path);
     }
   };
 
@@ -60,7 +59,6 @@ export default function App() {
       setSymptomCheckerOpen(false);
       setBlogsOpen(route.blogsOpen);
       setActiveBlogId(route.blogId);
-      trackPageView(window.location.pathname);
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);

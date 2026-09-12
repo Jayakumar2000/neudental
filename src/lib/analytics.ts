@@ -48,13 +48,7 @@ export function trackConversion(
   trackAdsConversion(action);
 }
 
-// The app navigates blog routes via history.pushState instead of a full page
-// load, so GA4's automatic page_view (which only fires once, on initial load)
-// never sees these — this sends the equivalent manually.
-export function trackPageView(path: string) {
-  trackEvent('page_view', {
-    page_path: path,
-    page_location: window.location.origin + path,
-    page_title: document.title,
-  });
-}
+// No trackPageView() here on purpose. GA4's Enhanced measurement has "Page
+// changes based on browser history events" switched on for this stream, so it
+// already emits a page_view on every pushState/popState. Sending our own as
+// well double-counted every blog navigation.
