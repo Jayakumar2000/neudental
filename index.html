@@ -12,6 +12,11 @@
       gtag('js', new Date());
 
       gtag('config', 'G-N6NS2ZXG78');
+
+      // Google Ads conversion tracking. Configured alongside GA4 on the same
+      // gtag instance so ad clicks get a _gcl cookie and conversion events fired
+      // from the app (src/lib/analytics.ts) can be attributed back to a campaign.
+      gtag('config', 'AW-18023171134');
     </script>
 
     <!-- Brand: neudental — Modern Dental Care for Confident Smiles -->

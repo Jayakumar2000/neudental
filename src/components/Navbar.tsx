@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Phone, Menu, X, Shield, Clock, MapPin, ChevronDown } from 'lucide-react';
 import { TREATMENTS } from '../data';
 import BrandLogo, { BRAND } from './BrandLogo';
-import { trackEvent } from '../lib/analytics';
+import { trackConversion } from '../lib/analytics';
 
 interface NavbarProps {
 onScrollToBooking: () => void;
@@ -101,7 +101,7 @@ return (<a key={item.name} href={item.href} onClick={(e) => handleLinkClick(e, i
 </nav>
 
 <div className="hidden md:flex items-center gap-4 shrink-0">
-<a href="tel:+919342367446" onClick={() => trackEvent('call_click', { link_location: 'navbar_desktop' })} className="shrink-0 whitespace-nowrap flex items-center gap-2 bg-gradient-to-r from-primary to-secondary text-white shadow shadow-primary/10 hover:shadow-lg hover:shadow-secondary/20 hover:-translate-y-0.5 active:translate-y-0 pl-3.5 pr-4 py-1.5 rounded-full transition-all duration-200" title="Click to dial Chennai neudental support">
+<a href="tel:+919342367446" onClick={() => trackConversion('call_click', 'call', { link_location: 'navbar_desktop' })} className="shrink-0 whitespace-nowrap flex items-center gap-2 bg-gradient-to-r from-primary to-secondary text-white shadow shadow-primary/10 hover:shadow-lg hover:shadow-secondary/20 hover:-translate-y-0.5 active:translate-y-0 pl-3.5 pr-4 py-1.5 rounded-full transition-all duration-200" title="Click to dial Chennai neudental support">
 <Phone className="w-4 h-4 shrink-0" />
 <div className="text-left"><span className="text-[9px] block opacity-80 uppercase font-bold tracking-wider leading-tight">Talk to Dentist</span><span className="text-sm font-bold font-sans leading-tight block">+91 93423 67446</span></div>
 </a>
@@ -135,7 +135,7 @@ return (<a key={item.name} href={item.href} className="text-primary hover:text-s
 })}
 </nav>
 <div className="flex flex-col gap-4 pt-4 border-t border-cool-gray/10">
-<a href="tel:+919342367446" onClick={() => { trackEvent('call_click', { link_location: 'navbar_mobile_menu' }); setMobileMenuOpen(false); }} className="flex items-center gap-3 p-3 rounded-xl bg-cool-gray/5 hover:bg-cool-gray/10 transition-colors">
+<a href="tel:+919342367446" onClick={() => { trackConversion('call_click', 'call', { link_location: 'navbar_mobile_menu' }); setMobileMenuOpen(false); }} className="flex items-center gap-3 p-3 rounded-xl bg-cool-gray/5 hover:bg-cool-gray/10 transition-colors">
 <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary"><Phone className="w-5 h-5" /></div>
 <div><p className="text-xs text-cool-gray uppercase font-bold tracking-wider">Talk to Dentist</p><p className="text-sm font-bold text-primary font-sans">+91 93423 67446</p></div>
 </a>

@@ -7,6 +7,7 @@ import { ArrowLeft, Phone, Check, Clock, ShieldCheck, Zap, BadgeCheck } from 'lu
 import { TREATMENTS } from '../data';
 import { Treatment } from '../types';
 import BookingForm from './BookingForm';
+import { trackConversion } from '../lib/analytics';
 
 interface TreatmentDetailViewProps {
   treatmentId: string;
@@ -140,6 +141,7 @@ export default function TreatmentDetailView({ treatmentId, onBack, onNavigateToT
         <div className="mt-8 flex items-center justify-center gap-4">
           <a
             href="tel:+919342367446"
+            onClick={() => trackConversion('call_click', 'call', { link_location: 'treatment_detail_cta' })}
             className="inline-flex items-center gap-2 bg-primary hover:bg-secondary text-white px-6 py-3.5 rounded-xl font-sans text-xs uppercase tracking-widest font-bold transition-all duration-200"
           >
             <Phone size={16} />
