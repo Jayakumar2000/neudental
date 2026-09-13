@@ -1,7 +1,8 @@
-// neudental v1 - AdminView Component
-// Staff-only appointments dashboard at /admin. Access is gated by a real
-// Firebase Auth login (not the anonymous session patients get) plus a
+// neudental v1 - AdminView: staff dashboard/CRM at /admin. Access is gated by
+// a real Firebase Auth login (not the anonymous session patients get) plus a
 // matching /admins/{uid} document in Firestore -- see firestore.rules.
+// This file is the shell (auth + single Firestore subscription + tab switch);
+// each tab's own UI lives in ./admin/.
 import React, { useEffect, useState } from 'react';
 import {
   signInWithEmailAndPassword,
@@ -9,36 +10,22 @@ import {
   onAuthStateChanged,
   type User,
 } from 'firebase/auth';
-import { collection, onSnapshot, orderBy, query, updateDoc, doc } from 'firebase/firestore';
-import { LogOut, Lock, Mail, Phone, Calendar, Clock, FileText, ShieldCheck, RefreshCw } from 'lucide-react';
+import { collection, onSnapshot, orderBy, query, updateDoc, doc, Timestamp } from 'firebase/firestore';
+import { LogOut, Lock, Mail, ShieldCheck, RefreshCw, LayoutDashboard, CalendarDays, ClipboardList, Users } from 'lucide-react';
 import { auth, db, OperationType, handleFirestoreError } from '../firebase';
-import { TREATMENTS } from '../data';
 import BrandLogo from './BrandLogo';
+import { AppointmentRecord } from './admin/adminShared';
+import AdminDashboardTab from './admin/AdminDashboardTab';
+import AdminCalendarTab from './admin/AdminCalendarTab';
+import AdminAppointmentsTab from './admin/AdminAppointmentsTab';
+import AdminPatientsTab from './admin/AdminPatientsTab';
 
-interface AppointmentRecord {
-  docId: string;
-  patientName: string;
-  phone: string;
-  email: string;
-  treatmentId: string;
-  date: string;
-  timeSlot: string;
-  status: string;
-  notes: string;
-}
-
-const STATUS_STYLES: Record<string, string> = {
-  pending: 'bg-amber-50 text-amber-700 border-amber-200',
-  confirmed: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  completed: 'bg-secondary/10 text-secondary border-secondary/20',
-  cancelled: 'bg-rose-50 text-rose-700 border-rose-200',
-};
-
-const STATUS_FILTERS = ['all', 'pending', 'confirmed', 'completed', 'cancelled'] as const;
-
-function getTreatmentName(id: string) {
-  return TREATMENTS.find((t) => t.id === id)?.name || id || 'General Check-Up';
-}
+const TABS = [
+  { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { key: 'calendar', label: 'Calendar', icon: CalendarDays },
+  { key: 'appointments', label: 'Appointments', icon: ClipboardList },
+  { key: 'patients', label: 'Patients', icon: Users },
+] as const;
 
 export default function AdminView() {
   const [authChecked, setAuthChecked] = useState(false);
@@ -51,8 +38,8 @@ export default function AdminView() {
   const [appointments, setAppointments] = useState<AppointmentRecord[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [loadingAppointments, setLoadingAppointments] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<(typeof STATUS_FILTERS)[number]>('pending');
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [tab, setTab] = useState<(typeof TABS)[number]['key']>('dashboard');
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (u) => {
@@ -82,6 +69,8 @@ export default function AdminView() {
             timeSlot: data.timeSlot || '',
             status: data.status || 'pending',
             notes: data.notes || '',
+            tags: Array.isArray(data.tags) ? data.tags : [],
+            createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : null,
           };
         });
         setAppointments(rows);
@@ -125,9 +114,14 @@ export default function AdminView() {
     }
   };
 
-  const visibleAppointments = statusFilter === 'all'
-    ? appointments
-    : appointments.filter((a) => a.status === statusFilter);
+  const handleToggleTag = async (docId: string, tag: string, currentTags: string[]) => {
+    const nextTags = currentTags.includes(tag) ? currentTags.filter((t) => t !== tag) : [...currentTags, tag];
+    try {
+      await updateDoc(doc(db, 'appointments', docId), { tags: nextTags });
+    } catch (err) {
+      handleFirestoreError(err, OperationType.UPDATE, 'appointments');
+    }
+  };
 
   if (!authChecked) {
     return <div className="min-h-screen flex items-center justify-center bg-surface-alt"><RefreshCw className="w-6 h-6 text-secondary animate-spin" /></div>;
@@ -161,7 +155,7 @@ export default function AdminView() {
       <header className="bg-white border-b border-cool-gray/10 px-6 md:px-10 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <BrandLogo showTagline={false} markClassName="h-8 w-auto" wordmarkClassName="h-[16px] w-auto" />
-          <span className="hidden sm:inline text-xs font-sans font-bold uppercase tracking-widest text-cool-gray border-l border-cool-gray/20 pl-3">Appointments Admin</span>
+          <span className="hidden sm:inline text-xs font-sans font-bold uppercase tracking-widest text-cool-gray border-l border-cool-gray/20 pl-3">Appointments CRM</span>
         </div>
         <div className="flex items-center gap-4">
           <span className="text-xs font-sans text-on-surface-variant hidden sm:inline">{user.email}</span>
@@ -169,53 +163,29 @@ export default function AdminView() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-6 md:px-10 py-8">
+      <main className="max-w-7xl mx-auto px-6 md:px-10 py-8">
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-          <h1 className="font-serif text-2xl font-bold text-primary flex items-center gap-2"><ShieldCheck className="w-6 h-6 text-secondary" /> Appointment Requests</h1>
-          <div className="flex flex-wrap gap-2">
-            {STATUS_FILTERS.map((s) => (
-              <button key={s} onClick={() => setStatusFilter(s)} className={`px-4 py-2 rounded-full font-sans text-xs uppercase tracking-wider font-bold transition-all cursor-pointer ${statusFilter === s ? 'bg-primary text-white' : 'bg-white border border-cool-gray/20 text-on-surface hover:border-primary'}`}>{s}</button>
+          <h1 className="font-serif text-2xl font-bold text-primary flex items-center gap-2"><ShieldCheck className="w-6 h-6 text-secondary" /> Appointments</h1>
+          <div className="flex flex-wrap gap-2 bg-white p-1.5 rounded-full border border-cool-gray/10 premium-shadow">
+            {TABS.map(({ key, label, icon: Icon }) => (
+              <button key={key} onClick={() => setTab(key)} className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full font-sans text-xs font-bold transition-all cursor-pointer ${tab === key ? 'bg-primary text-white' : 'text-on-surface-variant hover:bg-surface-alt'}`}>
+                <Icon className="w-3.5 h-3.5" /> {label}
+              </button>
             ))}
           </div>
         </div>
 
         {loadError && <div className="mb-6 p-4 rounded-xl bg-rose-50 text-rose-800 text-sm font-medium font-sans border-l-4 border-rose-500">{loadError}</div>}
         {loadingAppointments && <p className="font-sans text-sm text-cool-gray">Loading appointments…</p>}
-        {!loadingAppointments && !loadError && visibleAppointments.length === 0 && (
-          <div className="bg-white rounded-2xl p-12 text-center text-cool-gray border border-dashed border-cool-gray/20 font-sans">No {statusFilter === 'all' ? '' : statusFilter} appointments.</div>
-        )}
 
-        <div className="space-y-3">
-          {visibleAppointments.map((a) => (
-            <div key={a.docId} className="bg-white rounded-2xl p-5 border border-cool-gray/10 premium-shadow flex flex-col md:flex-row md:items-center gap-4 justify-between">
-              <div className="font-sans text-sm">
-                <div className="flex items-center gap-2 mb-1">
-                  <p className="font-bold text-primary">{a.patientName}</p>
-                  <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${STATUS_STYLES[a.status] || STATUS_STYLES.pending}`}>{a.status}</span>
-                </div>
-                <p className="text-cool-gray font-medium mb-1.5">{getTreatmentName(a.treatmentId)}</p>
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-on-surface-variant">
-                  <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5 text-secondary" /> {a.date}</span>
-                  <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-secondary" /> {a.timeSlot}</span>
-                  <a href={`tel:${a.phone}`} className="flex items-center gap-1 hover:text-secondary"><Phone className="w-3.5 h-3.5 text-secondary" /> {a.phone}</a>
-                  {a.email && <span className="flex items-center gap-1"><Mail className="w-3.5 h-3.5 text-secondary" /> {a.email}</span>}
-                </div>
-                {a.notes && <p className="flex items-start gap-1.5 mt-2 text-xs text-cool-gray italic max-w-lg"><FileText className="w-3.5 h-3.5 text-secondary shrink-0 mt-0.5" /> {a.notes}</p>}
-              </div>
-              <div className="flex gap-2 shrink-0">
-                {a.status !== 'confirmed' && (
-                  <button disabled={updatingId === a.docId} onClick={() => handleStatusChange(a.docId, 'confirmed')} className="px-3.5 py-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-sans font-bold cursor-pointer disabled:opacity-50">Confirm</button>
-                )}
-                {a.status !== 'completed' && (
-                  <button disabled={updatingId === a.docId} onClick={() => handleStatusChange(a.docId, 'completed')} className="px-3.5 py-2 rounded-lg bg-secondary/10 hover:bg-secondary/20 text-secondary text-xs font-sans font-bold cursor-pointer disabled:opacity-50">Completed</button>
-                )}
-                {a.status !== 'cancelled' && (
-                  <button disabled={updatingId === a.docId} onClick={() => handleStatusChange(a.docId, 'cancelled')} className="px-3.5 py-2 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-sans font-bold cursor-pointer disabled:opacity-50">Cancel</button>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
+        {!loadingAppointments && !loadError && (
+          <>
+            {tab === 'dashboard' && <AdminDashboardTab appointments={appointments} />}
+            {tab === 'calendar' && <AdminCalendarTab appointments={appointments} onStatusChange={handleStatusChange} updatingId={updatingId} />}
+            {tab === 'appointments' && <AdminAppointmentsTab appointments={appointments} onStatusChange={handleStatusChange} onToggleTag={handleToggleTag} updatingId={updatingId} />}
+            {tab === 'patients' && <AdminPatientsTab appointments={appointments} />}
+          </>
+        )}
       </main>
     </div>
   );
