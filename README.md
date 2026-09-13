@@ -16,9 +16,9 @@ Built with React, TypeScript, Vite, TailwindCSS, and Firebase.
 
 ```
 neudental/
-├── index-v1.html          # Entry HTML with SEO meta tags
+├── index.html             # Entry HTML with SEO meta tags
 ├── package.json           # Dependencies (neudental-v1)
-├── vite.config-v1.ts      # Vite build configuration
+├── vite.config.ts         # Vite build configuration
 ├── tsconfig.json          # TypeScript configuration
 ├── vercel.json            # Vercel deployment config
 ├── firestore.rules        # Firebase security rules
