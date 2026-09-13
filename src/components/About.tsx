@@ -17,18 +17,18 @@ interface GalleryPhoto {
 }
 
 const CLINIC_PHOTOS: GalleryPhoto[] = [
-  { src: '/clinic/Entrance_neudental_clinic.jpeg', alt: 'neudental clinic storefront and signage, Kodungaiyur, Chennai', position: 'top' },
-  { src: '/clinic/Signboard_neudental_clinic.jpeg', alt: 'neudental clinic signboard with address, timings and Dr. Swetha U details' },
-  { src: '/clinic/Dental_Chair_neudental_clinic.jpeg', alt: 'Dental treatment chair and operatory at neudental clinic' },
-  { src: '/clinic/Dental_Chair_Operatory_neudental_clinic.jpeg', alt: 'Fully equipped dental operatory at neudental clinic' },
-  { src: '/clinic/Treatment_Room_neudental_clinic.jpeg', alt: 'Treatment room interior at neudental clinic' },
-  { src: '/clinic/Treatment_Room_Wide_neudental_clinic.jpeg', alt: 'Wide view of the treatment room at neudental clinic' },
-  { src: '/clinic/Treatment_Room_Counter_neudental_clinic.jpeg', alt: 'Treatment room counter and workstation at neudental clinic' },
-  { src: '/clinic/Consultation_Desk_neudental_clinic.jpeg', alt: 'Consultation desk and waiting area at neudental clinic' },
-  { src: '/clinic/Reception_Logo_Wall_neudental_clinic.jpeg', alt: 'neudental logo wall at the clinic entrance' },
-  { src: '/clinic/Interior_Logo_Wall_neudental_clinic.jpeg', alt: 'neudental brand wall inside the clinic' },
-  { src: '/clinic/Neudental_Clinic_logo_signage.jpeg', alt: 'neudental clinic logo signage close-up' },
-  { src: '/clinic/Waiting_Area_Reception_neudental_clinic.jpeg', alt: 'Waiting area and reception at neudental clinic' },
+  { src: '/clinic/Entrance_neudental_clinic.webp', alt: 'neudental clinic storefront and signage, Kodungaiyur, Chennai', position: 'top' },
+  { src: '/clinic/Signboard_neudental_clinic.webp', alt: 'neudental clinic signboard with address, timings and Dr. Swetha U details' },
+  { src: '/clinic/Dental_Chair_neudental_clinic.webp', alt: 'Dental treatment chair and operatory at neudental clinic' },
+  { src: '/clinic/Dental_Chair_Operatory_neudental_clinic.webp', alt: 'Fully equipped dental operatory at neudental clinic' },
+  { src: '/clinic/Treatment_Room_neudental_clinic.webp', alt: 'Treatment room interior at neudental clinic' },
+  { src: '/clinic/Treatment_Room_Wide_neudental_clinic.webp', alt: 'Wide view of the treatment room at neudental clinic' },
+  { src: '/clinic/Treatment_Room_Counter_neudental_clinic.webp', alt: 'Treatment room counter and workstation at neudental clinic' },
+  { src: '/clinic/Consultation_Desk_neudental_clinic.webp', alt: 'Consultation desk and waiting area at neudental clinic' },
+  { src: '/clinic/Reception_Logo_Wall_neudental_clinic.webp', alt: 'neudental logo wall at the clinic entrance' },
+  { src: '/clinic/Interior_Logo_Wall_neudental_clinic.webp', alt: 'neudental brand wall inside the clinic' },
+  { src: '/clinic/Neudental_Clinic_logo_signage.webp', alt: 'neudental clinic logo signage close-up' },
+  { src: '/clinic/Waiting_Area_Reception_neudental_clinic.webp', alt: 'Waiting area and reception at neudental clinic' },
 ];
 
 const CLINIC_ROW_1 = CLINIC_PHOTOS.filter((_, i) => i % 2 === 0);
@@ -83,8 +83,9 @@ A modern, fully-equipped dental practice in the heart of Kodungaiyur — take a 
 <div className="w-full sm:w-56 md:w-64 shrink-0">
 <div className="aspect-[4/5] rounded-2xl overflow-hidden bg-cool-gray/10 premium-shadow">
 <img
-src="/doctor/dr-swetha.jpg"
+src="/doctor/dr-swetha.webp"
 alt="Dr. Swetha U, Lead Dental Surgeon at neudental"
+loading="lazy"
 className="w-full h-full object-cover object-top"
 />
 </div>
@@ -120,7 +121,7 @@ className="w-full h-full object-cover object-top"
 <div className="marquee-track gap-3 px-1.5">
 {[...CLINIC_ROW_1, ...CLINIC_ROW_1].map((photo, i) => (
 <div key={`${photo.src}-${i}`} className="relative shrink-0 w-48 h-32 sm:w-56 sm:h-36 rounded-2xl overflow-hidden group">
-<img src={photo.src} alt={photo.alt} style={{ objectPosition: photo.position ?? 'center' }} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+<img src={photo.src} alt={photo.alt} loading="lazy" style={{ objectPosition: photo.position ?? 'center' }} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
 </div>
 ))}
 </div>
@@ -129,7 +130,7 @@ className="w-full h-full object-cover object-top"
 <div className="marquee-track marquee-reverse gap-3 px-1.5">
 {[...CLINIC_ROW_2, ...CLINIC_ROW_2].map((photo, i) => (
 <div key={`${photo.src}-${i}`} className="relative shrink-0 w-48 h-32 sm:w-56 sm:h-36 rounded-2xl overflow-hidden group">
-<img src={photo.src} alt={photo.alt} style={{ objectPosition: photo.position ?? 'center' }} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+<img src={photo.src} alt={photo.alt} loading="lazy" style={{ objectPosition: photo.position ?? 'center' }} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
 </div>
 ))}
 </div>

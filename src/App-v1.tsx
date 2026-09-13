@@ -1,6 +1,6 @@
 // neudental v1 - Root Application Component
 // See README.md for full setup instructions
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import About from './components/About';
@@ -11,13 +11,25 @@ import DoctorTrustBanner from './components/DoctorTrustBanner';
 import Testimonials from './components/Testimonials';
 import LocationDetails from './components/LocationDetails';
 import Footer from './components/Footer';
-import BlogsListView from './components/BlogsListView';
-import BlogDetailView from './components/BlogDetailView';
-import AdminView from './components/AdminView';
 import { FAQS } from './data';
-import { ChevronDown, ChevronUp, ArrowLeft, Phone } from 'lucide-react';
+import { ChevronDown, ChevronUp, ArrowLeft, Phone, RefreshCw } from 'lucide-react';
 import type { FAQItem } from './types';
 import { trackConversion } from './lib/analytics';
+
+// Code-split: the staff-only admin CRM and the blog views are never opened by
+// most patients on a mobile data plan, so they shouldn't be in the same
+// download as the homepage. Lazy-loaded on first visit to their own route.
+const AdminView = lazy(() => import('./components/AdminView'));
+const BlogsListView = lazy(() => import('./components/BlogsListView'));
+const BlogDetailView = lazy(() => import('./components/BlogDetailView'));
+
+function RouteLoading() {
+  return (
+    <div className="min-h-[50vh] flex items-center justify-center">
+      <RefreshCw className="w-6 h-6 text-secondary animate-spin" />
+    </div>
+  );
+}
 
 // Blog subpages get a real URL (/blogs, /blogs/{blog-id}) via manual
 // history.pushState + a popstate listener below, since the app has no
@@ -41,7 +53,11 @@ export default function App() {
   const [faqOpenId, setFaqOpenId] = useState<string | null>(null);
 
   if (typeof window !== 'undefined' && window.location.pathname.replace(/\/+$/, '') === '/admin') {
-    return <AdminView />;
+    return (
+      <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-surface-alt"><RefreshCw className="w-6 h-6 text-secondary animate-spin" /></div>}>
+        <AdminView />
+      </Suspense>
+    );
   }
 
   const goToPath = (path: string) => {
@@ -171,7 +187,9 @@ export default function App() {
     return (
       <div className="min-h-screen bg-white">
         <Navbar onSelectTreatment={handleViewTreatmentInServices} onScrollToBooking={handleScrollToBooking} onLogoClick={handleCloseBlogs} onNavigateSection={navigateToSection} onOpenBlogs={handleOpenBlogs} />
-        <BlogDetailView blogId={activeBlogId} onBack={handleBackToBlogsList} />
+        <Suspense fallback={<RouteLoading />}>
+          <BlogDetailView blogId={activeBlogId} onBack={handleBackToBlogsList} />
+        </Suspense>
         <Footer onNavigateSection={navigateToSection} onOpenBlogs={handleOpenBlogs} onSelectTreatment={handleViewTreatmentInServices} />
       </div>
     );
@@ -181,7 +199,9 @@ export default function App() {
     return (
       <div className="min-h-screen bg-white">
         <Navbar onSelectTreatment={handleViewTreatmentInServices} onScrollToBooking={handleScrollToBooking} onLogoClick={handleCloseBlogs} onNavigateSection={navigateToSection} onOpenBlogs={handleOpenBlogs} />
-        <BlogsListView onSelectBlog={handleSelectBlog} />
+        <Suspense fallback={<RouteLoading />}>
+          <BlogsListView onSelectBlog={handleSelectBlog} />
+        </Suspense>
         <Footer onNavigateSection={navigateToSection} onOpenBlogs={handleOpenBlogs} onSelectTreatment={handleViewTreatmentInServices} />
       </div>
     );

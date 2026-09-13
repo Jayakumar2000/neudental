@@ -121,6 +121,7 @@ export default function Testimonials() {
                     <img
                       alt={test.imgAlt}
                       src={test.imgUrl}
+                      loading="lazy"
                       className="w-full h-full object-cover absolute inset-0 z-10"
                       onError={(e) => {
                         // Fallback if avatar doesn't resolve or loads poorly
@@ -130,7 +131,7 @@ export default function Testimonials() {
                   ) : null}
                   {test.sourceLogo && SOURCE_LOGOS[test.sourceLogo] ? (
                     <div className="w-full h-full bg-white flex items-center justify-center p-1">
-                      <img src={SOURCE_LOGOS[test.sourceLogo]} alt={`Review sourced from ${test.sourceLogo}`} className="w-full h-full object-contain" />
+                      <img src={SOURCE_LOGOS[test.sourceLogo]} alt={`Review sourced from ${test.sourceLogo}`} loading="lazy" className="w-full h-full object-contain" />
                     </div>
                   ) : (
                     /* Fallback Initials */

@@ -25,7 +25,7 @@ export default function BlogsListView({ onSelectBlog }: BlogsListViewProps) {
               className="text-left bg-surface-container-low border border-cool-gray/5 rounded-2xl overflow-hidden hover:border-secondary/20 hover:-translate-y-0.5 transition-all cursor-pointer flex flex-col"
             >
               <div className="w-full aspect-[16/9] overflow-hidden">
-                <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
+                <img src={post.image} alt={post.title} loading="lazy" className="w-full h-full object-cover" />
               </div>
               <div className="p-6 flex flex-col flex-1">
               <span className="text-[10px] font-bold uppercase tracking-wider text-secondary bg-secondary/5 px-2.5 py-1 rounded-full self-start mb-4">{post.category}</span>

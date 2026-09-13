@@ -57,7 +57,7 @@ Gentle, comfortable dentistry for every age, starting from a child's first denta
 </div>
 <div className="lg:col-span-5 relative">
 <div className="relative aspect-[4/5] w-full rounded-3xl overflow-hidden shadow-2xl border-4 border-white select-none group">
-<img alt="Dental treatment chair and operatory at neudental clinic" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="/clinic/Dental_Chair_Operatory_neudental_clinic.jpeg" />
+<img alt="Dental treatment chair and operatory at neudental clinic" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="/clinic/Dental_Chair_Operatory_neudental_clinic.webp" fetchPriority="high" />
 <div className="absolute inset-0 bg-gradient-to-t from-primary/30 to-transparent" />
 </div>
 <div className="absolute -bottom-6 -left-6 bg-white p-5 rounded-2xl premium-shadow border border-cool-gray/10 hidden md:block max-w-[220px]">
