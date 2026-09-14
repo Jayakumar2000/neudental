@@ -11,10 +11,11 @@ import DoctorTrustBanner from './components/DoctorTrustBanner';
 import Testimonials from './components/Testimonials';
 import LocationDetails from './components/LocationDetails';
 import Footer from './components/Footer';
-import { FAQS } from './data';
+import { FAQS, BLOGS } from './data';
 import { ChevronDown, ChevronUp, ArrowLeft, Phone, RefreshCw } from 'lucide-react';
 import type { FAQItem } from './types';
 import { trackConversion } from './lib/analytics';
+import { setPageMeta, resetPageMeta } from './lib/seo';
 
 // Code-split: the staff-only admin CRM and the blog views are never opened by
 // most patients on a mobile data plan, so they shouldn't be in the same
@@ -79,6 +80,33 @@ export default function App() {
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
+
+  // Every route shares one static index.html, so <title>/description/canonical
+  // never change on their own -- without this, a blog post would carry the
+  // homepage's canonical URL and tell Google it's a duplicate of "/" instead
+  // of its own indexable page.
+  useEffect(() => {
+    if (activeBlogId) {
+      const post = BLOGS.find((b) => b.id === activeBlogId);
+      if (post) {
+        setPageMeta({
+          title: `${post.title} | Neudental Blog`,
+          description: post.excerpt,
+          path: `/blogs/${post.id}`,
+        });
+        return;
+      }
+    }
+    if (blogsOpen) {
+      setPageMeta({
+        title: 'Dental Health Blog | Neudental, Kodungaiyur, Chennai',
+        description: 'Practical, patient-friendly dental health and clinic guidance from the Neudental team in Kodungaiyur, Chennai.',
+        path: '/blogs',
+      });
+      return;
+    }
+    resetPageMeta();
+  }, [blogsOpen, activeBlogId]);
 
   // Scrolls to a section that lives on the home page. If we're currently on a
   // subpage (so the section isn't mounted yet), close that view first and
