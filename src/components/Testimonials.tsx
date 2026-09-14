@@ -1,6 +1,15 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { TESTIMONIALS } from '../data';
 import { Star, ShieldCheck, ThumbsUp, Quote, ChevronLeft, ChevronRight } from 'lucide-react';
+
+const AUTOPLAY_MS = 4500;
+const TRANSITION_MS = 600;
+
+// Three back-to-back copies so the strip can move a few steps in either
+// direction from any position without running out of cards -- looping back to
+// copy 2 (index === count) happens with the same transition as any other
+// step, instead of visibly resetting to look like a first-review jump-cut.
+const LOOPED_TESTIMONIALS = [...TESTIMONIALS, ...TESTIMONIALS, ...TESTIMONIALS];
 
 // Only platforms with a real, square icon-only mark on file go here — a full
 // wordmark logo doesn't fit this avatar-sized circular slot legibly.
@@ -17,15 +26,69 @@ const SOURCE_LABELS: Partial<Record<string, string>> = {
 };
 
 export default function Testimonials() {
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const count = TESTIMONIALS.length;
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [index, setIndex] = useState(count); // start in the middle copy
+  const [step, setStep] = useState(392); // card width + gap, measured below
+  const [animate, setAnimate] = useState(true);
+  const [paused, setPaused] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
 
-  const scrollByCard = (direction: 1 | -1) => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const card = el.querySelector<HTMLElement>('[data-testimonial-card]');
-    const amount = (card?.offsetWidth ?? 340) + 32; // card width + gap
-    el.scrollBy({ left: direction * amount, behavior: 'smooth' });
+  // Measure the real card width (it changes at the sm: breakpoint) instead of
+  // hard-coding it, so the slide distance always matches what's on screen.
+  useLayoutEffect(() => {
+    const measure = () => {
+      const card = trackRef.current?.querySelector<HTMLElement>('[data-testimonial-card]');
+      if (card) setStep(card.offsetWidth + 32); // + gap-8
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, []);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setReducedMotion(mq.matches);
+    const onChange = () => setReducedMotion(mq.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+
+  const goTo = (nextIndex: number) => {
+    setAnimate(true);
+    setIndex(nextIndex);
   };
+  const goNext = () => goTo(index + 1);
+  const goPrev = () => goTo(index - 1);
+
+  // Once a step lands on the outer copies, snap back to the equivalent card
+  // in the middle copy with the transition switched off for one frame --
+  // invisible, since every copy holds identical cards in the same order.
+  const handleTransitionEnd = () => {
+    if (index >= count * 2) {
+      setAnimate(false);
+      setIndex(index - count);
+    } else if (index < count) {
+      setAnimate(false);
+      setIndex(index + count);
+    }
+  };
+  useEffect(() => {
+    if (!animate) {
+      const id = requestAnimationFrame(() => setAnimate(true));
+      return () => cancelAnimationFrame(id);
+    }
+  }, [animate]);
+
+  // Auto-advance at a steady, readable pace; pauses on hover/focus so a
+  // visitor mid-review isn't fighting the carousel, and never runs at all for
+  // prefers-reduced-motion (manual prev/next still work either way).
+  useEffect(() => {
+    if (paused || reducedMotion) return;
+    const id = setInterval(goNext, AUTOPLAY_MS);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index, paused, reducedMotion]);
 
   return (
     <section id="testimonials" className="py-14 lg:py-20 bg-white px-6 md:px-10 lg:px-16 border-b border-cool-gray/5 scroll-mt-24">
@@ -75,11 +138,19 @@ export default function Testimonials() {
           </div>
         </div>
 
-        {/* Testimonials — horizontal scroll strip with prev/next controls, no card left hanging alone on its own row */}
-        <div className="relative max-w-6xl mx-auto">
+        {/* Testimonials — seamless auto-rolling carousel, three looped copies
+        of the deck so it can always step in either direction without a
+        visible reset; pauses on hover/focus and for prefers-reduced-motion. */}
+        <div
+          className="relative max-w-6xl mx-auto"
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
+          onFocus={() => setPaused(true)}
+          onBlur={() => setPaused(false)}
+        >
           <button
             type="button"
-            onClick={() => scrollByCard(-1)}
+            onClick={goPrev}
             aria-label="Previous review"
             className="flex absolute -left-3 md:-left-5 top-1/2 -translate-y-1/2 z-10 w-8 h-8 md:w-11 md:h-11 rounded-full bg-white premium-shadow border border-cool-gray/10 items-center justify-center text-primary hover:text-secondary hover:border-secondary/30 transition-all cursor-pointer"
           >
@@ -87,22 +158,28 @@ export default function Testimonials() {
           </button>
           <button
             type="button"
-            onClick={() => scrollByCard(1)}
+            onClick={goNext}
             aria-label="Next review"
             className="flex absolute -right-3 md:-right-5 top-1/2 -translate-y-1/2 z-10 w-8 h-8 md:w-11 md:h-11 rounded-full bg-white premium-shadow border border-cool-gray/10 items-center justify-center text-primary hover:text-secondary hover:border-secondary/30 transition-all cursor-pointer"
           >
             <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
           </button>
 
+          <div className="overflow-hidden pb-2">
           <div
-            ref={scrollRef}
-            className="flex gap-8 overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar pb-2"
+            ref={trackRef}
+            onTransitionEnd={handleTransitionEnd}
+            className="flex gap-8"
+            style={{
+              transform: `translateX(-${index * step}px)`,
+              transition: animate && !reducedMotion ? `transform ${TRANSITION_MS}ms ease` : 'none',
+            }}
           >
-          {TESTIMONIALS.map((test) => (
+          {LOOPED_TESTIMONIALS.map((test, i) => (
             <div
-              key={test.id}
+              key={`${test.id}-${i}`}
               data-testimonial-card
-              className="bg-white border border-cool-gray/10 rounded-2xl p-8 premium-shadow hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between relative group shrink-0 snap-start w-[300px] sm:w-[360px]"
+              className="bg-white border border-cool-gray/10 rounded-2xl p-8 premium-shadow hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between relative group shrink-0 w-[300px] sm:w-[360px]"
             >
               {/* Giant quote layout background absolute */}
               <Quote className="absolute right-6 top-6 w-12 h-12 text-cool-gray/5 select-none pointer-events-none group-hover:text-secondary/5 transition-colors duration-300" />
@@ -155,6 +232,7 @@ export default function Testimonials() {
               </div>
             </div>
           ))}
+          </div>
           </div>
         </div>
       </div>
