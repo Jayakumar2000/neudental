@@ -74,7 +74,7 @@ export const BLOGS: BlogPost[] = [
     category: 'Patient Care',
     date: 'August 2026',
     readTime: '4 min read',
-    image: '/clinic/Treatment_Room_neudental_clinic.webp',
+    image: '/blogs/root-canal-operatory-banner.webp',
     content: [
       'A root canal has one job: save a tooth that would otherwise need to come out. Once the infected pulp is removed and the tooth is sealed, most of the hard work is already done. What happens in the next few days, though, still makes a real difference to how comfortable your recovery is.',
       'First, expect mild soreness for a day or two. This is normal and usually responds well to the pain relief your dentist prescribes. Avoid chewing directly on the treated tooth until any temporary filling has been replaced with a permanent crown or restoration.',
@@ -90,7 +90,7 @@ export const BLOGS: BlogPost[] = [
     category: 'Preventive Care',
     date: 'July 2026',
     readTime: '3 min read',
-    image: '/clinic/Consultation_Desk_neudental_clinic.webp',
+    image: '/blogs/regular-checkups-banner.webp',
     content: [
       'It is easy to assume a dental visit is only necessary when something hurts. In reality, some of the most common dental problems, early cavities, the first stages of gum disease, and cracked fillings, cause little to no pain until they have progressed significantly.',
       'A routine checkup lets your dentist catch these issues while they are still small, simple, and inexpensive to treat. A cavity caught early might need a small filling; the same cavity left unchecked for a year could mean a root canal or an extraction.',
