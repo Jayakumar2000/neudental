@@ -105,7 +105,7 @@ export const BLOGS: BlogPost[] = [
     category: 'Modern Dentistry',
     date: 'June 2026',
     readTime: '4 min read',
-    image: '/clinic/Treatment_Room_Counter_neudental_clinic.webp',
+    image: '/blogs/laser-dentistry-banner.webp',
     content: [
       'Laser dentistry uses a focused beam of light instead of traditional drills for many common procedures, including cavity treatment, gum reshaping, and some soft-tissue work. For patients, the appeal is straightforward: many of these procedures can be done with less discomfort, less bleeding, and a noticeably calmer experience overall.',
       'The reason it feels different comes down to precision. A laser can target only the affected tissue with very fine control, which often means less vibration, less pressure, and in many cases, less need for local anesthesia than a conventional approach would require.',
