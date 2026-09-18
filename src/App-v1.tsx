@@ -146,11 +146,14 @@ export default function App() {
   // Scrolls to a section that lives on the home page. If we're currently on a
   // subpage (so the section isn't mounted yet), close that view first and
   // retry once it renders, instead of scrolling to the top and then to the
-  // section as two separate, competing animations.
-  const navigateToSection = (sectionId: string) => {
+  // section as two separate, competing animations. `resolveTarget`, once the
+  // section is confirmed mounted, can redirect the scroll to a specific
+  // element inside it instead of the section's own top.
+  const navigateToSection = (sectionId: string, resolveTarget?: () => HTMLElement | null) => {
+    const scrollToTarget = () => (resolveTarget?.() ?? document.getElementById(sectionId))?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     const existing = document.getElementById(sectionId);
     if (existing) {
-      existing.scrollIntoView({ behavior: 'smooth' });
+      scrollToTarget();
       return;
     }
     setSymptomCheckerOpen(false);
@@ -160,9 +163,7 @@ export default function App() {
     goToPath('/');
     // Wait for the home page to actually render before scrolling to it.
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
-      });
+      requestAnimationFrame(scrollToTarget);
     });
   };
 
@@ -177,12 +178,21 @@ export default function App() {
   };
 
   // Clicking a treatment from the header nav dropdown or the footer list
-  // pre-selects it and scrolls to the Treatments Offered section instead,
-  // so visitors land on the treatment's info snapshot rather than skipping
-  // straight to booking.
+  // pre-selects it. On mobile that should land on the treatment's full
+  // detail card (cost, duration, highlights) in the swipeable deck further
+  // down the Services section -- not just the section's heading -- matching
+  // what tapping a tile in the mobile icon-grid overview already does.
+  // Desktop keeps landing on the section top: the selected treatment's
+  // detail sits in the sticky side panel right there already.
   const handleViewTreatmentInServices = (treatmentId: string) => {
     setPreSelectedTreatmentId(treatmentId);
-    navigateToSection('services');
+    navigateToSection('services', () => {
+      const deck = document.getElementById('treatments-deck');
+      // Services.tsx only renders the deck below the lg breakpoint (its
+      // `lg:hidden` wrapper) -- offsetParent is null there once that media
+      // query hides it, which is how desktop is told apart from mobile here.
+      return deck && deck.offsetParent !== null ? deck : null;
+    });
   };
 
   const handleOpenSymptomChecker = () => {
