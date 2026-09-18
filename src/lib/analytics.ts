@@ -48,7 +48,20 @@ export function trackConversion(
   trackAdsConversion(action);
 }
 
-// No trackPageView() here on purpose. GA4's Enhanced measurement has "Page
-// changes based on browser history events" switched on for this stream, so it
-// already emits a page_view on every pushState/popState. Sending our own as
-// well double-counted every blog navigation.
+// Manual page_view dispatch. index.html sets send_page_view: false on the
+// GA4 config call, which -- per Google's own SPA integration guidance --
+// disables GA4's automatic page_view tracking entirely, both the one on load
+// and the history-based one it would otherwise fire on every pushState. That
+// hands page_view fully to the app, which is the only thing that knows
+// whether a /blogs/:id slug is a real post; App-v1.tsx calls this once per
+// route change and never for a route it classifies as Not Found, so a bot
+// probing a fake blog slug no longer counts as a pageview at all.
+export function trackPageView(path: string, title: string) {
+  if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+    window.gtag('event', 'page_view', {
+      page_location: window.location.origin + path,
+      page_path: path,
+      page_title: title,
+    });
+  }
+}

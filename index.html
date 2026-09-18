@@ -12,30 +12,42 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
 
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-N6NS2ZXG78"></script>
+    <!-- Google tag (gtag.js) -- loaded conditionally, and page_view is fully
+    manual (src/lib/analytics.ts trackPageView). Two reasons:
+      1. /admin (staff-only CRM, and a magnet for bots probing for a login
+         page) and Google's own ?gtm_latency= tag-health checks skip loading
+         gtag.js entirely -- not just the page_view, so GA4's enhanced
+         measurement (session_start, scroll, etc.) never fires and neither
+         ever creates a session or shows up as a "user".
+      2. Everywhere else, send_page_view:false hands page_view to the app
+         instead of GA4's automatic/history-based tracking -- per Google's
+         own SPA guidance, this disables both, not just the one on load. The
+         app is the only thing that knows a /blogs/:id slug is real, so it's
+         the only thing that can decide whether a hit should count at all.
+    Google Ads config is skipped along with GA4 on excluded paths, since a
+    bot or a staff login was never going to be an ad conversion either. -->
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
 
-      // Two kinds of hit are excluded from GA4 on purpose, because both look
-      // like real homepage visits in reporting and neither is a patient:
-      //   /admin        -- the staff-only CRM, and a magnet for bots probing
-      //                    for a login page
-      //   ?gtm_latency= -- Google's own automated tag-health checks
-      // Google Ads (below) still configures normally so ad clicks keep their
-      // _gcl cookie and stay attributable.
       var neuPath = location.pathname.replace(/\/+$/, '') || '/';
-      var neuExcluded =
+      var neuGaExcluded =
         neuPath === '/admin' || /[?&]gtm_latency=/.test(location.search);
 
-      gtag('config', 'G-N6NS2ZXG78', { send_page_view: !neuExcluded });
+      if (!neuGaExcluded) {
+        var neuGtagScript = document.createElement('script');
+        neuGtagScript.async = true;
+        neuGtagScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-N6NS2ZXG78';
+        document.head.appendChild(neuGtagScript);
 
-      // Google Ads conversion tracking. Configured alongside GA4 on the same
-      // gtag instance so ad clicks get a _gcl cookie and conversion events fired
-      // from the app (src/lib/analytics.ts) can be attributed back to a campaign.
-      gtag('config', 'AW-18023171134');
+        gtag('js', new Date());
+        gtag('config', 'G-N6NS2ZXG78', { send_page_view: false });
+
+        // Google Ads conversion tracking. Configured alongside GA4 on the same
+        // gtag instance so ad clicks get a _gcl cookie and conversion events fired
+        // from the app (src/lib/analytics.ts) can be attributed back to a campaign.
+        gtag('config', 'AW-18023171134');
+      }
     </script>
 
     <!-- Brand: neudental — Modern Dental Care for Confident Smiles -->

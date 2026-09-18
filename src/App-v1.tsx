@@ -15,7 +15,7 @@ import NotFound from './components/NotFound';
 import { FAQS, BLOGS } from './data';
 import { ChevronDown, ChevronUp, ArrowLeft, Phone, RefreshCw } from 'lucide-react';
 import type { FAQItem } from './types';
-import { trackConversion } from './lib/analytics';
+import { trackConversion, trackPageView } from './lib/analytics';
 import { setPageMeta, resetPageMeta } from './lib/seo';
 
 // Code-split: the staff-only admin CRM and the blog views are never opened by
@@ -35,13 +35,14 @@ function RouteLoading() {
 
 // Blog subpages get a real URL (/blogs, /blogs/{blog-id}) via manual
 // history.pushState + a popstate listener below, since the app has no
-// router. vercel.json only rewrites known app paths to index.html --
-// anything else never reaches this bundle and gets Vercel's real static
-// 404 (public/404.html) instead. This classifier is the client-side
-// mirror of that same allow-list, so a route that somehow does reach the
-// SPA (e.g. the local dev/preview server, which rewrites everything)
-// still falls into the same Not Found view rather than silently
-// rendering the homepage.
+// router. vercel.json rewrites /blogs and everything under /blogs/* to
+// index.html -- it can't tell a real slug from an invented one, since that
+// list only exists in this app's own data. This classifier is what actually
+// draws that line: it's the client-side mirror of the edge allow-list for
+// paths outside /blogs entirely, and the sole authority for whether a given
+// blog slug is real, so a bot probing /blogs/some-fake-slug lands on the same
+// Not Found view (and never fires a page_view -- see the effect below) as
+// one probing a made-up top-level path.
 type Route =
   | { type: 'home' }
   | { type: 'admin' }
@@ -54,7 +55,10 @@ function classifyRoute(pathname: string): Route {
   if (clean === '/') return { type: 'home' };
   if (clean === '/admin') return { type: 'admin' };
   const detailMatch = clean.match(/^\/blogs\/([^/]+)$/);
-  if (detailMatch) return { type: 'blogPost', blogId: detailMatch[1] };
+  if (detailMatch) {
+    const blogId = detailMatch[1];
+    return BLOGS.some((post) => post.id === blogId) ? { type: 'blogPost', blogId } : { type: 'notFound' };
+  }
   if (clean === '/blogs') return { type: 'blogsList' };
   return { type: 'notFound' };
 }
@@ -101,7 +105,10 @@ export default function App() {
   // Every route shares one static index.html, so <title>/description/canonical
   // never change on their own -- without this, a blog post would carry the
   // homepage's canonical URL and tell Google it's a duplicate of "/" instead
-  // of its own indexable page.
+  // of its own indexable page. Also fires the one and only page_view for this
+  // route (see analytics.ts) -- skipped entirely when notFoundOpen, which is
+  // the actual fix for a bot probing a fake /blogs/:id slug still counting
+  // as a pageview.
   useEffect(() => {
     if (notFoundOpen) {
       setPageMeta({
@@ -115,23 +122,25 @@ export default function App() {
     if (activeBlogId) {
       const post = BLOGS.find((b) => b.id === activeBlogId);
       if (post) {
-        setPageMeta({
-          title: `${post.title} | Neudental Blog`,
-          description: post.excerpt,
-          path: `/blogs/${post.id}`,
-        });
+        const path = `/blogs/${post.id}`;
+        const title = `${post.title} | Neudental Blog`;
+        setPageMeta({ title, description: post.excerpt, path });
+        trackPageView(path, title);
         return;
       }
     }
     if (blogsOpen) {
+      const title = 'Dental Health Blog | Neudental, Kodungaiyur, Chennai';
       setPageMeta({
-        title: 'Dental Health Blog | Neudental, Kodungaiyur, Chennai',
+        title,
         description: 'Practical, patient-friendly dental health and clinic guidance from the Neudental team in Kodungaiyur, Chennai.',
         path: '/blogs',
       });
+      trackPageView('/blogs', title);
       return;
     }
     resetPageMeta();
+    trackPageView(window.location.pathname.replace(/\/+$/, '') || '/', document.title);
   }, [notFoundOpen, blogsOpen, activeBlogId]);
 
   // Scrolls to a section that lives on the home page. If we're currently on a
