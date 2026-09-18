@@ -11,7 +11,7 @@ function setAttr(selector: string, attr: string, value: string) {
   document.querySelector(selector)?.setAttribute(attr, value);
 }
 
-export function setPageMeta(opts: { title?: string; description?: string; path?: string } = {}) {
+export function setPageMeta(opts: { title?: string; description?: string; path?: string; noIndex?: boolean } = {}) {
   if (typeof document === 'undefined') return;
   const title = opts.title ?? DEFAULT_TITLE;
   const description = opts.description ?? DEFAULT_DESCRIPTION;
@@ -25,6 +25,8 @@ export function setPageMeta(opts: { title?: string; description?: string; path?:
   setAttr('meta[property="og:url"]', 'content', url);
   setAttr('meta[name="twitter:title"]', 'content', title);
   setAttr('meta[name="twitter:description"]', 'content', description);
+  // A broken/unknown link should never get indexed under its dead URL.
+  setAttr('meta[name="robots"]', 'content', opts.noIndex ? 'noindex, follow' : 'index, follow');
 }
 
 export function resetPageMeta() {

@@ -11,6 +11,7 @@ import DoctorTrustBanner from './components/DoctorTrustBanner';
 import Testimonials from './components/Testimonials';
 import LocationDetails from './components/LocationDetails';
 import Footer from './components/Footer';
+import NotFound from './components/NotFound';
 import { FAQS, BLOGS } from './data';
 import { ChevronDown, ChevronUp, ArrowLeft, Phone, RefreshCw } from 'lucide-react';
 import type { FAQItem } from './types';
@@ -34,23 +35,38 @@ function RouteLoading() {
 
 // Blog subpages get a real URL (/blogs, /blogs/{blog-id}) via manual
 // history.pushState + a popstate listener below, since the app has no
-// router. Vercel's catch-all rewrite (vercel.json) serves index.html for
-// any path, so this is what turns that path into the right view.
-function parseBlogRoute(pathname: string): { blogsOpen: boolean; blogId: string | null } {
+// router. vercel.json only rewrites known app paths to index.html --
+// anything else never reaches this bundle and gets Vercel's real static
+// 404 (public/404.html) instead. This classifier is the client-side
+// mirror of that same allow-list, so a route that somehow does reach the
+// SPA (e.g. the local dev/preview server, which rewrites everything)
+// still falls into the same Not Found view rather than silently
+// rendering the homepage.
+type Route =
+  | { type: 'home' }
+  | { type: 'admin' }
+  | { type: 'blogsList' }
+  | { type: 'blogPost'; blogId: string }
+  | { type: 'notFound' };
+
+function classifyRoute(pathname: string): Route {
   const clean = pathname.replace(/\/+$/, '') || '/';
+  if (clean === '/') return { type: 'home' };
+  if (clean === '/admin') return { type: 'admin' };
   const detailMatch = clean.match(/^\/blogs\/([^/]+)$/);
-  if (detailMatch) return { blogsOpen: true, blogId: detailMatch[1] };
-  if (clean === '/blogs') return { blogsOpen: true, blogId: null };
-  return { blogsOpen: false, blogId: null };
+  if (detailMatch) return { type: 'blogPost', blogId: detailMatch[1] };
+  if (clean === '/blogs') return { type: 'blogsList' };
+  return { type: 'notFound' };
 }
 
-const initialBlogRoute = typeof window !== 'undefined' ? parseBlogRoute(window.location.pathname) : { blogsOpen: false, blogId: null };
+const initialRoute: Route = typeof window !== 'undefined' ? classifyRoute(window.location.pathname) : { type: 'home' };
 
 export default function App() {
   const [preSelectedTreatmentId, setPreSelectedTreatmentId] = useState<string>('checkup');
   const [symptomCheckerOpen, setSymptomCheckerOpen] = useState(false);
-  const [blogsOpen, setBlogsOpen] = useState(initialBlogRoute.blogsOpen);
-  const [activeBlogId, setActiveBlogId] = useState<string | null>(initialBlogRoute.blogId);
+  const [blogsOpen, setBlogsOpen] = useState(initialRoute.type === 'blogsList' || initialRoute.type === 'blogPost');
+  const [activeBlogId, setActiveBlogId] = useState<string | null>(initialRoute.type === 'blogPost' ? initialRoute.blogId : null);
+  const [notFoundOpen, setNotFoundOpen] = useState(initialRoute.type === 'notFound');
   const [faqOpenId, setFaqOpenId] = useState<string | null>(null);
 
   if (typeof window !== 'undefined' && window.location.pathname.replace(/\/+$/, '') === '/admin') {
@@ -72,10 +88,11 @@ export default function App() {
   // Keep state in sync with the browser's own back/forward navigation.
   useEffect(() => {
     const handlePopState = () => {
-      const route = parseBlogRoute(window.location.pathname);
+      const route = classifyRoute(window.location.pathname);
       setSymptomCheckerOpen(false);
-      setBlogsOpen(route.blogsOpen);
-      setActiveBlogId(route.blogId);
+      setBlogsOpen(route.type === 'blogsList' || route.type === 'blogPost');
+      setActiveBlogId(route.type === 'blogPost' ? route.blogId : null);
+      setNotFoundOpen(route.type === 'notFound');
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
@@ -86,6 +103,15 @@ export default function App() {
   // homepage's canonical URL and tell Google it's a duplicate of "/" instead
   // of its own indexable page.
   useEffect(() => {
+    if (notFoundOpen) {
+      setPageMeta({
+        title: 'Page Not Found | Neudental',
+        description: 'The page you were looking for could not be found. Return to the Neudental homepage to explore our dental treatments and book an appointment.',
+        path: window.location.pathname,
+        noIndex: true,
+      });
+      return;
+    }
     if (activeBlogId) {
       const post = BLOGS.find((b) => b.id === activeBlogId);
       if (post) {
@@ -106,7 +132,7 @@ export default function App() {
       return;
     }
     resetPageMeta();
-  }, [blogsOpen, activeBlogId]);
+  }, [notFoundOpen, blogsOpen, activeBlogId]);
 
   // Scrolls to a section that lives on the home page. If we're currently on a
   // subpage (so the section isn't mounted yet), close that view first and
@@ -121,6 +147,7 @@ export default function App() {
     setSymptomCheckerOpen(false);
     setBlogsOpen(false);
     setActiveBlogId(null);
+    setNotFoundOpen(false);
     goToPath('/');
     // Wait for the home page to actually render before scrolling to it.
     requestAnimationFrame(() => {
@@ -152,6 +179,7 @@ export default function App() {
   const handleOpenSymptomChecker = () => {
     setBlogsOpen(false);
     setActiveBlogId(null);
+    setNotFoundOpen(false);
     setSymptomCheckerOpen(true);
     goToPath('/');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -171,8 +199,19 @@ export default function App() {
   const handleOpenBlogs = () => {
     setSymptomCheckerOpen(false);
     setActiveBlogId(null);
+    setNotFoundOpen(false);
     setBlogsOpen(true);
     goToPath('/blogs');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Used by the 404 view's "Back to Home" button and its Navbar logo click.
+  const handleGoHome = () => {
+    setSymptomCheckerOpen(false);
+    setBlogsOpen(false);
+    setActiveBlogId(null);
+    setNotFoundOpen(false);
+    goToPath('/');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -206,6 +245,16 @@ export default function App() {
           </button>
         </div>
         <SymptomChecker onSelectTreatment={handleSymptomCheckerSelectTreatment} />
+        <Footer onNavigateSection={navigateToSection} onOpenBlogs={handleOpenBlogs} onSelectTreatment={handleViewTreatmentInServices} />
+      </div>
+    );
+  }
+
+  if (notFoundOpen) {
+    return (
+      <div className="min-h-screen bg-white">
+        <Navbar onSelectTreatment={handleViewTreatmentInServices} onScrollToBooking={handleScrollToBooking} onLogoClick={handleGoHome} onNavigateSection={navigateToSection} onOpenBlogs={handleOpenBlogs} />
+        <NotFound onGoHome={handleGoHome} />
         <Footer onNavigateSection={navigateToSection} onOpenBlogs={handleOpenBlogs} onSelectTreatment={handleViewTreatmentInServices} />
       </div>
     );

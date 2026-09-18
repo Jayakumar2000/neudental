@@ -6,7 +6,15 @@
     "installCommand": "npm install",
     "rewrites": [
           {
-                  "source": "/(.*)",
+                  "source": "/blogs",
+                  "destination": "/index.html"
+          },
+          {
+                  "source": "/blogs/(.*)",
+                  "destination": "/index.html"
+          },
+          {
+                  "source": "/admin",
                   "destination": "/index.html"
           }
     ],
