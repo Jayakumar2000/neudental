@@ -6,7 +6,12 @@
   "hosting": {
     "public": "dist",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-    "rewrites": [{"source": "**", "destination": "/index.html"}],
+    "rewrites": [
+      {"source": "/", "destination": "/index.html"},
+      {"source": "/blogs", "destination": "/index.html"},
+      {"source": "/blogs/*", "destination": "/index.html"},
+      {"source": "/admin", "destination": "/index.html"}
+    ],
     "headers": [
       {"source": "**/*.@(js|css|ttf|woff|woff2|otf|eot)", "headers": [{"key": "Cache-Control", "value": "max-age=31536000"}]},
       {"source": "**", "headers": [

@@ -49,12 +49,11 @@
         color: #5b6b7a;
         margin: 0 0 32px;
       }
+      .actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
       a.btn {
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        background: var(--navy);
-        color: #fff;
         text-decoration: none;
         font-weight: 700;
         font-size: 13px;
@@ -62,9 +61,12 @@
         text-transform: uppercase;
         padding: 16px 32px;
         border-radius: 12px;
-        transition: background 0.2s ease, transform 0.2s ease;
+        transition: background 0.2s ease, transform 0.2s ease, color 0.2s ease;
       }
-      a.btn:hover { background: var(--cyan); color: var(--navy); transform: translateY(-2px); }
+      a.btn.primary { background: var(--navy); color: #fff; }
+      a.btn.primary:hover { background: var(--cyan); color: var(--navy); transform: translateY(-2px); }
+      a.btn.secondary { border: 1px solid rgba(11, 19, 65, 0.15); color: var(--navy); }
+      a.btn.secondary:hover { background: rgba(11, 19, 65, 0.05); transform: translateY(-2px); }
     </style>
   </head>
   <body>
@@ -73,7 +75,10 @@
       <p class="code">404</p>
       <h1>This link looks broken</h1>
       <p>The page you were looking for doesn't exist or may have moved. Let's get you back to the Neudental homepage.</p>
-      <a class="btn" href="/">&larr; Back to Home</a>
+      <div class="actions">
+        <a class="btn primary" href="/">&larr; Back to Home</a>
+        <a class="btn secondary" href="tel:+919342367446">Call the Clinic</a>
+      </div>
     </div>
   </body>
 </html>

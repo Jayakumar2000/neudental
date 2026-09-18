@@ -19,7 +19,18 @@
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
 
-      gtag('config', 'G-N6NS2ZXG78');
+      // Two kinds of hit are excluded from GA4 on purpose, because both look
+      // like real homepage visits in reporting and neither is a patient:
+      //   /admin        -- the staff-only CRM, and a magnet for bots probing
+      //                    for a login page
+      //   ?gtm_latency= -- Google's own automated tag-health checks
+      // Google Ads (below) still configures normally so ad clicks keep their
+      // _gcl cookie and stay attributable.
+      var neuPath = location.pathname.replace(/\/+$/, '') || '/';
+      var neuExcluded =
+        neuPath === '/admin' || /[?&]gtm_latency=/.test(location.search);
+
+      gtag('config', 'G-N6NS2ZXG78', { send_page_view: !neuExcluded });
 
       // Google Ads conversion tracking. Configured alongside GA4 on the same
       // gtag instance so ad clicks get a _gcl cookie and conversion events fired
