@@ -61,6 +61,7 @@ export const FAQS: FAQItem[] = [
   { id: 'faq-3', question: 'Do you offer clear aligners / Invisalign?', answer: 'Yes! We offer modern orthodontic solutions including clear aligners for straightening teeth discreetly. Dr. Swetha will assess your case and recommend the best treatment plan during a consultation.', category: 'treatment' },
   { id: 'faq-4', question: 'What are your clinic timings?', answer: 'We are open all 7 days, Monday to Sunday: 10:00 AM - 2:00 PM and 5:00 PM - 9:30 PM. You can book appointments via WhatsApp or our online form.', category: 'appointment' },
   { id: 'faq-5', question: 'How do I book an appointment?', answer: 'You can book an appointment using any of the options we offer — the booking form on this website, chatting with us on WhatsApp, or calling us directly. Walk-ins are also welcome during clinic hours.', category: 'appointment' },
+  { id: 'faq-6', question: 'Is neudental the same clinic as Bludental?', answer: 'Yes — neudental was formerly known as Bludental. It is the same clinic, at the same location in Kodungaiyur, with the same team led by Dr. Swetha. Only the name has changed.', category: 'general' },
 ];
 
 // Alias for backward compatibility with components using DOCTORS (plural)
