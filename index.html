@@ -12,29 +12,42 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
 
-    <!-- Google tag (gtag.js) -- loaded conditionally, and page_view is fully
-    manual (src/lib/analytics.ts trackPageView). Two reasons:
+    <!-- Google tag (gtag.js) and Microsoft Clarity -- one shared gate, so
+    there's exactly one place either tag can be loaded from and no risk of a
+    duplicate tag creeping in elsewhere. page_view itself is fully manual
+    (src/lib/analytics.ts trackPageView). Reasons:
       1. /admin (staff-only CRM, and a magnet for bots probing for a login
          page) and Google's own ?gtm_latency= tag-health checks skip loading
-         gtag.js entirely -- not just the page_view, so GA4's enhanced
-         measurement (session_start, scroll, etc.) never fires and neither
-         ever creates a session or shows up as a "user".
-      2. Everywhere else, send_page_view:false hands page_view to the app
-         instead of GA4's automatic/history-based tracking -- per Google's
-         own SPA guidance, this disables both, not just the one on load. The
-         app is the only thing that knows a /blogs/:id slug is real, so it's
-         the only thing that can decide whether a hit should count at all.
-    Google Ads config is skipped along with GA4 on excluded paths, since a
-    bot or a staff login was never going to be an ad conversion either. -->
+         both tags entirely -- not just GA4's page_view, so neither GA4's
+         enhanced measurement (session_start, scroll, etc.) nor a Clarity
+         recording ever starts for that hit, and neither shows up as a
+         "user"/session.
+      2. Everywhere else, GA4's send_page_view:false hands page_view to the
+         app instead of GA4's automatic/history-based tracking -- per
+         Google's own SPA guidance, this disables both, not just the one on
+         load. The app is the only thing that knows a /blogs/:id slug is
+         real, so it's the only thing that can decide whether a GA4 hit
+         should count at all (App-v1.tsx's page-meta effect skips
+         trackPageView for a route it classifies as Not Found). Clarity has
+         no equivalent hand-off -- it starts recording as soon as it loads,
+         before the app has classified the route -- so App-v1.tsx also calls
+         window.clarity('stop') the moment it lands on Not Found, cutting
+         a bot-probed fake blog slug's recording short instead of letting it
+         run.
+    Google Ads config is skipped along with GA4/Clarity on excluded paths,
+    since a bot or a staff login was never going to be an ad conversion
+    either. Clarity tracks SPA route changes on its own via the History API,
+    so nothing further is needed for it to see /blogs, /blogs/:id etc. as
+    separate pages within the one session. -->
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
 
       var neuPath = location.pathname.replace(/\/+$/, '') || '/';
-      var neuGaExcluded =
+      var neuAnalyticsExcluded =
         neuPath === '/admin' || /[?&]gtm_latency=/.test(location.search);
 
-      if (!neuGaExcluded) {
+      if (!neuAnalyticsExcluded) {
         var neuGtagScript = document.createElement('script');
         neuGtagScript.async = true;
         neuGtagScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-N6NS2ZXG78';
@@ -47,6 +60,13 @@
         // gtag instance so ad clicks get a _gcl cookie and conversion events fired
         // from the app (src/lib/analytics.ts) can be attributed back to a campaign.
         gtag('config', 'AW-18023171134');
+
+        // Microsoft Clarity: session recordings + heatmaps.
+        (function (c, l, a, r, i, t, y) {
+          c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments); };
+          t = l.createElement(r); t.async = 1; t.src = 'https://www.clarity.ms/tag/' + i;
+          y = l.getElementsByTagName(r)[0]; y.parentNode.insertBefore(t, y);
+        })(window, document, 'clarity', 'script', 'ykqtp15nru');
       }
     </script>
 

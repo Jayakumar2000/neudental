@@ -15,7 +15,7 @@ import NotFound from './components/NotFound';
 import { FAQS, BLOGS } from './data';
 import { ChevronDown, ChevronUp, ArrowLeft, Phone, RefreshCw } from 'lucide-react';
 import type { FAQItem } from './types';
-import { trackConversion, trackPageView } from './lib/analytics';
+import { trackConversion, trackPageView, stopClarityRecording } from './lib/analytics';
 import { setPageMeta, resetPageMeta } from './lib/seo';
 
 // Code-split: the staff-only admin CRM and the blog views are never opened by
@@ -117,6 +117,12 @@ export default function App() {
         path: window.location.pathname,
         noIndex: true,
       });
+      // Clarity already started recording by the time index.html's own
+      // exclusion check could run (that only knows about /admin and
+      // ?gtm_latency=, not a fake blog slug -- only the app can tell). Cut
+      // it short here instead of letting a bot-probed dead link run a full
+      // session.
+      stopClarityRecording();
       return;
     }
     if (activeBlogId) {

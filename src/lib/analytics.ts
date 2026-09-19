@@ -4,6 +4,7 @@
 declare global {
   interface Window {
     gtag?: (...args: unknown[]) => void;
+    clarity?: (...args: unknown[]) => void;
   }
 }
 
@@ -63,5 +64,19 @@ export function trackPageView(path: string, title: string) {
       page_path: path,
       page_title: title,
     });
+  }
+}
+
+// Clarity has no GA4-style send_page_view hand-off -- it starts recording as
+// soon as its script loads, before the app has classified the current route.
+// So a bot probing a fake /blogs/:id slug still gets a Clarity session
+// started; this is the best available correction, called from App-v1.tsx the
+// moment it lands on Not Found, to cut that recording short instead of
+// letting it run for the rest of the visit. window.clarity is defined
+// synchronously by the loader snippet in index.html (calls queue until the
+// real script finishes loading), so this is safe to call immediately.
+export function stopClarityRecording() {
+  if (typeof window !== 'undefined' && typeof window.clarity === 'function') {
+    window.clarity('stop');
   }
 }
