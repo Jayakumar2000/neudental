@@ -4,7 +4,7 @@ import { Treatment, Doctor, Testimonial, Symptom, FAQItem, BlogPost } from './ty
 
 export const TREATMENTS: Treatment[] = [
   // Preventive Dentistry
-  { id: 'checkup', name: 'Regular Check-up', category: 'preventive', description: 'Early cavity & gum diagnosis', seoKeywords: ['dental checkup Kodungaiyur', 'dental exam Chennai'], duration: '30-45 minutes', priceRange: '₹300-₹500', startingPrice: 300, iconName: 'IconRegularCheckup', features: ['Early detection of dental problems', 'Complimentary X-ray', 'Oral hygiene advice'] },
+  { id: 'checkup', name: 'Regular Check-up', category: 'preventive', description: 'Early cavity & gum diagnosis', seoKeywords: ['dental checkup Kodungaiyur', 'dental exam Chennai'], duration: '30-45 minutes', priceRange: '₹200-₹500', startingPrice: 200, iconName: 'IconRegularCheckup', features: ['Early detection of dental problems', 'Complimentary X-ray', 'Oral hygiene advice'] },
   { id: 'cleaning', name: 'Dental Cleaning', category: 'preventive', description: 'Removes plaque & tartar buildup', seoKeywords: ['teeth cleaning Chennai', 'dental scaling Kodungaiyur'], duration: '30-45 minutes', priceRange: '₹1000-₹1500', startingPrice: 1000, iconName: 'IconDentalCleaning', features: ['Plaque & tartar removal', 'Gum health maintenance', 'Fluoride treatment', 'Oral hygiene instructions'] },
   { id: 'imaging', name: 'Dental Imaging', category: 'preventive', description: 'Digital X-ray & OPG scans', seoKeywords: ['dental X-ray Chennai', 'digital radiography'], duration: '10-15 minutes', priceRange: '₹200-₹800', startingPrice: 200, iconName: 'IconDentalImaging', features: ['Digital X-rays', 'Cavity & infection detection', 'Root & bone assessment', 'Precision treatment planning'] },
   // Restorative Dentistry
