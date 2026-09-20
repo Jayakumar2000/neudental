@@ -2,8 +2,8 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { TESTIMONIALS } from '../data';
 import { Star, ShieldCheck, ThumbsUp, Quote, ChevronLeft, ChevronRight } from 'lucide-react';
 
-const AUTOPLAY_MS = 4500;
-const TRANSITION_MS = 600;
+const AUTOPLAY_MS = 2500;
+const TRANSITION_MS = 400;
 
 // Three back-to-back copies so the strip can move a few steps in either
 // direction from any position without running out of cards -- looping back to

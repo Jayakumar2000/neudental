@@ -70,7 +70,7 @@ Gentle, comfortable dentistry for every age, starting from a child's first denta
 <div className="w-px h-9 bg-cool-gray/15 shrink-0" />
 <div className="leading-tight">
 <div className="flex items-baseline gap-2 whitespace-nowrap">
-<span className="text-xl font-bold text-primary font-sans">5.0</span>
+<span className="text-xl font-bold text-primary font-sans">4.9</span>
 <div className="flex items-center gap-0.5 text-[#FBBF24]">
 <Star className="w-3 h-3 fill-current" /><Star className="w-3 h-3 fill-current" /><Star className="w-3 h-3 fill-current" /><Star className="w-3 h-3 fill-current" /><Star className="w-3 h-3 fill-current" />
 </div>

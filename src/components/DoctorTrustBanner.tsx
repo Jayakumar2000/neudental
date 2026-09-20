@@ -11,7 +11,7 @@ export default function DoctorTrustBanner() {
         <p className="font-serif font-bold text-white text-sm leading-tight">Neudental Clinic, Chennai</p>
         <div className="flex items-center gap-1 mt-1">
           <Star className="w-3 h-3 fill-current text-[#FBBF24]" />
-          <span className="text-[11px] font-bold text-white font-sans">5.0</span>
+          <span className="text-[11px] font-bold text-white font-sans">4.9</span>
           <span className="text-[11px] text-white/80 font-sans">&middot; 150+ Reviews &middot; 3,000+ Patients</span>
         </div>
       </div>

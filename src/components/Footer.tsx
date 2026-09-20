@@ -33,11 +33,11 @@ markClassName="h-10 w-auto"
 wordmarkClassName="h-[20px] w-auto"
 showTagline={false}
 />
-<p className="text-xs text-white/70 leading-relaxed pt-2">
+<p className="text-[11px] text-white/45 italic pt-2">Neudental — formerly known as Bludental.</p>
+<p className="text-xs text-white/70 leading-relaxed">
 Providing comprehensive dental treatments including Painless RCT, Invisalign,
 and dental implants, backed by advanced, patient-first technology.
 </p>
-<p className="text-[11px] text-white/45 italic">Neudental — formerly known as Bludental.</p>
 <div className="pt-2 text-xs text-mint/95 space-y-1">
 <p className="flex items-center gap-1.5 font-bold">
 <span className="inline-block w-2 h-2 rounded-full bg-emerald-400" />
