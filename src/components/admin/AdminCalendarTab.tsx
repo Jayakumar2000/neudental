@@ -5,12 +5,14 @@ import React, { useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight, Download, Sun, Moon, Phone, Mail } from 'lucide-react';
 import {
   AppointmentRecord, STATUS_STYLES, TAG_STYLES, todayIST, slotToMinutes, isMorningSlot,
-  formatDateDisplay, getTreatmentName, appointmentsToCsv, downloadCsv,
+  formatDateDisplay, getTreatmentName, appointmentsToCsv, downloadCsv, statusLabel,
 } from './adminShared';
+import AppointmentActions from './AppointmentActions';
 
 interface Props {
   appointments: AppointmentRecord[];
   onStatusChange: (docId: string, status: string) => void;
+  onReschedule: (appointment: AppointmentRecord, date: string, timeSlot: string) => void;
   updatingId: string | null;
 }
 
@@ -27,7 +29,7 @@ function heatClass(count: number): string {
   return 'bg-secondary text-white';
 }
 
-export default function AdminCalendarTab({ appointments, onStatusChange, updatingId }: Props) {
+export default function AdminCalendarTab({ appointments, onStatusChange, onReschedule, updatingId }: Props) {
   const today = todayIST();
   const [y0, m0] = today.split('-').map(Number);
   const [viewYear, setViewYear] = useState(y0);
@@ -129,7 +131,7 @@ export default function AdminCalendarTab({ appointments, onStatusChange, updatin
                     <div key={a.docId} className="rounded-xl border border-cool-gray/10 p-3 font-sans">
                       <div className="flex items-center justify-between gap-2 mb-1">
                         <span className="font-bold text-primary text-sm">{a.timeSlot} — {a.patientName}</span>
-                        <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border shrink-0 ${STATUS_STYLES[a.status] || STATUS_STYLES.pending}`}>{a.status}</span>
+                        <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border shrink-0 ${STATUS_STYLES[a.status] || STATUS_STYLES.pending}`}>{statusLabel(a.status)}</span>
                       </div>
                       <p className="text-xs text-cool-gray mb-1.5">{getTreatmentName(a.treatmentId)}</p>
                       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-on-surface-variant mb-2">
@@ -141,11 +143,7 @@ export default function AdminCalendarTab({ appointments, onStatusChange, updatin
                           {a.tags.map((t) => <span key={t} className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${TAG_STYLES[t] || 'bg-surface-alt text-cool-gray border-cool-gray/15'}`}>{t}</span>)}
                         </div>
                       )}
-                      <div className="flex gap-1.5">
-                        {a.status !== 'confirmed' && <button disabled={updatingId === a.docId} onClick={() => onStatusChange(a.docId, 'confirmed')} className="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[10px] font-bold cursor-pointer disabled:opacity-50">Confirm</button>}
-                        {a.status !== 'completed' && <button disabled={updatingId === a.docId} onClick={() => onStatusChange(a.docId, 'completed')} className="px-2.5 py-1 rounded-lg bg-secondary/10 hover:bg-secondary/20 text-secondary text-[10px] font-bold cursor-pointer disabled:opacity-50">Completed</button>}
-                        {a.status !== 'cancelled' && <button disabled={updatingId === a.docId} onClick={() => onStatusChange(a.docId, 'cancelled')} className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-[10px] font-bold cursor-pointer disabled:opacity-50">Cancel</button>}
-                      </div>
+                      <AppointmentActions appointment={a} compact updating={updatingId === a.docId} onStatusChange={onStatusChange} onReschedule={onReschedule} />
                     </div>
                   ))}
                 </div>

@@ -47,6 +47,17 @@ export interface Symptom {
   urgency: 'routine' | 'moderate' | 'urgent';
 }
 
+// 'pending' only exists on bookings made before confirmation was automated;
+// 'completed' is shown to staff as "Done" (patient showed up).
+export type AppointmentStatus =
+  | 'pending'
+  | 'confirmed'
+  | 'rescheduled'
+  | 'completed'
+  | 'no_show'
+  | 'no_response'
+  | 'cancelled';
+
 export interface Appointment {
   id: string;
   patientName: string;
@@ -55,7 +66,7 @@ export interface Appointment {
   treatmentId: string;
   date: string;
   timeSlot: string;
-  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  status: AppointmentStatus;
   notes?: string;
 }
 

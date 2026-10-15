@@ -20,8 +20,14 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    function isUpcomingStatus(status) {
+      return status in ['pending', 'confirmed', 'rescheduled'];
+    }
+
     match /appointments/{appointmentId} {
       allow read: if isAdmin() || isOwner(resource.data.userId);
+      // Bookings are auto-confirmed on create. 'pending' stays accepted so a
+      // visitor still running the previous site build can finish booking.
       allow create: if isSignedIn()
         && request.resource.data.userId == request.auth.uid
         && request.resource.data.patientName is string
@@ -30,8 +36,14 @@ service cloud.firestore {
         && request.resource.data.treatmentId is string
         && request.resource.data.date is string
         && request.resource.data.timeSlot is string
-        && request.resource.data.status == 'pending';
-      allow update: if isAdmin() || isOwner(resource.data.userId);
+        && request.resource.data.status in ['pending', 'confirmed'];
+      // Staff record every outcome; a patient may only cancel their own
+      // upcoming booking, and can't touch any other field.
+      allow update: if isAdmin()
+        || (isOwner(resource.data.userId)
+          && isUpcomingStatus(resource.data.status)
+          && request.resource.data.status == 'cancelled'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'statusUpdatedAt']));
       allow delete: if false;
     }
   }

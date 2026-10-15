@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { TREATMENTS } from '../data';
-import { Appointment } from '../types';
+import { TREATMENTS, APPOINTMENT_SLOT_GROUPS } from '../data';
+import { Appointment, AppointmentStatus } from '../types';
 import { Calendar, Clock, Sparkles, Check, Trash2, CalendarCheck, Phone, User, Activity } from 'lucide-react';
 import { collection, query, where, orderBy, onSnapshot, setDoc, doc, Timestamp, updateDoc } from 'firebase/firestore';
 import { db, OperationType, handleFirestoreError, ensureAnonymousAuth } from '../firebase';
@@ -25,6 +25,20 @@ function getISTNow() {
   const hour = map.hour === '24' ? 0 : parseInt(map.hour, 10);
   return { dateStr: `${map.year}-${map.month}-${map.day}`, minutesSinceMidnight: hour * 60 + parseInt(map.minute, 10) };
 }
+
+// What a patient sees for each status in "Your Bookings" -- staff-only
+// outcomes like "no response" are worded as a next step, not a verdict.
+const PATIENT_STATUS: Record<AppointmentStatus, { label: string; className: string }> = {
+  pending: { label: 'Awaiting confirmation', className: 'bg-amber-50 text-amber-700' },
+  confirmed: { label: 'Confirmed', className: 'bg-emerald-50 text-emerald-700' },
+  rescheduled: { label: 'Rescheduled', className: 'bg-pink-50 text-pink-700' },
+  completed: { label: 'Visited', className: 'bg-secondary/10 text-secondary' },
+  no_show: { label: 'Missed', className: 'bg-orange-50 text-orange-700' },
+  no_response: { label: 'Please call the clinic', className: 'bg-violet-50 text-violet-700' },
+  cancelled: { label: 'Cancelled', className: 'bg-rose-50 text-rose-700' },
+};
+
+const UPCOMING_STATUSES: AppointmentStatus[] = ['pending', 'confirmed', 'rescheduled'];
 
 function slotToMinutes(slot: string): number {
   const [time, meridiem] = slot.split(' ');
@@ -84,10 +98,7 @@ export default function BookingForm({ preSelectedTreatmentId, onClose, bare = fa
     return () => unsubscribe();
   }, [userId]);
 
-  const timeSlots = [
-    { label: 'Morning Slots (10:00 AM - 1:30 PM)', times: ['10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM', '12:00 PM', '12:30 PM', '01:00 PM', '01:30 PM'] },
-    { label: 'Evening Slots (5:00 PM - 9:30 PM)', times: ['05:00 PM', '05:30 PM', '06:00 PM', '06:30 PM', '07:00 PM', '07:30 PM', '08:00 PM', '08:30 PM', '09:00 PM', '09:30 PM'] }
-  ];
+  const timeSlots = APPOINTMENT_SLOT_GROUPS;
 
   const istNow = getISTNow();
   const todayStr = istNow.dateStr; // YYYY-MM-DD IST, matches <input type="date">
@@ -116,9 +127,25 @@ export default function BookingForm({ preSelectedTreatmentId, onClose, bare = fa
     const dayOfWeek = selectedDateObj.getDay();
     if (dayOfWeek === 0 && timeSlots[1].times.includes(timeSlot)) { setErrorMsg('neudental evening sessions are CLOSED on Sundays. Please select a morning slot.'); return; }
     const docId = 'app_' + Date.now();
+    const ref = doc(db, 'appointments', docId);
+    const booking = { id: docId, patientName: patientName.trim(), phone: phone.trim(), email: email.trim(), treatmentId, date, timeSlot, notes: notes.trim(), userId, createdAt: Timestamp.now() };
+    const autoConfirmation = { status: 'confirmed', confirmedAt: Timestamp.now(), confirmedBy: 'auto' };
     try {
-      await setDoc(doc(db, 'appointments', docId), { id: docId, patientName: patientName.trim(), phone: phone.trim(), email: email.trim(), treatmentId, date, timeSlot, status: 'pending', notes: notes.trim(), userId, createdAt: Timestamp.now() });
-      setSuccessMsg(`Slot requested for ${date} at ${timeSlot}, ${patientName}. Our team will confirm shortly by phone or WhatsApp.`);
+      try {
+        await setDoc(ref, { ...booking, ...autoConfirmation });
+      } catch (err) {
+        if ((err as { code?: string })?.code !== 'permission-denied') throw err;
+        // Firestore rules are published separately from the site. Until the
+        // copy in firestore.rules is live, create must be 'pending' -- confirm
+        // it straight after, which those older rules allow the owner to do.
+        await setDoc(ref, { ...booking, status: 'pending' });
+        try {
+          await updateDoc(ref, autoConfirmation);
+        } catch (confirmErr) {
+          handleFirestoreError(confirmErr, OperationType.UPDATE, 'appointments');
+        }
+      }
+      setSuccessMsg(`Your appointment is confirmed for ${date} at ${timeSlot}, ${patientName.trim()}. Need to change it? Call +91 93423 67446.`);
       trackConversion('generate_lead', 'booking', { treatment_id: treatmentId });
       setPatientName(''); setPhone(''); setEmail(''); setNotes('');
     } catch (err) { handleFirestoreError(err, OperationType.CREATE, 'appointments'); setErrorMsg('Could not register your slot. Please try again.'); }
@@ -126,7 +153,7 @@ export default function BookingForm({ preSelectedTreatmentId, onClose, bare = fa
 
   const handleCancelBooking = async (id: string) => {
     if (!userId) return;
-    try { await updateDoc(doc(db, 'appointments', id), { status: 'cancelled' }); setSuccessMsg('Your slot has been canceled.'); } catch (err) { setErrorMsg('Could not cancel slot.'); }
+    try { await updateDoc(doc(db, 'appointments', id), { status: 'cancelled', statusUpdatedAt: Timestamp.now() }); setSuccessMsg('Your slot has been canceled.'); } catch (err) { setErrorMsg('Could not cancel slot.'); }
   };
 
   const getTreatmentName = (id: string) => TREATMENTS.find(t => t.id === id)?.name || 'General Check-Up';
@@ -151,13 +178,17 @@ export default function BookingForm({ preSelectedTreatmentId, onClose, bare = fa
       </form>
       {myBookings.length > 0 && (
         <div className="mt-12 pt-8 border-t border-cool-gray/10">
-          <div className="flex items-center justify-between mb-4"><span className="text-xs font-bold uppercase tracking-wider text-primary">Your Bookings ({myBookings.length})</span><span className="text-[10px] text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full font-bold">Pending clinic confirmation</span></div>
-          <div className="space-y-3">{myBookings.map((booking) => (
+          <div className="mb-4"><span className="text-xs font-bold uppercase tracking-wider text-primary">Your Bookings ({myBookings.length})</span></div>
+          <div className="space-y-3">{myBookings.map((booking) => {
+            const status = PATIENT_STATUS[booking.status] || PATIENT_STATUS.confirmed;
+            const canCancel = UPCOMING_STATUSES.includes(booking.status) && booking.date >= todayStr;
+            return (
             <div key={booking.id} className="p-4 rounded-xl bg-surface border border-cool-gray/10 flex items-center justify-between gap-4">
-              <div className="font-sans text-xs leading-relaxed"><p className="font-bold text-primary">{booking.patientName}</p><p className="text-cool-gray font-medium">{getTreatmentName(booking.treatmentId)}</p><div className="flex items-center gap-3 text-[11px] text-cool-gray font-bold mt-1.5"><span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5 text-secondary" /> {booking.date}</span><span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-secondary" /> {booking.timeSlot}</span></div></div>
-              <button onClick={() => handleCancelBooking(booking.id)} className="p-2 text-cool-gray hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors shrink-0 cursor-pointer" title="Cancel slot"><Trash2 className="w-4.5 h-4.5" /></button>
+              <div className="font-sans text-xs leading-relaxed"><div className="flex flex-wrap items-center gap-2"><p className="font-bold text-primary">{booking.patientName}</p><span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${status.className}`}>{status.label}</span></div><p className="text-cool-gray font-medium">{getTreatmentName(booking.treatmentId)}</p><div className="flex items-center gap-3 text-[11px] text-cool-gray font-bold mt-1.5"><span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5 text-secondary" /> {booking.date}</span><span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-secondary" /> {booking.timeSlot}</span></div></div>
+              {canCancel && <button onClick={() => handleCancelBooking(booking.id)} className="p-2 text-cool-gray hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors shrink-0 cursor-pointer" title="Cancel slot"><Trash2 className="w-4.5 h-4.5" /></button>}
             </div>
-          ))}</div>
+            );
+          })}</div>
         </div>
       )}
     </div>

@@ -3,9 +3,9 @@
 import React, { useMemo } from 'react';
 import { CalendarCheck, Users, Clock3, Hourglass, Sun, Moon } from 'lucide-react';
 import {
-  AppointmentRecord, STATUS_HEX, STATUS_FILTERS, CATEGORY_ORDER, CATEGORY_COLORS,
+  AppointmentRecord, STATUS_HEX, STATUS_ORDER, CATEGORY_ORDER, CATEGORY_COLORS,
   CATEGORY_LABELS, getTreatmentCategory, getTreatmentName, todayIST, addDaysStr,
-  slotToMinutes, isMorningSlot, formatDateDisplay,
+  slotToMinutes, isMorningSlot, formatDateDisplay, statusLabel, isAwaitingOutcome,
 } from './adminShared';
 
 interface Props {
@@ -32,11 +32,10 @@ export default function AdminDashboardTab({ appointments }: Props) {
     const weekStart = addDaysStr(today, -6);
     const thisWeek = appointments.filter((a) => a.date >= weekStart && a.date <= today);
     const todays = appointments.filter((a) => a.date === today);
-    const pending = appointments.filter((a) => a.status === 'pending');
     return {
       today: todays.length,
       week: thisWeek.length,
-      pending: pending.length,
+      awaitingOutcome: appointments.filter(isAwaitingOutcome).length,
       patients: uniquePatients.size,
     };
   }, [appointments, today]);
@@ -67,11 +66,12 @@ export default function AdminDashboardTab({ appointments }: Props) {
   }, [appointments]);
 
   const statusBreakdown = useMemo(() => {
-    const statuses = STATUS_FILTERS.filter((s) => s !== 'all');
-    const counts = new Map<string, number>(statuses.map((s) => [s, 0]));
+    const counts = new Map<string, number>(STATUS_ORDER.map((s) => [s, 0]));
     for (const a of appointments) counts.set(a.status, (counts.get(a.status) || 0) + 1);
     const total = Math.max(1, appointments.length);
-    return statuses.map((s) => ({ status: s, count: counts.get(s) || 0, pct: Math.round(((counts.get(s) || 0) / total) * 100) }));
+    return STATUS_ORDER
+      .filter((s) => s !== 'pending' || (counts.get(s) || 0) > 0)
+      .map((s) => ({ status: s, count: counts.get(s) || 0, pct: Math.round(((counts.get(s) || 0) / total) * 100) }));
   }, [appointments]);
 
   return (
@@ -79,7 +79,7 @@ export default function AdminDashboardTab({ appointments }: Props) {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatTile icon={<CalendarCheck className="w-5 h-5 text-secondary" />} label="Today" value={stats.today} tint="bg-secondary/10" />
         <StatTile icon={<Clock3 className="w-5 h-5 text-emerald-600" />} label="This Week" value={stats.week} tint="bg-emerald-50" />
-        <StatTile icon={<Hourglass className="w-5 h-5 text-amber-600" />} label="Pending" value={stats.pending} tint="bg-amber-50" />
+        <StatTile icon={<Hourglass className="w-5 h-5 text-orange-600" />} label="Awaiting Outcome" value={stats.awaitingOutcome} tint="bg-orange-50" />
         <StatTile icon={<Users className="w-5 h-5 text-violet-600" />} label="Total Patients" value={stats.patients} tint="bg-violet-50" />
       </div>
 
@@ -141,7 +141,7 @@ export default function AdminDashboardTab({ appointments }: Props) {
           <div className="space-y-2.5">
             {statusBreakdown.map(({ status, count, pct }) => (
               <div key={status} className="flex items-center gap-3 text-xs font-sans">
-                <span className="w-32 shrink-0 text-on-surface-variant font-medium capitalize">{status}</span>
+                <span className="w-32 shrink-0 text-on-surface-variant font-medium">{statusLabel(status)}</span>
                 <div className="flex-1 h-2.5 rounded-full bg-surface-alt overflow-hidden"><div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: STATUS_HEX[status] }} /></div>
                 <span className="w-6 text-right font-bold text-primary tabular-nums">{count}</span>
               </div>

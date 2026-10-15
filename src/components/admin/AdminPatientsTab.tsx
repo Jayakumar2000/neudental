@@ -4,7 +4,7 @@ import React, { useMemo, useState } from 'react';
 import { Search, Phone, Mail, Calendar, ChevronDown, ChevronUp, Download } from 'lucide-react';
 import {
   AppointmentRecord, STATUS_STYLES, getTreatmentName, sortByDateTime, todayIST,
-  appointmentsToCsv, downloadCsv,
+  downloadCsv, statusLabel, UPCOMING_STATUSES,
 } from './adminShared';
 
 interface Props {
@@ -37,7 +37,7 @@ export default function AdminPatientsTab({ appointments }: Props) {
     for (const [phone, visits] of byPhone) {
       const sorted = [...visits].sort(sortByDateTime);
       const latest = sorted[sorted.length - 1];
-      const upcoming = sorted.filter((v) => v.date >= today && v.status !== 'cancelled').sort(sortByDateTime)[0] || null;
+      const upcoming = sorted.filter((v) => v.date >= today && UPCOMING_STATUSES.has(v.status)).sort(sortByDateTime)[0] || null;
       list.push({
         phone,
         patientName: latest.patientName,
@@ -112,7 +112,7 @@ export default function AdminPatientsTab({ appointments }: Props) {
                       <div key={v.docId} className="flex flex-wrap items-center justify-between gap-2 bg-white rounded-xl border border-cool-gray/10 px-4 py-2.5 text-xs font-sans">
                         <span className="font-bold text-primary">{v.date} · {v.timeSlot}</span>
                         <span className="text-cool-gray">{getTreatmentName(v.treatmentId)}</span>
-                        <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${STATUS_STYLES[v.status] || STATUS_STYLES.pending}`}>{v.status}</span>
+                        <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${STATUS_STYLES[v.status] || STATUS_STYLES.pending}`}>{statusLabel(v.status)}</span>
                       </div>
                     ))}
                   </div>

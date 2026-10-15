@@ -71,6 +71,7 @@ export default function AdminView() {
             notes: data.notes || '',
             tags: Array.isArray(data.tags) ? data.tags : [],
             createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : null,
+            rescheduledFrom: data.rescheduledFrom?.date ? { date: data.rescheduledFrom.date, timeSlot: data.rescheduledFrom.timeSlot || '' } : null,
           };
         });
         setAppointments(rows);
@@ -106,7 +107,24 @@ export default function AdminView() {
   const handleStatusChange = async (docId: string, status: string) => {
     setUpdatingId(docId);
     try {
-      await updateDoc(doc(db, 'appointments', docId), { status });
+      await updateDoc(doc(db, 'appointments', docId), { status, statusUpdatedAt: Timestamp.now() });
+    } catch (err) {
+      handleFirestoreError(err, OperationType.UPDATE, 'appointments');
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  const handleReschedule = async (appointment: AppointmentRecord, date: string, timeSlot: string) => {
+    setUpdatingId(appointment.docId);
+    try {
+      await updateDoc(doc(db, 'appointments', appointment.docId), {
+        date,
+        timeSlot,
+        status: 'rescheduled',
+        rescheduledFrom: { date: appointment.date, timeSlot: appointment.timeSlot },
+        statusUpdatedAt: Timestamp.now(),
+      });
     } catch (err) {
       handleFirestoreError(err, OperationType.UPDATE, 'appointments');
     } finally {
@@ -181,8 +199,8 @@ export default function AdminView() {
         {!loadingAppointments && !loadError && (
           <>
             {tab === 'dashboard' && <AdminDashboardTab appointments={appointments} />}
-            {tab === 'calendar' && <AdminCalendarTab appointments={appointments} onStatusChange={handleStatusChange} updatingId={updatingId} />}
-            {tab === 'appointments' && <AdminAppointmentsTab appointments={appointments} onStatusChange={handleStatusChange} onToggleTag={handleToggleTag} updatingId={updatingId} />}
+            {tab === 'calendar' && <AdminCalendarTab appointments={appointments} onStatusChange={handleStatusChange} onReschedule={handleReschedule} updatingId={updatingId} />}
+            {tab === 'appointments' && <AdminAppointmentsTab appointments={appointments} onStatusChange={handleStatusChange} onReschedule={handleReschedule} onToggleTag={handleToggleTag} updatingId={updatingId} />}
             {tab === 'patients' && <AdminPatientsTab appointments={appointments} />}
           </>
         )}

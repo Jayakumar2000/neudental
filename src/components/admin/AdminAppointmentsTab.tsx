@@ -1,23 +1,27 @@
 // neudental v1 - Admin Appointments tab: the searchable/filterable CRM list,
 // with per-appointment preset tags and CSV export of whatever is in view.
 import React, { useMemo, useState } from 'react';
-import { Search, Calendar, Clock, Phone, Mail, FileText, Download, Tag as TagIcon } from 'lucide-react';
+import { Search, Calendar, Clock, Phone, Mail, FileText, Download, Tag as TagIcon, History } from 'lucide-react';
 import {
-  AppointmentRecord, STATUS_STYLES, STATUS_FILTERS, TAG_OPTIONS, TAG_STYLES,
+  AppointmentRecord, STATUS_STYLES, STATUS_ORDER, TAG_OPTIONS, TAG_STYLES,
   CATEGORY_ORDER, CATEGORY_LABELS, getTreatmentName, getTreatmentCategory,
-  sortByDateTime, appointmentsToCsv, downloadCsv,
+  sortByDateTime, appointmentsToCsv, downloadCsv, statusLabel, isAwaitingOutcome,
 } from './adminShared';
+import AppointmentActions from './AppointmentActions';
 
 interface Props {
   appointments: AppointmentRecord[];
   onStatusChange: (docId: string, status: string) => void;
+  onReschedule: (appointment: AppointmentRecord, date: string, timeSlot: string) => void;
   onToggleTag: (docId: string, tag: string, currentTags: string[]) => void;
   updatingId: string | null;
 }
 
-export default function AdminAppointmentsTab({ appointments, onStatusChange, onToggleTag, updatingId }: Props) {
+const AWAITING = 'awaiting';
+
+export default function AdminAppointmentsTab({ appointments, onStatusChange, onReschedule, onToggleTag, updatingId }: Props) {
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<(typeof STATUS_FILTERS)[number]>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
@@ -26,13 +30,21 @@ export default function AdminAppointmentsTab({ appointments, onStatusChange, onT
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return appointments
-      .filter((a) => statusFilter === 'all' || a.status === statusFilter)
+      .filter((a) => statusFilter === 'all' || (statusFilter === AWAITING ? isAwaitingOutcome(a) : a.status === statusFilter))
       .filter((a) => categoryFilter === 'all' || getTreatmentCategory(a.treatmentId) === categoryFilter)
       .filter((a) => !fromDate || a.date >= fromDate)
       .filter((a) => !toDate || a.date <= toDate)
       .filter((a) => !q || a.patientName.toLowerCase().includes(q) || a.phone.includes(q) || a.email.toLowerCase().includes(q))
       .sort(sortByDateTime);
   }, [appointments, search, statusFilter, categoryFilter, fromDate, toDate]);
+
+  const awaitingCount = useMemo(() => appointments.filter(isAwaitingOutcome).length, [appointments]);
+  const hasPending = appointments.some((a) => a.status === 'pending');
+  const statusChips = [
+    { key: 'all', label: 'All' },
+    { key: AWAITING, label: `Awaiting outcome${awaitingCount ? ` (${awaitingCount})` : ''}` },
+    ...STATUS_ORDER.filter((s) => s !== 'pending' || hasPending).map((s) => ({ key: s, label: statusLabel(s) })),
+  ];
 
   return (
     <div className="space-y-4">
@@ -56,8 +68,8 @@ export default function AdminAppointmentsTab({ appointments, onStatusChange, onT
           </button>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {STATUS_FILTERS.map((s) => (
-            <button key={s} onClick={() => setStatusFilter(s)} className={`px-3.5 py-1.5 rounded-full font-sans text-[11px] uppercase tracking-wider font-bold transition-all cursor-pointer ${statusFilter === s ? 'bg-primary text-white' : 'bg-surface-alt border border-cool-gray/15 text-on-surface hover:border-primary'}`}>{s}</button>
+          {statusChips.map(({ key, label }) => (
+            <button key={key} onClick={() => setStatusFilter(key)} className={`px-3.5 py-1.5 rounded-full font-sans text-[11px] uppercase tracking-wider font-bold transition-all cursor-pointer ${statusFilter === key ? 'bg-primary text-white' : 'bg-surface-alt border border-cool-gray/15 text-on-surface hover:border-primary'}`}>{label}</button>
           ))}
           <span className="w-px h-4 bg-cool-gray/20 mx-1" />
           <button onClick={() => setCategoryFilter('all')} className={`px-3.5 py-1.5 rounded-full font-sans text-[11px] uppercase tracking-wider font-bold transition-all cursor-pointer ${categoryFilter === 'all' ? 'bg-primary text-white' : 'bg-surface-alt border border-cool-gray/15 text-on-surface hover:border-primary'}`}>All Treatments</button>
@@ -78,7 +90,8 @@ export default function AdminAppointmentsTab({ appointments, onStatusChange, onT
               <div className="font-sans text-sm flex-1">
                 <div className="flex flex-wrap items-center gap-2 mb-1">
                   <p className="font-bold text-primary">{a.patientName}</p>
-                  <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${STATUS_STYLES[a.status] || STATUS_STYLES.pending}`}>{a.status}</span>
+                  <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${STATUS_STYLES[a.status] || STATUS_STYLES.pending}`}>{statusLabel(a.status)}</span>
+                  {isAwaitingOutcome(a) && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-white text-orange-700 border-orange-300">Mark outcome</span>}
                   {a.tags.map((t) => <span key={t} className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${TAG_STYLES[t] || ''}`}>{t}</span>)}
                 </div>
                 <p className="text-cool-gray font-medium mb-1.5">{getTreatmentName(a.treatmentId)} · <span className="text-[11px]">{CATEGORY_LABELS[getTreatmentCategory(a.treatmentId)]}</span></p>
@@ -88,14 +101,11 @@ export default function AdminAppointmentsTab({ appointments, onStatusChange, onT
                   <a href={`tel:${a.phone}`} className="flex items-center gap-1 hover:text-secondary"><Phone className="w-3.5 h-3.5 text-secondary" /> {a.phone}</a>
                   {a.email && <span className="flex items-center gap-1"><Mail className="w-3.5 h-3.5 text-secondary" /> {a.email}</span>}
                 </div>
+                {a.rescheduledFrom && <p className="flex items-center gap-1.5 mt-2 text-[11px] text-pink-700"><History className="w-3.5 h-3.5 shrink-0" /> Moved from {a.rescheduledFrom.date} {a.rescheduledFrom.timeSlot}</p>}
                 {a.notes && <p className="flex items-start gap-1.5 mt-2 text-xs text-cool-gray italic max-w-lg"><FileText className="w-3.5 h-3.5 text-secondary shrink-0 mt-0.5" /> {a.notes}</p>}
               </div>
-              <div className="flex flex-col items-end gap-2 shrink-0">
-                <div className="flex gap-2">
-                  {a.status !== 'confirmed' && <button disabled={updatingId === a.docId} onClick={() => onStatusChange(a.docId, 'confirmed')} className="px-3.5 py-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-sans font-bold cursor-pointer disabled:opacity-50">Confirm</button>}
-                  {a.status !== 'completed' && <button disabled={updatingId === a.docId} onClick={() => onStatusChange(a.docId, 'completed')} className="px-3.5 py-2 rounded-lg bg-secondary/10 hover:bg-secondary/20 text-secondary text-xs font-sans font-bold cursor-pointer disabled:opacity-50">Completed</button>}
-                  {a.status !== 'cancelled' && <button disabled={updatingId === a.docId} onClick={() => onStatusChange(a.docId, 'cancelled')} className="px-3.5 py-2 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-sans font-bold cursor-pointer disabled:opacity-50">Cancel</button>}
-                </div>
+              <div className="flex flex-col items-end gap-2 md:max-w-lg">
+                <AppointmentActions appointment={a} updating={updatingId === a.docId} onStatusChange={onStatusChange} onReschedule={onReschedule} />
                 <div className="relative">
                   <button onClick={() => setTagMenuFor(tagMenuFor === a.docId ? null : a.docId)} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-cool-gray/15 text-[11px] font-sans font-bold text-cool-gray hover:border-primary cursor-pointer"><TagIcon className="w-3 h-3" /> Tag</button>
                   {tagMenuFor === a.docId && (
