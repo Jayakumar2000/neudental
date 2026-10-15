@@ -4,7 +4,7 @@ import React, { useMemo, useState } from 'react';
 import { Search, Phone, Mail, Calendar, ChevronDown, ChevronUp, Download } from 'lucide-react';
 import {
   AppointmentRecord, STATUS_STYLES, getTreatmentName, sortByDateTime, todayIST,
-  downloadCsv, statusLabel, UPCOMING_STATUSES,
+  downloadCsv, statusLabel, isAwaitingOutcome, useMinuteTick, OPEN_STATUSES,
 } from './adminShared';
 
 interface Props {
@@ -25,6 +25,7 @@ export default function AdminPatientsTab({ appointments }: Props) {
   const [search, setSearch] = useState('');
   const [expanded, setExpanded] = useState<string | null>(null);
   const today = todayIST();
+  const tick = useMinuteTick();
 
   const patients = useMemo(() => {
     const byPhone = new Map<string, AppointmentRecord[]>();
@@ -37,7 +38,7 @@ export default function AdminPatientsTab({ appointments }: Props) {
     for (const [phone, visits] of byPhone) {
       const sorted = [...visits].sort(sortByDateTime);
       const latest = sorted[sorted.length - 1];
-      const upcoming = sorted.filter((v) => v.date >= today && UPCOMING_STATUSES.has(v.status)).sort(sortByDateTime)[0] || null;
+      const upcoming = sorted.filter((v) => v.date >= today && OPEN_STATUSES.has(v.status) && !isAwaitingOutcome(v)).sort(sortByDateTime)[0] || null;
       list.push({
         phone,
         patientName: latest.patientName,
@@ -49,7 +50,7 @@ export default function AdminPatientsTab({ appointments }: Props) {
       });
     }
     return list.sort((a, b) => (b.lastVisit > a.lastVisit ? 1 : -1));
-  }, [appointments, today]);
+  }, [appointments, today, tick]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();

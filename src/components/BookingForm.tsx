@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { TREATMENTS, APPOINTMENT_SLOT_GROUPS } from '../data';
 import { Appointment, AppointmentStatus } from '../types';
 import { Calendar, Clock, Sparkles, Check, Trash2, CalendarCheck, Phone, User, Activity } from 'lucide-react';
@@ -38,7 +38,14 @@ const PATIENT_STATUS: Record<AppointmentStatus, { label: string; className: stri
   cancelled: { label: 'Cancelled', className: 'bg-rose-50 text-rose-700' },
 };
 
-const UPCOMING_STATUSES: AppointmentStatus[] = ['pending', 'confirmed', 'rescheduled'];
+const CANCELLABLE_STATUSES: AppointmentStatus[] = ['pending', 'confirmed', 'rescheduled', 'no_response'];
+
+// Weekday of the YYYY-MM-DD date itself: new Date('YYYY-MM-DD') is UTC
+// midnight, which getDay() reads as the previous day west of UTC.
+function isSundayEvening(dateStr: string, slot: string): boolean {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return new Date(Date.UTC(y, m - 1, d)).getUTCDay() === 0 && APPOINTMENT_SLOT_GROUPS[1].times.includes(slot);
+}
 
 function slotToMinutes(slot: string): number {
   const [time, meridiem] = slot.split(' ');
@@ -62,6 +69,8 @@ export default function BookingForm({ preSelectedTreatmentId, onClose, bare = fa
   const [myBookings, setMyBookings] = useState<Appointment[]>([]);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const submittingRef = useRef(false);
   const [, forceTick] = useState(0);
 
   useEffect(() => { if (preSelectedTreatmentId) setTreatmentId(preSelectedTreatmentId); }, [preSelectedTreatmentId]);
@@ -114,6 +123,9 @@ export default function BookingForm({ preSelectedTreatmentId, onClose, bare = fa
 
   const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();
+    // A second tap while the first is still writing would create a second,
+    // equally auto-confirmed booking (and count the Ads conversion twice).
+    if (submittingRef.current) return;
     setErrorMsg(null);
     setSuccessMsg(null);
     if (!userId) { setErrorMsg('Session establishing. Please try again.'); return; }
@@ -123,14 +135,15 @@ export default function BookingForm({ preSelectedTreatmentId, onClose, bare = fa
     if (date < todayStr) { setErrorMsg('Please select a future appointment date.'); return; }
     if (!timeSlot) { setErrorMsg('Please select an available time slot.'); return; }
     if (isSlotPast(timeSlot)) { setErrorMsg('That time slot has already passed. Please choose another.'); return; }
-    const selectedDateObj = new Date(date);
-    const dayOfWeek = selectedDateObj.getDay();
-    if (dayOfWeek === 0 && timeSlots[1].times.includes(timeSlot)) { setErrorMsg('neudental evening sessions are CLOSED on Sundays. Please select a morning slot.'); return; }
+    if (isSundayEvening(date, timeSlot)) { setErrorMsg('neudental evening sessions are CLOSED on Sundays. Please select a morning slot.'); return; }
     const docId = 'app_' + Date.now();
     const ref = doc(db, 'appointments', docId);
     const booking = { id: docId, patientName: patientName.trim(), phone: phone.trim(), email: email.trim(), treatmentId, date, timeSlot, notes: notes.trim(), userId, createdAt: Timestamp.now() };
     const autoConfirmation = { status: 'confirmed', confirmedAt: Timestamp.now(), confirmedBy: 'auto' };
+    submittingRef.current = true;
+    setSubmitting(true);
     try {
+      let confirmed = true;
       try {
         await setDoc(ref, { ...booking, ...autoConfirmation });
       } catch (err) {
@@ -142,13 +155,22 @@ export default function BookingForm({ preSelectedTreatmentId, onClose, bare = fa
         try {
           await updateDoc(ref, autoConfirmation);
         } catch (confirmErr) {
+          confirmed = false;
           handleFirestoreError(confirmErr, OperationType.UPDATE, 'appointments');
         }
       }
-      setSuccessMsg(`Your appointment is confirmed for ${date} at ${timeSlot}, ${patientName.trim()}. Need to change it? Call +91 93423 67446.`);
+      setSuccessMsg(confirmed
+        ? `Your appointment is confirmed for ${date} at ${timeSlot}, ${patientName.trim()}. Need to change it? Call +91 93423 67446.`
+        : `Booking received for ${date} at ${timeSlot}, ${patientName.trim()}. Our team will confirm it by phone or WhatsApp shortly.`);
       trackConversion('generate_lead', 'booking', { treatment_id: treatmentId });
       setPatientName(''); setPhone(''); setEmail(''); setNotes('');
-    } catch (err) { handleFirestoreError(err, OperationType.CREATE, 'appointments'); setErrorMsg('Could not register your slot. Please try again.'); }
+    } catch (err) {
+      handleFirestoreError(err, OperationType.CREATE, 'appointments');
+      setErrorMsg('Could not register your slot. Please try again.');
+    } finally {
+      submittingRef.current = false;
+      setSubmitting(false);
+    }
   };
 
   const handleCancelBooking = async (id: string) => {
@@ -165,23 +187,25 @@ export default function BookingForm({ preSelectedTreatmentId, onClose, bare = fa
       {successMsg && <div className="mb-6 p-4 rounded-xl bg-emerald-50 text-emerald-800 text-xs font-medium font-sans border-l-4 border-emerald-500">{successMsg}</div>}
       {errorMsg && <div className="mb-6 p-4 rounded-xl bg-rose-50 text-rose-800 text-xs font-medium font-sans border-l-4 border-rose-500">{errorMsg}</div>}
       <form onSubmit={handleBooking} className="space-y-5">
-        <div className="space-y-1"><label className="text-xs font-display font-medium text-primary uppercase">Patient Name</label><div className="relative"><User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-cool-gray" /><input type="text" placeholder="E.g., Jayakumar" required value={patientName} onChange={(e) => setPatientName(e.target.value)} className="w-full pl-10 pr-4 py-3 bg-[#F8FAFC] border-0 border-b-2 border-cool-gray/20 focus:border-secondary focus:ring-0 outline-none text-base sm:text-sm text-primary transition-colors font-sans rounded-t" /></div></div>
+        <div className="space-y-1"><label className="text-xs font-display font-medium text-primary uppercase">Patient Name</label><div className="relative"><User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-cool-gray" /><input type="text" placeholder="E.g., Jayakumar" required maxLength={100} value={patientName} onChange={(e) => setPatientName(e.target.value)} className="w-full pl-10 pr-4 py-3 bg-[#F8FAFC] border-0 border-b-2 border-cool-gray/20 focus:border-secondary focus:ring-0 outline-none text-base sm:text-sm text-primary transition-colors font-sans rounded-t" /></div></div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1"><label className="text-xs font-display font-medium text-primary uppercase">Mobile Number</label><div className="relative"><Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-cool-gray" /><input type="tel" placeholder="+91 9876543210" required value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))} className="w-full pl-10 pr-4 py-3 bg-[#F8FAFC] border-0 border-b-2 border-cool-gray/20 focus:border-secondary focus:ring-0 outline-none text-base sm:text-sm text-primary transition-colors font-sans rounded-t" /></div></div>
-          <div className="space-y-1"><label className="text-xs font-display font-medium text-primary uppercase">Email (Optional)</label><input type="email" placeholder="contact@gmail.com" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-4 py-3 bg-[#F8FAFC] border-0 border-b-2 border-cool-gray/20 focus:border-secondary focus:ring-0 outline-none text-base sm:text-sm text-primary transition-colors font-sans rounded-t" /></div>
+          <div className="space-y-1"><label className="text-xs font-display font-medium text-primary uppercase">Email (Optional)</label><input type="email" placeholder="contact@gmail.com" maxLength={200} value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-4 py-3 bg-[#F8FAFC] border-0 border-b-2 border-cool-gray/20 focus:border-secondary focus:ring-0 outline-none text-base sm:text-sm text-primary transition-colors font-sans rounded-t" /></div>
         </div>
         <div className="space-y-1"><label className="text-xs font-display font-medium text-primary uppercase">Target Treatment Course</label><select value={treatmentId} onChange={(e) => setTreatmentId(e.target.value)} className="w-full px-4 py-3 bg-[#F8FAFC] border-0 border-b-2 border-cool-gray/20 focus:border-secondary focus:ring-0 outline-none text-base sm:text-sm text-primary font-sans rounded-t">{TREATMENTS.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></div>
         <div className="space-y-1"><label className="text-xs font-display font-medium text-primary uppercase">Appointment Date</label><input type="date" required min={todayStr} value={date} onChange={(e) => setDate(e.target.value)} className="w-full px-4 py-3 bg-[#F8FAFC] border-0 border-b-2 border-cool-gray/20 focus:border-secondary focus:ring-0 outline-none text-base sm:text-sm text-primary font-sans rounded-t" /></div>
         <div className="space-y-2"><label className="text-xs font-display font-medium text-primary uppercase block">Select Preferred Hour</label><div className="space-y-3">{timeSlots.map((group) => (<div key={group.label} className="bg-[#F8FAFC] p-3 rounded-xl border border-cool-gray/5"><span className="text-[10px] text-cool-gray uppercase font-bold tracking-wider block mb-2">{group.label}</span><div className="flex flex-wrap gap-1.5">{group.times.map((slot) => { const disabled = isSlotPast(slot); return <button type="button" key={slot} disabled={disabled} title={disabled ? 'This time has already passed today' : undefined} onClick={() => setTimeSlot(slot)} className={`px-3 py-1.5 rounded-lg font-sans text-xs font-semibold transition-all ${disabled ? 'bg-cool-gray/5 border border-cool-gray/10 text-cool-gray/50 line-through cursor-not-allowed' : timeSlot === slot ? 'bg-secondary text-white shadow-md cursor-pointer' : 'bg-white border border-cool-gray/10 hover:border-cool-gray/30 text-on-surface cursor-pointer'}`}>{slot}</button>; })}</div></div>))}</div></div>
-        <div className="space-y-1"><label className="text-xs font-display font-medium text-primary uppercase">Notes (Optional)</label><textarea placeholder="Symptoms or additional notes" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} className="w-full px-4 py-3 bg-[#F8FAFC] border-0 border-b-2 border-cool-gray/20 focus:border-secondary focus:ring-0 outline-none text-base sm:text-sm text-primary font-sans rounded-t resize-none" /></div>
-        <button type="submit" className="w-full bg-primary hover:bg-secondary text-white py-4 cursor-pointer rounded-xl font-sans text-xs uppercase tracking-widest font-bold transition-all duration-200">Book Appointment</button>
+        <div className="space-y-1"><label className="text-xs font-display font-medium text-primary uppercase">Notes (Optional)</label><textarea placeholder="Symptoms or additional notes" rows={2} maxLength={2000} value={notes} onChange={(e) => setNotes(e.target.value)} className="w-full px-4 py-3 bg-[#F8FAFC] border-0 border-b-2 border-cool-gray/20 focus:border-secondary focus:ring-0 outline-none text-base sm:text-sm text-primary font-sans rounded-t resize-none" /></div>
+        <button type="submit" disabled={submitting} className="w-full bg-primary hover:bg-secondary disabled:opacity-60 disabled:cursor-wait text-white py-4 cursor-pointer rounded-xl font-sans text-xs uppercase tracking-widest font-bold transition-all duration-200">{submitting ? 'Booking…' : 'Book Appointment'}</button>
       </form>
       {myBookings.length > 0 && (
         <div className="mt-12 pt-8 border-t border-cool-gray/10">
           <div className="mb-4"><span className="text-xs font-bold uppercase tracking-wider text-primary">Your Bookings ({myBookings.length})</span></div>
           <div className="space-y-3">{myBookings.map((booking) => {
             const status = PATIENT_STATUS[booking.status] || PATIENT_STATUS.confirmed;
-            const canCancel = UPCOMING_STATUSES.includes(booking.status) && booking.date >= todayStr;
+            // Once the slot has started, staff record what happened instead.
+            const slotNotStarted = booking.date > todayStr || (booking.date === todayStr && slotToMinutes(booking.timeSlot) > istNow.minutesSinceMidnight);
+            const canCancel = CANCELLABLE_STATUSES.includes(booking.status) && slotNotStarted;
             return (
             <div key={booking.id} className="p-4 rounded-xl bg-surface border border-cool-gray/10 flex items-center justify-between gap-4">
               <div className="font-sans text-xs leading-relaxed"><div className="flex flex-wrap items-center gap-2"><p className="font-bold text-primary">{booking.patientName}</p><span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${status.className}`}>{status.label}</span></div><p className="text-cool-gray font-medium">{getTreatmentName(booking.treatmentId)}</p><div className="flex items-center gap-3 text-[11px] text-cool-gray font-bold mt-1.5"><span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5 text-secondary" /> {booking.date}</span><span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-secondary" /> {booking.timeSlot}</span></div></div>

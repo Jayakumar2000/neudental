@@ -1,7 +1,8 @@
 // neudental v1 - Admin dashboard shared types, constants and helpers.
 // Split out from AdminView so the four tabs (Dashboard/Calendar/Appointments/
 // Patients) can all work off the same appointment shape and date/CSV helpers.
-import { TREATMENTS } from '../../data';
+import { useEffect, useState } from 'react';
+import { TREATMENTS, APPOINTMENT_SLOT_GROUPS } from '../../data';
 import type { Treatment } from '../../types';
 
 export interface AppointmentRecord {
@@ -16,7 +17,8 @@ export interface AppointmentRecord {
   notes: string;
   tags: string[];
   createdAt: Date | null;
-  rescheduledFrom: { date: string; timeSlot: string } | null;
+  // The slot it was moved from, and the status it had there (e.g. a No-show).
+  rescheduledFrom: { date: string; timeSlot: string; status: string } | null;
 }
 
 // Display order everywhere (filters, status chart). 'pending' last: only
@@ -58,6 +60,14 @@ export const STATUS_HEX: Record<string, string> = {
 };
 
 export const UPCOMING_STATUSES = new Set<string>(['pending', 'confirmed', 'rescheduled']);
+
+// Still on the books: 'no_response' is often set before the visit (reminder
+// call unanswered), so it keeps the slot and counts as upcoming until then.
+export const OPEN_STATUSES = new Set<string>([...UPCOMING_STATUSES, 'no_response']);
+
+// Outcomes were only recorded from this launch date on; older bookings never
+// had them and would otherwise flood the queue.
+const OUTCOME_TRACKING_START = '2026-10-15';
 
 export function statusLabel(status: string): string {
   return STATUS_LABELS[status] || status;
@@ -148,13 +158,58 @@ function nowMinutesIST(): number {
   return (parseInt(map.hour, 10) % 24) * 60 + parseInt(map.minute, 10);
 }
 
+function hasSlotStarted(date: string, timeSlot: string): boolean {
+  const today = todayIST();
+  if (date !== today) return date < today;
+  return slotToMinutes(timeSlot) <= nowMinutesIST();
+}
+
 // Still marked upcoming although its slot has already started: staff need to
 // record what happened (Done / No-show / No response / Reschedule / Cancel).
 export function isAwaitingOutcome(a: AppointmentRecord): boolean {
-  if (!UPCOMING_STATUSES.has(a.status)) return false;
-  const today = todayIST();
-  if (a.date !== today) return a.date < today;
-  return slotToMinutes(a.timeSlot) <= nowMinutesIST();
+  return UPCOMING_STATUSES.has(a.status) && a.date >= OUTCOME_TRACKING_START && hasSlotStarted(a.date, a.timeSlot);
+}
+
+// Re-render once a minute so time-based state ("Awaiting outcome", past
+// slots) stays current while the portal is left open at the front desk.
+export function useMinuteTick(): number {
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setTick((t) => t + 1), 60000);
+    return () => clearInterval(id);
+  }, []);
+  return tick;
+}
+
+// Same rules the patient booking form enforces; null when bookable.
+export function bookingSlotProblem(date: string, timeSlot: string): string | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return 'Pick a date.';
+  if (date < todayIST()) return 'Pick today or a later date.';
+  if (hasSlotStarted(date, timeSlot)) return 'That time has already passed today.';
+  const [y, m, d] = date.split('-').map(Number);
+  if (new Date(Date.UTC(y, m - 1, d)).getUTCDay() === 0 && APPOINTMENT_SLOT_GROUPS[1].times.includes(timeSlot)) {
+    return 'Evening sessions are closed on Sundays.';
+  }
+  return null;
+}
+
+export function firstOpenSlot(date: string): string | null {
+  for (const group of APPOINTMENT_SLOT_GROUPS) {
+    for (const slot of group.times) if (!bookingSlotProblem(date, slot)) return slot;
+  }
+  return null;
+}
+
+// Auto-confirmation has no capacity check, so surface any slot holding more
+// than one upcoming booking for staff to sort out.
+export function findSlotClashes(appointments: AppointmentRecord[]): Set<string> {
+  const bySlot = new Map<string, string[]>();
+  for (const a of appointments) {
+    if (!OPEN_STATUSES.has(a.status) || hasSlotStarted(a.date, a.timeSlot)) continue;
+    const key = `${a.date}|${a.timeSlot}`;
+    bySlot.set(key, [...(bySlot.get(key) || []), a.docId]);
+  }
+  return new Set([...bySlot.values()].filter((ids) => ids.length > 1).flat());
 }
 
 export function addDaysStr(dateStr: string, days: number): string {
@@ -185,7 +240,7 @@ function csvCell(value: string): string {
 }
 
 export function appointmentsToCsv(rows: AppointmentRecord[]): string {
-  const headers = ['Patient Name', 'Phone', 'Email', 'Treatment', 'Category', 'Date', 'Time Slot', 'Status', 'Tags', 'Notes'];
+  const headers = ['Patient Name', 'Phone', 'Email', 'Treatment', 'Category', 'Date', 'Time Slot', 'Status', 'Moved From', 'Tags', 'Notes'];
   const lines = [headers.join(',')];
   for (const a of rows) {
     lines.push([
@@ -196,7 +251,8 @@ export function appointmentsToCsv(rows: AppointmentRecord[]): string {
       CATEGORY_LABELS[getTreatmentCategory(a.treatmentId)] || '',
       a.date,
       a.timeSlot,
-      statusLabel(a.status),
+      a.status,
+      a.rescheduledFrom ? `${a.rescheduledFrom.date} ${a.rescheduledFrom.timeSlot}` : '',
       a.tags.join('; '),
       a.notes,
     ].map((v) => csvCell(String(v ?? ''))).join(','));

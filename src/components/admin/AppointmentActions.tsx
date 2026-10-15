@@ -4,14 +4,14 @@
 import React, { useState } from 'react';
 import { CalendarClock } from 'lucide-react';
 import { APPOINTMENT_SLOT_GROUPS } from '../../data';
-import { AppointmentRecord, UPCOMING_STATUSES, todayIST } from './adminShared';
+import { AppointmentRecord, UPCOMING_STATUSES, todayIST, addDaysStr, bookingSlotProblem, firstOpenSlot } from './adminShared';
 
 interface Props {
   appointment: AppointmentRecord;
   updating: boolean;
   compact?: boolean;
-  onStatusChange: (docId: string, status: string) => void;
-  onReschedule: (appointment: AppointmentRecord, date: string, timeSlot: string) => void;
+  onStatusChange: (docId: string, status: string) => Promise<boolean>;
+  onReschedule: (appointment: AppointmentRecord, date: string, timeSlot: string) => Promise<boolean>;
 }
 
 const OUTCOMES = [
@@ -24,20 +24,28 @@ export default function AppointmentActions({ appointment: a, updating, compact =
   const [rescheduling, setRescheduling] = useState(false);
   const [newDate, setNewDate] = useState(a.date);
   const [newSlot, setNewSlot] = useState(a.timeSlot);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
-  const size = compact ? 'px-2.5 py-1 text-[10px]' : 'px-3.5 py-2 text-xs';
+  // Compact (calendar) buttons stay finger-sized on phones.
+  const size = compact ? 'px-3 py-2 text-[11px] sm:px-2.5 sm:py-1 sm:text-[10px]' : 'px-3.5 py-2 text-xs';
   const button = `${size} rounded-lg font-sans font-bold cursor-pointer disabled:opacity-50`;
+  const problem = bookingSlotProblem(newDate, newSlot);
   const unchanged = newDate === a.date && newSlot === a.timeSlot;
 
   const openReschedule = () => {
-    setNewDate(a.date >= todayIST() ? a.date : todayIST());
-    setNewSlot(a.timeSlot);
+    let date = a.date >= todayIST() ? a.date : todayIST();
+    let slot = bookingSlotProblem(date, a.timeSlot) ? firstOpenSlot(date) : a.timeSlot;
+    if (!slot) { date = addDaysStr(date, 1); slot = firstOpenSlot(date); }
+    setNewDate(date);
+    setNewSlot(slot || a.timeSlot);
+    setSaveError(null);
     setRescheduling(true);
   };
 
-  const saveReschedule = () => {
-    onReschedule(a, newDate, newSlot);
-    setRescheduling(false);
+  const saveReschedule = async () => {
+    setSaveError(null);
+    if (await onReschedule(a, newDate, newSlot)) setRescheduling(false);
+    else setSaveError('Not saved. Please try again.');
   };
 
   return (
@@ -47,14 +55,16 @@ export default function AppointmentActions({ appointment: a, updating, compact =
           <button disabled={updating} onClick={() => onStatusChange(a.docId, 'confirmed')} className={`${button} bg-emerald-50 hover:bg-emerald-100 text-emerald-700`}>Confirm</button>
         )}
         {a.status !== 'pending' && !UPCOMING_STATUSES.has(a.status) && (
-          <button disabled={updating} onClick={() => onStatusChange(a.docId, 'confirmed')} title="Mark as an upcoming confirmed appointment again" className={`${button} bg-emerald-50 hover:bg-emerald-100 text-emerald-700`}>Reopen</button>
+          <button disabled={updating} onClick={() => onStatusChange(a.docId, a.rescheduledFrom ? 'rescheduled' : 'confirmed')} title="Undo: make this an upcoming appointment again" className={`${button} bg-emerald-50 hover:bg-emerald-100 text-emerald-700`}>Reopen</button>
         )}
         {OUTCOMES.filter((o) => o.status !== a.status).map((o) => (
           <button key={o.status} disabled={updating} onClick={() => onStatusChange(a.docId, o.status)} className={`${button} ${o.className}`}>{o.label}</button>
         ))}
-        <button disabled={updating} onClick={() => (rescheduling ? setRescheduling(false) : openReschedule())} className={`${button} inline-flex items-center gap-1 bg-pink-50 hover:bg-pink-100 text-pink-700`}>
-          <CalendarClock className={compact ? 'w-3 h-3' : 'w-3.5 h-3.5'} /> Reschedule
-        </button>
+        {a.status !== 'completed' && (
+          <button disabled={updating} onClick={() => (rescheduling ? setRescheduling(false) : openReschedule())} className={`${button} inline-flex items-center gap-1 bg-pink-50 hover:bg-pink-100 text-pink-700`}>
+            <CalendarClock className={compact ? 'w-3 h-3' : 'w-3.5 h-3.5'} /> Reschedule
+          </button>
+        )}
         {a.status !== 'cancelled' && (
           <button disabled={updating} onClick={() => onStatusChange(a.docId, 'cancelled')} className={`${button} bg-rose-50 hover:bg-rose-100 text-rose-700`}>Cancel</button>
         )}
@@ -79,14 +89,15 @@ export default function AppointmentActions({ appointment: a, updating, compact =
             >
               {APPOINTMENT_SLOT_GROUPS.map((group) => (
                 <optgroup key={group.label} label={group.label}>
-                  {group.times.map((slot) => <option key={slot} value={slot}>{slot}</option>)}
+                  {group.times.map((slot) => <option key={slot} value={slot} disabled={!!bookingSlotProblem(newDate, slot)}>{slot}</option>)}
                 </optgroup>
               ))}
             </select>
           </div>
+          {(problem || saveError) && <p role="alert" className="text-[11px] font-sans font-medium text-rose-700">{saveError || problem}</p>}
           <div className="flex justify-end gap-1.5">
             <button onClick={() => setRescheduling(false)} className="px-3 py-1.5 rounded-lg text-[11px] font-sans font-bold text-cool-gray hover:text-primary cursor-pointer">Close</button>
-            <button disabled={updating || !newDate || !newSlot || unchanged} onClick={saveReschedule} className="px-3 py-1.5 rounded-lg bg-primary hover:bg-secondary text-white text-[11px] font-sans font-bold cursor-pointer disabled:opacity-40">Save new time</button>
+            <button disabled={updating || !!problem || unchanged} onClick={saveReschedule} className="px-3 py-1.5 rounded-lg bg-primary hover:bg-secondary text-white text-[11px] font-sans font-bold cursor-pointer disabled:opacity-40">{updating ? 'Saving…' : 'Save new time'}</button>
           </div>
         </div>
       )}

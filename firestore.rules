@@ -20,28 +20,56 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    function isUpcomingStatus(status) {
-      return status in ['pending', 'confirmed', 'rescheduled'];
+    // 'no_response' is often set before the visit (reminder call unanswered);
+    // the booking is still on the books, so the patient may still cancel it.
+    function isCancellableStatus(status) {
+      return status in ['pending', 'confirmed', 'rescheduled', 'no_response'];
+    }
+
+    // Mirrors APPOINTMENT_SLOT_GROUPS in src/data.ts.
+    function isBookingSlot(slot) {
+      return slot in ['10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM', '12:00 PM', '12:30 PM', '01:00 PM', '01:30 PM',
+        '05:00 PM', '05:30 PM', '06:00 PM', '06:30 PM', '07:00 PM', '07:30 PM', '08:00 PM', '08:30 PM', '09:00 PM', '09:30 PM'];
+    }
+
+    function isOptionalString(data, field, maxSize) {
+      return !(field in data) || (data[field] is string && data[field].size() <= maxSize);
     }
 
     match /appointments/{appointmentId} {
       allow read: if isAdmin() || isOwner(resource.data.userId);
       // Bookings are auto-confirmed on create. 'pending' stays accepted so a
       // visitor still running the previous site build can finish booking.
+      // Staff-only fields (tags, rescheduledFrom...) can't be planted here.
       allow create: if isSignedIn()
+        && request.resource.data.keys().hasOnly(['id', 'patientName', 'phone', 'email', 'treatmentId', 'date', 'timeSlot',
+          'notes', 'userId', 'createdAt', 'status', 'confirmedAt', 'confirmedBy'])
+        && request.resource.data.id == appointmentId
         && request.resource.data.userId == request.auth.uid
         && request.resource.data.patientName is string
         && request.resource.data.patientName.size() > 0
+        && request.resource.data.patientName.size() <= 100
         && request.resource.data.phone is string
+        && request.resource.data.phone.size() <= 20
+        && isOptionalString(request.resource.data, 'email', 200)
         && request.resource.data.treatmentId is string
+        && request.resource.data.treatmentId.size() <= 60
         && request.resource.data.date is string
-        && request.resource.data.timeSlot is string
-        && request.resource.data.status in ['pending', 'confirmed'];
+        && request.resource.data.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && isBookingSlot(request.resource.data.timeSlot)
+        && isOptionalString(request.resource.data, 'notes', 2000)
+        && request.resource.data.createdAt is timestamp
+        && ((request.resource.data.status == 'pending'
+              && !('confirmedBy' in request.resource.data)
+              && !('confirmedAt' in request.resource.data))
+          || (request.resource.data.status == 'confirmed'
+              && request.resource.data.confirmedBy == 'auto'
+              && request.resource.data.confirmedAt is timestamp));
       // Staff record every outcome; a patient may only cancel their own
       // upcoming booking, and can't touch any other field.
       allow update: if isAdmin()
         || (isOwner(resource.data.userId)
-          && isUpcomingStatus(resource.data.status)
+          && isCancellableStatus(resource.data.status)
           && request.resource.data.status == 'cancelled'
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'statusUpdatedAt']));
       allow delete: if false;

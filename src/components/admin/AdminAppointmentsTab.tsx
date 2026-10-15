@@ -5,14 +5,14 @@ import { Search, Calendar, Clock, Phone, Mail, FileText, Download, Tag as TagIco
 import {
   AppointmentRecord, STATUS_STYLES, STATUS_ORDER, TAG_OPTIONS, TAG_STYLES,
   CATEGORY_ORDER, CATEGORY_LABELS, getTreatmentName, getTreatmentCategory,
-  sortByDateTime, appointmentsToCsv, downloadCsv, statusLabel, isAwaitingOutcome,
+  sortByDateTime, appointmentsToCsv, downloadCsv, statusLabel, isAwaitingOutcome, useMinuteTick, findSlotClashes,
 } from './adminShared';
 import AppointmentActions from './AppointmentActions';
 
 interface Props {
   appointments: AppointmentRecord[];
-  onStatusChange: (docId: string, status: string) => void;
-  onReschedule: (appointment: AppointmentRecord, date: string, timeSlot: string) => void;
+  onStatusChange: (docId: string, status: string) => Promise<boolean>;
+  onReschedule: (appointment: AppointmentRecord, date: string, timeSlot: string) => Promise<boolean>;
   onToggleTag: (docId: string, tag: string, currentTags: string[]) => void;
   updatingId: string | null;
 }
@@ -26,6 +26,7 @@ export default function AdminAppointmentsTab({ appointments, onStatusChange, onR
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [tagMenuFor, setTagMenuFor] = useState<string | null>(null);
+  const tick = useMinuteTick();
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -36,9 +37,10 @@ export default function AdminAppointmentsTab({ appointments, onStatusChange, onR
       .filter((a) => !toDate || a.date <= toDate)
       .filter((a) => !q || a.patientName.toLowerCase().includes(q) || a.phone.includes(q) || a.email.toLowerCase().includes(q))
       .sort(sortByDateTime);
-  }, [appointments, search, statusFilter, categoryFilter, fromDate, toDate]);
+  }, [appointments, search, statusFilter, categoryFilter, fromDate, toDate, tick]);
 
-  const awaitingCount = useMemo(() => appointments.filter(isAwaitingOutcome).length, [appointments]);
+  const awaitingCount = useMemo(() => appointments.filter(isAwaitingOutcome).length, [appointments, tick]);
+  const clashes = useMemo(() => findSlotClashes(appointments), [appointments]);
   const hasPending = appointments.some((a) => a.status === 'pending');
   const statusChips = [
     { key: 'all', label: 'All' },
@@ -92,6 +94,7 @@ export default function AdminAppointmentsTab({ appointments, onStatusChange, onR
                   <p className="font-bold text-primary">{a.patientName}</p>
                   <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${STATUS_STYLES[a.status] || STATUS_STYLES.pending}`}>{statusLabel(a.status)}</span>
                   {isAwaitingOutcome(a) && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-white text-orange-700 border-orange-300">Mark outcome</span>}
+                  {clashes.has(a.docId) && <span title="Another upcoming booking has this same date and time" className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-white text-rose-700 border-rose-300">Double-booked</span>}
                   {a.tags.map((t) => <span key={t} className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${TAG_STYLES[t] || ''}`}>{t}</span>)}
                 </div>
                 <p className="text-cool-gray font-medium mb-1.5">{getTreatmentName(a.treatmentId)} · <span className="text-[11px]">{CATEGORY_LABELS[getTreatmentCategory(a.treatmentId)]}</span></p>
@@ -101,7 +104,7 @@ export default function AdminAppointmentsTab({ appointments, onStatusChange, onR
                   <a href={`tel:${a.phone}`} className="flex items-center gap-1 hover:text-secondary"><Phone className="w-3.5 h-3.5 text-secondary" /> {a.phone}</a>
                   {a.email && <span className="flex items-center gap-1"><Mail className="w-3.5 h-3.5 text-secondary" /> {a.email}</span>}
                 </div>
-                {a.rescheduledFrom && <p className="flex items-center gap-1.5 mt-2 text-[11px] text-pink-700"><History className="w-3.5 h-3.5 shrink-0" /> Moved from {a.rescheduledFrom.date} {a.rescheduledFrom.timeSlot}</p>}
+                {a.rescheduledFrom && <p className="flex items-center gap-1.5 mt-2 text-[11px] text-pink-700"><History className="w-3.5 h-3.5 shrink-0" /> Moved from {a.rescheduledFrom.date} {a.rescheduledFrom.timeSlot}{a.rescheduledFrom.status && !['confirmed', 'pending', 'rescheduled'].includes(a.rescheduledFrom.status) ? ` (was ${statusLabel(a.rescheduledFrom.status)})` : ''}</p>}
                 {a.notes && <p className="flex items-start gap-1.5 mt-2 text-xs text-cool-gray italic max-w-lg"><FileText className="w-3.5 h-3.5 text-secondary shrink-0 mt-0.5" /> {a.notes}</p>}
               </div>
               <div className="flex flex-col items-end gap-2 md:max-w-lg">

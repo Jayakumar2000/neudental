@@ -5,7 +5,7 @@ import { CalendarCheck, Users, Clock3, Hourglass, Sun, Moon } from 'lucide-react
 import {
   AppointmentRecord, STATUS_HEX, STATUS_ORDER, CATEGORY_ORDER, CATEGORY_COLORS,
   CATEGORY_LABELS, getTreatmentCategory, getTreatmentName, todayIST, addDaysStr,
-  slotToMinutes, isMorningSlot, formatDateDisplay, statusLabel, isAwaitingOutcome,
+  slotToMinutes, isMorningSlot, formatDateDisplay, statusLabel, isAwaitingOutcome, useMinuteTick,
 } from './adminShared';
 
 interface Props {
@@ -26,6 +26,7 @@ function StatTile({ icon, label, value, tint }: { icon: React.ReactNode; label: 
 
 export default function AdminDashboardTab({ appointments }: Props) {
   const today = todayIST();
+  const tick = useMinuteTick();
 
   const stats = useMemo(() => {
     const uniquePatients = new Set(appointments.map((a) => a.phone).filter(Boolean));
@@ -38,7 +39,7 @@ export default function AdminDashboardTab({ appointments }: Props) {
       awaitingOutcome: appointments.filter(isAwaitingOutcome).length,
       patients: uniquePatients.size,
     };
-  }, [appointments, today]);
+  }, [appointments, today, tick]);
 
   const todaysSchedule = useMemo(
     () => appointments.filter((a) => a.date === today).sort((a, b) => slotToMinutes(a.timeSlot) - slotToMinutes(b.timeSlot)),

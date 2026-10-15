@@ -5,14 +5,14 @@ import React, { useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight, Download, Sun, Moon, Phone, Mail } from 'lucide-react';
 import {
   AppointmentRecord, STATUS_STYLES, TAG_STYLES, todayIST, slotToMinutes, isMorningSlot,
-  formatDateDisplay, getTreatmentName, appointmentsToCsv, downloadCsv, statusLabel,
+  formatDateDisplay, getTreatmentName, appointmentsToCsv, downloadCsv, statusLabel, findSlotClashes,
 } from './adminShared';
 import AppointmentActions from './AppointmentActions';
 
 interface Props {
   appointments: AppointmentRecord[];
-  onStatusChange: (docId: string, status: string) => void;
-  onReschedule: (appointment: AppointmentRecord, date: string, timeSlot: string) => void;
+  onStatusChange: (docId: string, status: string) => Promise<boolean>;
+  onReschedule: (appointment: AppointmentRecord, date: string, timeSlot: string) => Promise<boolean>;
   updatingId: string | null;
 }
 
@@ -61,6 +61,7 @@ export default function AdminCalendarTab({ appointments, onStatusChange, onResch
     () => appointments.filter((a) => a.date === selectedDate).sort((a, b) => slotToMinutes(a.timeSlot) - slotToMinutes(b.timeSlot)),
     [appointments, selectedDate]
   );
+  const clashes = useMemo(() => findSlotClashes(appointments), [appointments]);
   const dayMorning = dayAppointments.filter((a) => isMorningSlot(a.timeSlot));
   const dayEvening = dayAppointments.filter((a) => !isMorningSlot(a.timeSlot));
 
@@ -134,6 +135,7 @@ export default function AdminCalendarTab({ appointments, onStatusChange, onResch
                         <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border shrink-0 ${STATUS_STYLES[a.status] || STATUS_STYLES.pending}`}>{statusLabel(a.status)}</span>
                       </div>
                       <p className="text-xs text-cool-gray mb-1.5">{getTreatmentName(a.treatmentId)}</p>
+                      {clashes.has(a.docId) && <p className="text-[10px] font-bold text-rose-700 mb-1.5">Double-booked: another upcoming booking has this slot</p>}
                       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-on-surface-variant mb-2">
                         <a href={`tel:${a.phone}`} className="flex items-center gap-1 hover:text-secondary"><Phone className="w-3 h-3 text-secondary" /> {a.phone}</a>
                         {a.email && <span className="flex items-center gap-1"><Mail className="w-3 h-3 text-secondary" /> {a.email}</span>}

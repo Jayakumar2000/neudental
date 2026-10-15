@@ -3,22 +3,26 @@
 // matching /admins/{uid} document in Firestore -- see firestore.rules.
 // This file is the shell (auth + single Firestore subscription + tab switch);
 // each tab's own UI lives in ./admin/.
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
   type User,
 } from 'firebase/auth';
-import { collection, onSnapshot, orderBy, query, updateDoc, doc, Timestamp } from 'firebase/firestore';
+import { collection, onSnapshot, orderBy, query, updateDoc, doc, Timestamp, arrayUnion } from 'firebase/firestore';
 import { LogOut, Lock, Mail, ShieldCheck, RefreshCw, LayoutDashboard, CalendarDays, ClipboardList, Users } from 'lucide-react';
 import { auth, db, OperationType, handleFirestoreError } from '../firebase';
 import BrandLogo from './BrandLogo';
-import { AppointmentRecord } from './admin/adminShared';
+import { AppointmentRecord, todayIST } from './admin/adminShared';
 import AdminDashboardTab from './admin/AdminDashboardTab';
 import AdminCalendarTab from './admin/AdminCalendarTab';
 import AdminAppointmentsTab from './admin/AdminAppointmentsTab';
 import AdminPatientsTab from './admin/AdminPatientsTab';
+
+// Patients can write these documents, so never hand a non-string to React
+// (an object would throw and blank the whole portal).
+const str = (v: unknown) => (typeof v === 'string' ? v : '');
 
 const TABS = [
   { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -39,6 +43,8 @@ export default function AdminView() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [loadingAppointments, setLoadingAppointments] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const autoConfirmed = useRef(new Set<string>());
   const [tab, setTab] = useState<(typeof TABS)[number]['key']>('dashboard');
 
   useEffect(() => {
@@ -59,23 +65,34 @@ export default function AdminView() {
       (snapshot) => {
         const rows: AppointmentRecord[] = snapshot.docs.map((d) => {
           const data = d.data();
+          const from = data.rescheduledFrom;
           return {
             docId: d.id,
-            patientName: data.patientName || '',
-            phone: data.phone || '',
-            email: data.email || '',
-            treatmentId: data.treatmentId || '',
-            date: data.date || '',
-            timeSlot: data.timeSlot || '',
-            status: data.status || 'pending',
-            notes: data.notes || '',
-            tags: Array.isArray(data.tags) ? data.tags : [],
+            patientName: str(data.patientName),
+            phone: str(data.phone),
+            email: str(data.email),
+            treatmentId: str(data.treatmentId),
+            date: str(data.date),
+            timeSlot: str(data.timeSlot),
+            status: str(data.status) || 'pending',
+            notes: str(data.notes),
+            tags: Array.isArray(data.tags) ? data.tags.filter((t: unknown): t is string => typeof t === 'string') : [],
             createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : null,
-            rescheduledFrom: data.rescheduledFrom?.date ? { date: data.rescheduledFrom.date, timeSlot: data.rescheduledFrom.timeSlot || '' } : null,
+            rescheduledFrom: from && str(from.date) ? { date: str(from.date), timeSlot: str(from.timeSlot), status: str(from.status) } : null,
           };
         });
         setAppointments(rows);
         setLoadingAppointments(false);
+        // Bookings made before confirmation was automated (or from a tab
+        // still running that old build) arrive 'pending' -- confirm any that
+        // are still upcoming so nobody has to.
+        const today = todayIST();
+        for (const r of rows) {
+          if (r.status !== 'pending' || r.date < today || autoConfirmed.current.has(r.docId)) continue;
+          autoConfirmed.current.add(r.docId);
+          updateDoc(doc(db, 'appointments', r.docId), { status: 'confirmed', confirmedAt: Timestamp.now(), confirmedBy: 'auto', statusUpdatedAt: Timestamp.now() })
+            .catch((err) => handleFirestoreError(err, OperationType.UPDATE, 'appointments'));
+        }
       },
       (error) => {
         setLoadingAppointments(false);
@@ -104,32 +121,36 @@ export default function AdminView() {
     }
   };
 
-  const handleStatusChange = async (docId: string, status: string) => {
+  const runUpdate = async (docId: string, fields: Record<string, unknown>, failure: string): Promise<boolean> => {
     setUpdatingId(docId);
+    setActionError(null);
     try {
-      await updateDoc(doc(db, 'appointments', docId), { status, statusUpdatedAt: Timestamp.now() });
+      await updateDoc(doc(db, 'appointments', docId), fields);
+      return true;
     } catch (err) {
       handleFirestoreError(err, OperationType.UPDATE, 'appointments');
+      setActionError(failure);
+      return false;
     } finally {
       setUpdatingId(null);
     }
   };
 
-  const handleReschedule = async (appointment: AppointmentRecord, date: string, timeSlot: string) => {
-    setUpdatingId(appointment.docId);
-    try {
-      await updateDoc(doc(db, 'appointments', appointment.docId), {
-        date,
-        timeSlot,
-        status: 'rescheduled',
-        rescheduledFrom: { date: appointment.date, timeSlot: appointment.timeSlot },
-        statusUpdatedAt: Timestamp.now(),
-      });
-    } catch (err) {
-      handleFirestoreError(err, OperationType.UPDATE, 'appointments');
-    } finally {
-      setUpdatingId(null);
-    }
+  const handleStatusChange = (docId: string, status: string) =>
+    runUpdate(docId, { status, statusUpdatedAt: Timestamp.now() }, 'Could not update that appointment. Check your connection and try again.');
+
+  // rescheduledFrom keeps the slot and status it was moved from (so a
+  // No-show isn't silently erased); rescheduleHistory keeps every move.
+  const handleReschedule = (appointment: AppointmentRecord, date: string, timeSlot: string) => {
+    const from = { date: appointment.date, timeSlot: appointment.timeSlot, status: appointment.status };
+    return runUpdate(appointment.docId, {
+      date,
+      timeSlot,
+      status: 'rescheduled',
+      rescheduledFrom: from,
+      rescheduleHistory: arrayUnion({ ...from, movedAt: Timestamp.now() }),
+      statusUpdatedAt: Timestamp.now(),
+    }, 'Could not save the new time. The appointment still has its old time; please try again.');
   };
 
   const handleToggleTag = async (docId: string, tag: string, currentTags: string[]) => {
@@ -194,6 +215,12 @@ export default function AdminView() {
         </div>
 
         {loadError && <div className="mb-6 p-4 rounded-xl bg-rose-50 text-rose-800 text-sm font-medium font-sans border-l-4 border-rose-500">{loadError}</div>}
+        {actionError && (
+          <div role="alert" className="fixed bottom-4 inset-x-4 sm:left-auto sm:right-6 sm:max-w-md z-50 p-4 rounded-xl bg-rose-50 text-rose-800 text-sm font-medium font-sans border-l-4 border-rose-500 premium-shadow flex items-start justify-between gap-4">
+            <span>{actionError}</span>
+            <button onClick={() => setActionError(null)} className="text-xs font-bold text-rose-700 hover:text-rose-900 cursor-pointer shrink-0">Dismiss</button>
+          </div>
+        )}
         {loadingAppointments && <p className="font-sans text-sm text-cool-gray">Loading appointments…</p>}
 
         {!loadingAppointments && !loadError && (
