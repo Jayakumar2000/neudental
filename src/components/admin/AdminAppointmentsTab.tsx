@@ -5,7 +5,7 @@ import { Search, Calendar, Clock, Phone, Mail, FileText, Download, Tag as TagIco
 import {
   AppointmentRecord, STATUS_STYLES, STATUS_ORDER, TAG_OPTIONS, TAG_STYLES,
   CATEGORY_ORDER, CATEGORY_LABELS, getTreatmentName, getTreatmentCategory,
-  sortByDateTime, appointmentsToCsv, downloadCsv, statusLabel, isAwaitingOutcome, useMinuteTick, findSlotClashes,
+  sortByDateTime, appointmentsToCsv, downloadCsv, statusLabel, occupiedSlots, isAwaitingOutcome, useMinuteTick, findSlotClashes,
 } from './adminShared';
 import AppointmentActions from './AppointmentActions';
 
@@ -41,6 +41,7 @@ export default function AdminAppointmentsTab({ appointments, onStatusChange, onR
 
   const awaitingCount = useMemo(() => appointments.filter(isAwaitingOutcome).length, [appointments, tick]);
   const clashes = useMemo(() => findSlotClashes(appointments), [appointments]);
+  const occupied = useMemo(() => occupiedSlots(appointments), [appointments]);
   const hasPending = appointments.some((a) => a.status === 'pending');
   const statusChips = [
     { key: 'all', label: 'All' },
@@ -108,7 +109,7 @@ export default function AdminAppointmentsTab({ appointments, onStatusChange, onR
                 {a.notes && <p className="flex items-start gap-1.5 mt-2 text-xs text-cool-gray italic max-w-lg"><FileText className="w-3.5 h-3.5 text-secondary shrink-0 mt-0.5" /> {a.notes}</p>}
               </div>
               <div className="flex flex-col items-end gap-2 md:max-w-lg">
-                <AppointmentActions appointment={a} updating={updatingId === a.docId} onStatusChange={onStatusChange} onReschedule={onReschedule} />
+                <AppointmentActions appointment={a} occupied={occupied} updating={updatingId === a.docId} onStatusChange={onStatusChange} onReschedule={onReschedule} />
                 <div className="relative">
                   <button onClick={() => setTagMenuFor(tagMenuFor === a.docId ? null : a.docId)} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-cool-gray/15 text-[11px] font-sans font-bold text-cool-gray hover:border-primary cursor-pointer"><TagIcon className="w-3 h-3" /> Tag</button>
                   {tagMenuFor === a.docId && (

@@ -10,6 +10,8 @@ interface Props {
   appointment: AppointmentRecord;
   updating: boolean;
   compact?: boolean;
+  // "date|timeSlot" -> docId of the open booking in that slot.
+  occupied: Map<string, string>;
   onStatusChange: (docId: string, status: string) => Promise<boolean>;
   onReschedule: (appointment: AppointmentRecord, date: string, timeSlot: string) => Promise<boolean>;
 }
@@ -20,7 +22,7 @@ const OUTCOMES = [
   { status: 'no_response', label: 'No response', className: 'bg-violet-50 hover:bg-violet-100 text-violet-700' },
 ] as const;
 
-export default function AppointmentActions({ appointment: a, updating, compact = false, onStatusChange, onReschedule }: Props) {
+export default function AppointmentActions({ appointment: a, updating, occupied, compact = false, onStatusChange, onReschedule }: Props) {
   const [rescheduling, setRescheduling] = useState(false);
   const [newDate, setNewDate] = useState(a.date);
   const [newSlot, setNewSlot] = useState(a.timeSlot);
@@ -31,6 +33,11 @@ export default function AppointmentActions({ appointment: a, updating, compact =
   const button = `${size} rounded-lg font-sans font-bold cursor-pointer disabled:opacity-50`;
   const problem = bookingSlotProblem(newDate, newSlot);
   const unchanged = newDate === a.date && newSlot === a.timeSlot;
+  const takenBy = (date: string, slot: string) => {
+    const id = occupied.get(`${date}|${slot}`);
+    return id && id !== a.docId ? id : null;
+  };
+  const doubleBooks = !problem && !unchanged && !!takenBy(newDate, newSlot);
 
   const openReschedule = () => {
     let date = a.date >= todayIST() ? a.date : todayIST();
@@ -89,12 +96,13 @@ export default function AppointmentActions({ appointment: a, updating, compact =
             >
               {APPOINTMENT_SLOT_GROUPS.map((group) => (
                 <optgroup key={group.label} label={group.label}>
-                  {group.times.map((slot) => <option key={slot} value={slot} disabled={!!bookingSlotProblem(newDate, slot)}>{slot}</option>)}
+                  {group.times.map((slot) => <option key={slot} value={slot} disabled={!!bookingSlotProblem(newDate, slot)}>{slot}{takenBy(newDate, slot) ? ' · booked' : ''}</option>)}
                 </optgroup>
               ))}
             </select>
           </div>
           {(problem || saveError) && <p role="alert" className="text-[11px] font-sans font-medium text-rose-700">{saveError || problem}</p>}
+          {doubleBooks && !saveError && <p className="text-[11px] font-sans font-medium text-amber-700">Another patient already has this slot. Saving will double-book it.</p>}
           <div className="flex justify-end gap-1.5">
             <button onClick={() => setRescheduling(false)} className="px-3 py-1.5 rounded-lg text-[11px] font-sans font-bold text-cool-gray hover:text-primary cursor-pointer">Close</button>
             <button disabled={updating || !!problem || unchanged} onClick={saveReschedule} className="px-3 py-1.5 rounded-lg bg-primary hover:bg-secondary text-white text-[11px] font-sans font-bold cursor-pointer disabled:opacity-40">{updating ? 'Saving…' : 'Save new time'}</button>

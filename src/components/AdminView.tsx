@@ -19,6 +19,7 @@ import AdminDashboardTab from './admin/AdminDashboardTab';
 import AdminCalendarTab from './admin/AdminCalendarTab';
 import AdminAppointmentsTab from './admin/AdminAppointmentsTab';
 import AdminPatientsTab from './admin/AdminPatientsTab';
+import { useSlotHoldSync } from './admin/useSlotHoldSync';
 
 // Patients can write these documents, so never hand a non-string to React
 // (an object would throw and blank the whole portal).
@@ -42,6 +43,9 @@ export default function AdminView() {
   const [appointments, setAppointments] = useState<AppointmentRecord[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [loadingAppointments, setLoadingAppointments] = useState(false);
+  // True once the first snapshot has arrived: the slot-hold sync must never
+  // read the initial empty list as "every booking is gone".
+  const [appointmentsReady, setAppointmentsReady] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const autoConfirmed = useRef(new Set<string>());
@@ -56,6 +60,7 @@ export default function AdminView() {
   }, []);
 
   useEffect(() => {
+    setAppointmentsReady(false);
     if (!user) { setAppointments([]); return; }
     setLoadingAppointments(true);
     setLoadError(null);
@@ -82,6 +87,7 @@ export default function AdminView() {
           };
         });
         setAppointments(rows);
+        setAppointmentsReady(true);
         setLoadingAppointments(false);
         // Bookings made before confirmation was automated (or from a tab
         // still running that old build) arrive 'pending' -- confirm any that
@@ -106,6 +112,8 @@ export default function AdminView() {
     );
     return () => unsubscribe();
   }, [user]);
+
+  useSlotHoldSync(user, appointments, appointmentsReady);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

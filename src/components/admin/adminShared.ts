@@ -4,6 +4,9 @@
 import { useEffect, useState } from 'react';
 import { TREATMENTS, APPOINTMENT_SLOT_GROUPS } from '../../data';
 import type { Treatment } from '../../types';
+import { slotToMinutes, addDaysStr } from '../../lib/booking';
+
+export { slotToMinutes, addDaysStr };
 
 export interface AppointmentRecord {
   docId: string;
@@ -121,19 +124,6 @@ export function getTreatmentCategory(id: string): string {
   return TREATMENT_BY_ID.get(id)?.category || 'preventive';
 }
 
-// "10:00 AM" / "05:30 PM" -> minutes since midnight, for sorting and for
-// placing a slot into the Morning/Evening schedule strip.
-export function slotToMinutes(slot: string): number {
-  const [time, meridiem] = slot.split(' ');
-  if (!time || !meridiem) return 0;
-  const [hStr, mStr] = time.split(':');
-  let h = parseInt(hStr, 10) || 0;
-  const m = parseInt(mStr, 10) || 0;
-  if (meridiem === 'PM' && h !== 12) h += 12;
-  if (meridiem === 'AM' && h === 12) h = 0;
-  return h * 60 + m;
-}
-
 export function isMorningSlot(slot: string): boolean {
   return slotToMinutes(slot) < 14 * 60; // before 2:00 PM
 }
@@ -196,8 +186,9 @@ export function firstOpenSlot(date: string): string | null {
   return null;
 }
 
-// Auto-confirmation has no capacity check, so surface any slot holding more
-// than one upcoming booking for staff to sort out.
+// Online bookings are limited to one per slot (see slotHolds), but staff can
+// overbook on purpose and bookings from before that limit may share a slot,
+// so surface any slot holding more than one upcoming booking.
 export function findSlotClashes(appointments: AppointmentRecord[]): Set<string> {
   const bySlot = new Map<string, string[]>();
   for (const a of appointments) {
@@ -208,11 +199,12 @@ export function findSlotClashes(appointments: AppointmentRecord[]): Set<string> 
   return new Set([...bySlot.values()].filter((ids) => ids.length > 1).flat());
 }
 
-export function addDaysStr(dateStr: string, days: number): string {
-  const [y, m, d] = dateStr.split('-').map(Number);
-  const dt = new Date(Date.UTC(y, m - 1, d));
-  dt.setUTCDate(dt.getUTCDate() + days);
-  return dt.toISOString().slice(0, 10);
+// "date|timeSlot" of every slot an open booking occupies, so the reschedule
+// picker can warn before staff double-book a slot.
+export function occupiedSlots(appointments: AppointmentRecord[]): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const a of appointments) if (OPEN_STATUSES.has(a.status)) map.set(`${a.date}|${a.timeSlot}`, a.docId);
+  return map;
 }
 
 export function formatDateDisplay(dateStr: string): string {

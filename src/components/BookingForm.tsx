@@ -2,9 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { TREATMENTS, APPOINTMENT_SLOT_GROUPS } from '../data';
 import { Appointment, AppointmentStatus } from '../types';
 import { Calendar, Clock, Sparkles, Check, Trash2, CalendarCheck, Phone, User, Activity } from 'lucide-react';
-import { collection, query, where, orderBy, onSnapshot, setDoc, doc, Timestamp, updateDoc } from 'firebase/firestore';
+import { collection, query, where, orderBy, onSnapshot, setDoc, doc, Timestamp, updateDoc, writeBatch, getDoc } from 'firebase/firestore';
 import { db, OperationType, handleFirestoreError, ensureAnonymousAuth } from '../firebase';
 import { trackConversion } from '../lib/analytics';
+import { BOOKING_WINDOW_DAYS, slotToMinutes, holdIdFor, addDaysStr } from '../lib/booking';
 
 interface BookingFormProps {
   preSelectedTreatmentId: string;
@@ -46,14 +47,7 @@ function normalizeMobile(value: string): string {
   return value.replace(/\D/g, '').slice(-10);
 }
 
-function slotToMinutes(slot: string): number {
-  const [time, meridiem] = slot.split(' ');
-  const [hStr, mStr] = time.split(':');
-  let h = parseInt(hStr, 10);
-  if (meridiem === 'PM' && h !== 12) h += 12;
-  if (meridiem === 'AM' && h === 12) h = 0;
-  return h * 60 + parseInt(mStr, 10);
-}
+const isPermissionDenied = (err: unknown) => (err as { code?: string })?.code === 'permission-denied';
 
 export default function BookingForm({ preSelectedTreatmentId, onClose, bare = false }: BookingFormProps) {
   const [patientName, setPatientName] = useState('');
@@ -71,6 +65,7 @@ export default function BookingForm({ preSelectedTreatmentId, onClose, bare = fa
   const [submitting, setSubmitting] = useState(false);
   const submittingRef = useRef(false);
   const [, forceTick] = useState(0);
+  const [bookedSlots, setBookedSlots] = useState<Set<string>>(new Set());
 
   useEffect(() => { if (preSelectedTreatmentId) setTreatmentId(preSelectedTreatmentId); }, [preSelectedTreatmentId]);
 
@@ -106,19 +101,34 @@ export default function BookingForm({ preSelectedTreatmentId, onClose, bare = fa
     return () => unsubscribe();
   }, [userId]);
 
+  // Slots already taken on the chosen date. Until the slotHolds rules are
+  // deployed the read is refused; then nothing is greyed out.
+  useEffect(() => {
+    setBookedSlots(new Set());
+    if (!userId || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return;
+    const q = query(collection(db, 'slotHolds'), where('date', '==', date));
+    return onSnapshot(q, (snapshot) => {
+      setBookedSlots(new Set(snapshot.docs.map((d) => d.data().timeSlot as string)));
+    }, (error) => {
+      if (!isPermissionDenied(error)) handleFirestoreError(error, OperationType.LIST, 'slotHolds');
+    });
+  }, [userId, date]);
+
   const timeSlots = APPOINTMENT_SLOT_GROUPS;
 
   const istNow = getISTNow();
   const todayStr = istNow.dateStr; // YYYY-MM-DD IST, matches <input type="date">
   const isToday = date === todayStr;
+  const maxDateStr = addDaysStr(todayStr, BOOKING_WINDOW_DAYS);
   const isSlotPast = (slot: string) => isToday && slotToMinutes(slot) <= istNow.minutesSinceMidnight;
+  const isSlotBooked = (slot: string) => bookedSlots.has(slot);
 
   // If the date changes (or the clock ticks past it), drop a selection that's
   // no longer bookable instead of silently submitting a past slot.
   useEffect(() => {
-    if (timeSlot && isSlotPast(timeSlot)) setTimeSlot('');
+    if (timeSlot && (isSlotPast(timeSlot) || isSlotBooked(timeSlot))) setTimeSlot('');
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [date, istNow.dateStr, istNow.minutesSinceMidnight]);
+  }, [date, istNow.dateStr, istNow.minutesSinceMidnight, bookedSlots]);
 
   const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -132,11 +142,19 @@ export default function BookingForm({ preSelectedTreatmentId, onClose, bare = fa
     if (!/^[6-9]\d{9}$/.test(phone)) { setErrorMsg('Valid 10-digit mobile number is required.'); return; }
     if (!date) { setErrorMsg('Please select a valid treatment date.'); return; }
     if (date < todayStr) { setErrorMsg('Please select a future appointment date.'); return; }
+    if (date > maxDateStr) { setErrorMsg(`Appointments can be booked up to ${BOOKING_WINDOW_DAYS} days ahead. For a later date, please call +91 93423 67446.`); return; }
     if (!timeSlot) { setErrorMsg('Please select an available time slot.'); return; }
     if (isSlotPast(timeSlot)) { setErrorMsg('That time slot has already passed. Please choose another.'); return; }
+    if (isSlotBooked(timeSlot)) { setErrorMsg('That time slot is already booked. Please choose another.'); return; }
+    // Bookings are only visible per browser, so this catches a repeat booking
+    // from the same device, e.g. after the success message was missed.
+    const existing = myBookings.find((b) => b.phone === phone && CANCELLABLE_STATUSES.includes(b.status)
+      && (b.date > todayStr || (b.date === todayStr && slotToMinutes(b.timeSlot) > istNow.minutesSinceMidnight)));
+    if (existing && !window.confirm(`This number already has an appointment on ${existing.date} at ${existing.timeSlot}. Book another one as well?`)) return;
     // Date.now() alone collides when two visitors book in the same millisecond.
     const docId = 'app_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
     const ref = doc(db, 'appointments', docId);
+    const holdRef = doc(db, 'slotHolds', holdIdFor(date, timeSlot));
     const booking = { id: docId, patientName: patientName.trim(), phone: phone.trim(), email: email.trim(), treatmentId, date, timeSlot, notes: notes.trim(), userId, createdAt: Timestamp.now() };
     const autoConfirmation = { status: 'confirmed', confirmedAt: Timestamp.now(), confirmedBy: 'auto' };
     submittingRef.current = true;
@@ -144,18 +162,42 @@ export default function BookingForm({ preSelectedTreatmentId, onClose, bare = fa
     try {
       let confirmed = true;
       try {
-        await setDoc(ref, { ...booking, ...autoConfirmation });
+        // The booking and its slot hold are saved together or not at all;
+        // the hold can't be created if someone else already has the slot.
+        const batch = writeBatch(db);
+        batch.set(ref, { ...booking, ...autoConfirmation });
+        batch.set(holdRef, { date, timeSlot, appointmentId: docId });
+        await batch.commit();
       } catch (err) {
-        if ((err as { code?: string })?.code !== 'permission-denied') throw err;
-        // Firestore rules are published separately from the site. Until the
-        // copy in firestore.rules is live, create must be 'pending' -- confirm
-        // it straight after, which those older rules allow the owner to do.
-        await setDoc(ref, { ...booking, status: 'pending' });
+        if (!isPermissionDenied(err)) throw err;
+        let slotTaken = false;
+        let holdRulesLive = true;
         try {
-          await updateDoc(ref, autoConfirmation);
-        } catch (confirmErr) {
-          confirmed = false;
-          handleFirestoreError(confirmErr, OperationType.UPDATE, 'appointments');
+          slotTaken = (await getDoc(holdRef)).exists();
+        } catch (readErr) {
+          if (!isPermissionDenied(readErr)) throw readErr;
+          holdRulesLive = false;
+        }
+        if (slotTaken) {
+          setErrorMsg(`Sorry, ${timeSlot} on ${date} was just booked by someone else. Please choose another time.`);
+          return;
+        }
+        if (holdRulesLive) throw err;
+        // Firestore rules are published separately from the site. Until the
+        // copy in firestore.rules (with slotHolds) is live, book the way the
+        // previous rules accept: confirmed on create, or else pending and
+        // confirmed straight after.
+        try {
+          await setDoc(ref, { ...booking, ...autoConfirmation });
+        } catch (legacyErr) {
+          if (!isPermissionDenied(legacyErr)) throw legacyErr;
+          await setDoc(ref, { ...booking, status: 'pending' });
+          try {
+            await updateDoc(ref, autoConfirmation);
+          } catch (confirmErr) {
+            confirmed = false;
+            handleFirestoreError(confirmErr, OperationType.UPDATE, 'appointments');
+          }
         }
       }
       setSuccessMsg(confirmed
@@ -172,13 +214,32 @@ export default function BookingForm({ preSelectedTreatmentId, onClose, bare = fa
     }
   };
 
-  const handleCancelBooking = async (id: string) => {
+  const handleCancelBooking = async (booking: Appointment) => {
     if (!userId) return;
-    if (!window.confirm('Cancel this appointment?')) return;
+    if (!window.confirm(`Cancel your appointment on ${booking.date} at ${booking.timeSlot}?`)) return;
     setErrorMsg(null);
     setSuccessMsg(null);
     try {
-      await updateDoc(doc(db, 'appointments', id), { status: 'cancelled', statusUpdatedAt: Timestamp.now() });
+      const ref = doc(db, 'appointments', booking.id);
+      const cancellation = { status: 'cancelled', statusUpdatedAt: Timestamp.now() };
+      // Free the slot in the same write when this booking holds it. Bookings
+      // made before slot holds (or moved by staff) may not hold one.
+      const holdRef = doc(db, 'slotHolds', holdIdFor(booking.date, booking.timeSlot));
+      let holdsSlot = false;
+      try {
+        const hold = await getDoc(holdRef);
+        holdsSlot = hold.exists() && hold.data().appointmentId === booking.id;
+      } catch (readErr) {
+        if (!isPermissionDenied(readErr)) throw readErr;
+      }
+      if (holdsSlot) {
+        const batch = writeBatch(db);
+        batch.update(ref, cancellation);
+        batch.delete(holdRef);
+        await batch.commit();
+      } else {
+        await updateDoc(ref, cancellation);
+      }
       setSuccessMsg('Your slot has been canceled.');
     } catch (err) {
       handleFirestoreError(err, OperationType.UPDATE, 'appointments');
@@ -201,9 +262,10 @@ export default function BookingForm({ preSelectedTreatmentId, onClose, bare = fa
           <div className="space-y-1"><label className="text-xs font-display font-medium text-primary uppercase">Email (Optional)</label><input type="email" placeholder="contact@gmail.com" maxLength={200} value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-4 py-3 bg-[#F8FAFC] border-0 border-b-2 border-cool-gray/20 focus:border-secondary focus:ring-0 outline-none text-base sm:text-sm text-primary transition-colors font-sans rounded-t" /></div>
         </div>
         <div className="space-y-1"><label className="text-xs font-display font-medium text-primary uppercase">Target Treatment Course</label><select value={treatmentId} onChange={(e) => setTreatmentId(e.target.value)} className="w-full px-4 py-3 bg-[#F8FAFC] border-0 border-b-2 border-cool-gray/20 focus:border-secondary focus:ring-0 outline-none text-base sm:text-sm text-primary font-sans rounded-t">{TREATMENTS.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></div>
-        <div className="space-y-1"><label className="text-xs font-display font-medium text-primary uppercase">Appointment Date</label><input type="date" required min={todayStr} value={date} onChange={(e) => setDate(e.target.value)} className="w-full px-4 py-3 bg-[#F8FAFC] border-0 border-b-2 border-cool-gray/20 focus:border-secondary focus:ring-0 outline-none text-base sm:text-sm text-primary font-sans rounded-t" /></div>
-        <div className="space-y-2"><label className="text-xs font-display font-medium text-primary uppercase block">Select Preferred Hour</label><div className="space-y-3">{timeSlots.map((group) => (<div key={group.label} className="bg-[#F8FAFC] p-3 rounded-xl border border-cool-gray/5"><span className="text-[10px] text-cool-gray uppercase font-bold tracking-wider block mb-2">{group.label}</span><div className="flex flex-wrap gap-1.5">{group.times.map((slot) => { const disabled = isSlotPast(slot); return <button type="button" key={slot} disabled={disabled} title={disabled ? 'This time has already passed today' : undefined} onClick={() => setTimeSlot(slot)} className={`px-3 py-1.5 rounded-lg font-sans text-xs font-semibold transition-all ${disabled ? 'bg-cool-gray/5 border border-cool-gray/10 text-cool-gray/50 line-through cursor-not-allowed' : timeSlot === slot ? 'bg-secondary text-white shadow-md cursor-pointer' : 'bg-white border border-cool-gray/10 hover:border-cool-gray/30 text-on-surface cursor-pointer'}`}>{slot}</button>; })}</div></div>))}</div></div>
+        <div className="space-y-1"><label className="text-xs font-display font-medium text-primary uppercase">Appointment Date</label><input type="date" required min={todayStr} max={maxDateStr} value={date} onChange={(e) => setDate(e.target.value)} className="w-full px-4 py-3 bg-[#F8FAFC] border-0 border-b-2 border-cool-gray/20 focus:border-secondary focus:ring-0 outline-none text-base sm:text-sm text-primary font-sans rounded-t" /></div>
+        <div className="space-y-2"><label className="text-xs font-display font-medium text-primary uppercase block">Select Preferred Hour</label><p className="font-sans text-[11px] text-cool-gray">One patient per slot, so there's no waiting. Struck-through times are already booked or have passed.</p><div className="space-y-3">{timeSlots.map((group) => (<div key={group.label} className="bg-[#F8FAFC] p-3 rounded-xl border border-cool-gray/5"><span className="text-[10px] text-cool-gray uppercase font-bold tracking-wider block mb-2">{group.label}</span><div className="flex flex-wrap gap-1.5">{group.times.map((slot) => { const past = isSlotPast(slot); const booked = !past && isSlotBooked(slot); const disabled = past || booked; return <button type="button" key={slot} disabled={disabled} title={past ? 'This time has already passed today' : booked ? 'This time is already booked' : undefined} aria-label={booked ? `${slot}, already booked` : undefined} onClick={() => setTimeSlot(slot)} className={`px-3 py-1.5 rounded-lg font-sans text-xs font-semibold transition-all ${disabled ? 'bg-cool-gray/5 border border-cool-gray/10 text-cool-gray/50 line-through cursor-not-allowed' : timeSlot === slot ? 'bg-secondary text-white shadow-md cursor-pointer' : 'bg-white border border-cool-gray/10 hover:border-cool-gray/30 text-on-surface cursor-pointer'}`}>{slot}</button>; })}</div></div>))}</div></div>
         <div className="space-y-1"><label className="text-xs font-display font-medium text-primary uppercase">Notes (Optional)</label><textarea placeholder="Symptoms or additional notes" rows={2} maxLength={2000} value={notes} onChange={(e) => setNotes(e.target.value)} className="w-full px-4 py-3 bg-[#F8FAFC] border-0 border-b-2 border-cool-gray/20 focus:border-secondary focus:ring-0 outline-none text-base sm:text-sm text-primary font-sans rounded-t resize-none" /></div>
+        <p className="font-sans text-[11px] text-on-surface-variant leading-relaxed">By booking, you agree that neudental may call or WhatsApp you about this appointment, and use the details you share here, including any notes about symptoms, only to arrange and provide your dental care.</p>
         <button type="submit" disabled={submitting} className="w-full bg-primary hover:bg-secondary disabled:opacity-60 disabled:cursor-wait text-white py-4 cursor-pointer rounded-xl font-sans text-xs uppercase tracking-widest font-bold transition-all duration-200">{submitting ? 'Booking…' : 'Book Appointment'}</button>
       </form>
       {myBookings.length > 0 && (
@@ -217,7 +279,7 @@ export default function BookingForm({ preSelectedTreatmentId, onClose, bare = fa
             return (
             <div key={booking.id} className="p-4 rounded-xl bg-surface border border-cool-gray/10 flex items-center justify-between gap-4">
               <div className="font-sans text-xs leading-relaxed"><div className="flex flex-wrap items-center gap-2"><p className="font-bold text-primary">{booking.patientName}</p><span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${status.className}`}>{status.label}</span></div><p className="text-cool-gray font-medium">{getTreatmentName(booking.treatmentId)}</p><div className="flex items-center gap-3 text-[11px] text-cool-gray font-bold mt-1.5"><span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5 text-secondary" /> {booking.date}</span><span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-secondary" /> {booking.timeSlot}</span></div></div>
-              {canCancel && <button onClick={() => handleCancelBooking(booking.id)} className="p-2 text-cool-gray hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors shrink-0 cursor-pointer" title="Cancel slot"><Trash2 className="w-4.5 h-4.5" /></button>}
+              {canCancel && <button onClick={() => handleCancelBooking(booking)} className="p-2 text-cool-gray hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors shrink-0 cursor-pointer" title="Cancel slot"><Trash2 className="w-4.5 h-4.5" /></button>}
             </div>
             );
           })}</div>
