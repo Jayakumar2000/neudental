@@ -67,6 +67,9 @@ const initialRoute: Route = typeof window !== 'undefined' ? classifyRoute(window
 
 export default function App() {
   const [preSelectedTreatmentId, setPreSelectedTreatmentId] = useState<string>('checkup');
+  // Counts treatment picks, so picking the same treatment again still
+  // reaches the booking form after the patient changed its dropdown.
+  const [treatmentPick, setTreatmentPick] = useState(0);
   const [symptomCheckerOpen, setSymptomCheckerOpen] = useState(false);
   const [blogsOpen, setBlogsOpen] = useState(initialRoute.type === 'blogsList' || initialRoute.type === 'blogPost');
   const [activeBlogId, setActiveBlogId] = useState<string | null>(initialRoute.type === 'blogPost' ? initialRoute.blogId : null);
@@ -180,6 +183,7 @@ export default function App() {
   // pre-selects it and scrolls to the booking form.
   const handleSelectTreatment = (treatmentId: string) => {
     setPreSelectedTreatmentId(treatmentId);
+    setTreatmentPick((n) => n + 1);
     handleScrollToBooking();
   };
 
@@ -192,6 +196,7 @@ export default function App() {
   // detail sits in the sticky side panel right there already.
   const handleViewTreatmentInServices = (treatmentId: string) => {
     setPreSelectedTreatmentId(treatmentId);
+    setTreatmentPick((n) => n + 1);
     navigateToSection('services', () => {
       const deck = document.getElementById('treatments-deck');
       // Services.tsx only renders the deck below the lg breakpoint (its
@@ -319,7 +324,7 @@ export default function App() {
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white rounded-3xl border border-cool-gray/10 premium-shadow overflow-hidden">
             <DoctorTrustBanner />
-            <BookingForm preSelectedTreatmentId={preSelectedTreatmentId} bare />
+            <BookingForm preSelectedTreatmentId={preSelectedTreatmentId} preSelectNonce={treatmentPick} bare />
           </div>
         </div>
       </section>
