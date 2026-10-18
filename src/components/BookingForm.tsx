@@ -40,11 +40,10 @@ const PATIENT_STATUS: Record<AppointmentStatus, { label: string; className: stri
 
 const CANCELLABLE_STATUSES: AppointmentStatus[] = ['pending', 'confirmed', 'rescheduled', 'no_response'];
 
-// Weekday of the YYYY-MM-DD date itself: new Date('YYYY-MM-DD') is UTC
-// midnight, which getDay() reads as the previous day west of UTC.
-function isSundayEvening(dateStr: string, slot: string): boolean {
-  const [y, m, d] = dateStr.split('-').map(Number);
-  return new Date(Date.UTC(y, m - 1, d)).getUTCDay() === 0 && APPOINTMENT_SLOT_GROUPS[1].times.includes(slot);
+// Keep the last 10 digits so a typed or pasted "+91 98765 43210" or
+// "098765 43210" ends up as the mobile number itself, not "9198765432".
+function normalizeMobile(value: string): string {
+  return value.replace(/\D/g, '').slice(-10);
 }
 
 function slotToMinutes(slot: string): number {
@@ -99,7 +98,7 @@ export default function BookingForm({ preSelectedTreatmentId, onClose, bare = fa
       const bookings: Appointment[] = [];
       snapshot.forEach((docSnapshot) => {
         const data = docSnapshot.data();
-        bookings.push({ id: data.id, patientName: data.patientName || '', phone: data.phone || '', email: data.email || '', treatmentId: data.treatmentId || '', date: data.date || '', timeSlot: data.timeSlot || '', status: data.status || 'pending', notes: data.notes || '' });
+        bookings.push({ id: docSnapshot.id, patientName: data.patientName || '', phone: data.phone || '', email: data.email || '', treatmentId: data.treatmentId || '', date: data.date || '', timeSlot: data.timeSlot || '', status: data.status || 'pending', notes: data.notes || '' });
       });
       setMyBookings(bookings);
       setDbLoading(false);
@@ -130,13 +129,13 @@ export default function BookingForm({ preSelectedTreatmentId, onClose, bare = fa
     setSuccessMsg(null);
     if (!userId) { setErrorMsg('Session establishing. Please try again.'); return; }
     if (!patientName.trim()) { setErrorMsg('Patient Name is required.'); return; }
-    if (!phone.trim() || phone.length < 10) { setErrorMsg('Valid 10-digit mobile number is required.'); return; }
+    if (!/^[6-9]\d{9}$/.test(phone)) { setErrorMsg('Valid 10-digit mobile number is required.'); return; }
     if (!date) { setErrorMsg('Please select a valid treatment date.'); return; }
     if (date < todayStr) { setErrorMsg('Please select a future appointment date.'); return; }
     if (!timeSlot) { setErrorMsg('Please select an available time slot.'); return; }
     if (isSlotPast(timeSlot)) { setErrorMsg('That time slot has already passed. Please choose another.'); return; }
-    if (isSundayEvening(date, timeSlot)) { setErrorMsg('neudental evening sessions are CLOSED on Sundays. Please select a morning slot.'); return; }
-    const docId = 'app_' + Date.now();
+    // Date.now() alone collides when two visitors book in the same millisecond.
+    const docId = 'app_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
     const ref = doc(db, 'appointments', docId);
     const booking = { id: docId, patientName: patientName.trim(), phone: phone.trim(), email: email.trim(), treatmentId, date, timeSlot, notes: notes.trim(), userId, createdAt: Timestamp.now() };
     const autoConfirmation = { status: 'confirmed', confirmedAt: Timestamp.now(), confirmedBy: 'auto' };
@@ -175,7 +174,16 @@ export default function BookingForm({ preSelectedTreatmentId, onClose, bare = fa
 
   const handleCancelBooking = async (id: string) => {
     if (!userId) return;
-    try { await updateDoc(doc(db, 'appointments', id), { status: 'cancelled', statusUpdatedAt: Timestamp.now() }); setSuccessMsg('Your slot has been canceled.'); } catch (err) { setErrorMsg('Could not cancel slot.'); }
+    if (!window.confirm('Cancel this appointment?')) return;
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    try {
+      await updateDoc(doc(db, 'appointments', id), { status: 'cancelled', statusUpdatedAt: Timestamp.now() });
+      setSuccessMsg('Your slot has been canceled.');
+    } catch (err) {
+      handleFirestoreError(err, OperationType.UPDATE, 'appointments');
+      setErrorMsg('Could not cancel slot. Please call +91 93423 67446.');
+    }
   };
 
   const getTreatmentName = (id: string) => TREATMENTS.find(t => t.id === id)?.name || 'General Check-Up';
@@ -189,7 +197,7 @@ export default function BookingForm({ preSelectedTreatmentId, onClose, bare = fa
       <form onSubmit={handleBooking} className="space-y-5">
         <div className="space-y-1"><label className="text-xs font-display font-medium text-primary uppercase">Patient Name</label><div className="relative"><User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-cool-gray" /><input type="text" placeholder="E.g., Jayakumar" required maxLength={100} value={patientName} onChange={(e) => setPatientName(e.target.value)} className="w-full pl-10 pr-4 py-3 bg-[#F8FAFC] border-0 border-b-2 border-cool-gray/20 focus:border-secondary focus:ring-0 outline-none text-base sm:text-sm text-primary transition-colors font-sans rounded-t" /></div></div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1"><label className="text-xs font-display font-medium text-primary uppercase">Mobile Number</label><div className="relative"><Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-cool-gray" /><input type="tel" placeholder="+91 9876543210" required value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))} className="w-full pl-10 pr-4 py-3 bg-[#F8FAFC] border-0 border-b-2 border-cool-gray/20 focus:border-secondary focus:ring-0 outline-none text-base sm:text-sm text-primary transition-colors font-sans rounded-t" /></div></div>
+          <div className="space-y-1"><label className="text-xs font-display font-medium text-primary uppercase">Mobile Number</label><div className="relative"><Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-cool-gray" /><input type="tel" placeholder="9876543210" inputMode="numeric" required value={phone} onChange={(e) => setPhone(normalizeMobile(e.target.value))} className="w-full pl-10 pr-4 py-3 bg-[#F8FAFC] border-0 border-b-2 border-cool-gray/20 focus:border-secondary focus:ring-0 outline-none text-base sm:text-sm text-primary transition-colors font-sans rounded-t" /></div></div>
           <div className="space-y-1"><label className="text-xs font-display font-medium text-primary uppercase">Email (Optional)</label><input type="email" placeholder="contact@gmail.com" maxLength={200} value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-4 py-3 bg-[#F8FAFC] border-0 border-b-2 border-cool-gray/20 focus:border-secondary focus:ring-0 outline-none text-base sm:text-sm text-primary transition-colors font-sans rounded-t" /></div>
         </div>
         <div className="space-y-1"><label className="text-xs font-display font-medium text-primary uppercase">Target Treatment Course</label><select value={treatmentId} onChange={(e) => setTreatmentId(e.target.value)} className="w-full px-4 py-3 bg-[#F8FAFC] border-0 border-b-2 border-cool-gray/20 focus:border-secondary focus:ring-0 outline-none text-base sm:text-sm text-primary font-sans rounded-t">{TREATMENTS.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></div>

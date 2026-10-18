@@ -186,10 +186,6 @@ export function bookingSlotProblem(date: string, timeSlot: string): string | nul
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return 'Pick a date.';
   if (date < todayIST()) return 'Pick today or a later date.';
   if (hasSlotStarted(date, timeSlot)) return 'That time has already passed today.';
-  const [y, m, d] = date.split('-').map(Number);
-  if (new Date(Date.UTC(y, m - 1, d)).getUTCDay() === 0 && APPOINTMENT_SLOT_GROUPS[1].times.includes(timeSlot)) {
-    return 'Evening sessions are closed on Sundays.';
-  }
   return null;
 }
 
