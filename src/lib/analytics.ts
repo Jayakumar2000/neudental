@@ -49,6 +49,14 @@ export function trackConversion(
   trackAdsConversion(action);
 }
 
+// Tags the current Clarity session with a custom event, so its recording can
+// be found under Clarity > Recordings > Filters > Custom events.
+export function trackClarityEvent(name: string) {
+  if (typeof window !== 'undefined' && typeof window.clarity === 'function') {
+    window.clarity('event', name);
+  }
+}
+
 // Manual page_view dispatch. index.html sets send_page_view: false on the
 // GA4 config call, which -- per Google's own SPA integration guidance --
 // disables GA4's automatic page_view tracking entirely, both the one on load
