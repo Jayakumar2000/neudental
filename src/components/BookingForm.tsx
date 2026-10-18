@@ -147,8 +147,11 @@ export default function BookingForm({ preSelectedTreatmentId, preSelectNonce, on
   const [bookingsNotice, setBookingsNotice] = useState<{ tone: 'error' | 'success'; text: string } | null>(null);
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
   const [revealRequest, setRevealRequest] = useState<{ target: RevealTarget; n: number } | null>(null);
-  // Screen-reader announcement for an error on the field that already has focus.
-  const [srError, setSrError] = useState('');
+  // Screen-reader announcement for an error on the field that already has
+  // focus; shown only while that field's error stands.
+  const [srError, setSrError] = useState<{ key: FieldKey; text: string } | null>(null);
+  // Announces a result that isn't given focus (an always-present live region).
+  const [srStatus, setSrStatus] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const submittingRef = useRef(false);
   // After one reload to pick up a new build, don't offer another.
@@ -314,10 +317,10 @@ export default function BookingForm({ preSelectedTreatmentId, preSelectNonce, on
     if (firstInvalid) {
       // Moving focus to the field reads its error out. If the patient is
       // already in that field (they pressed Go/Enter there), announce it.
-      setSrError('');
+      setSrError(null);
       if (fieldElements()[firstInvalid] === document.activeElement) {
-        const message = errors[firstInvalid] ?? '';
-        setTimeout(() => setSrError(message), 50);
+        const announce = { key: firstInvalid, text: errors[firstInvalid] ?? '' };
+        setTimeout(() => setSrError(announce), 50);
       }
       revealNext(firstInvalid);
       return;
@@ -445,6 +448,16 @@ export default function BookingForm({ preSelectedTreatmentId, preSelectNonce, on
     if (!userId) return;
     if (!window.confirm(`Cancel your appointment on ${formatBookingDate(booking.date)} at ${booking.timeSlot}?`)) return;
     setBookingsNotice(null);
+    setSrStatus('');
+    // On a slow connection the patient may tap or scroll elsewhere before
+    // this finishes (iOS never focuses a tapped button, so focus can't tell).
+    let movedOn = false;
+    const startY = window.scrollY;
+    const onUserAction = (e: Event) => { if (!bookingsRef.current?.contains(e.target as Node)) movedOn = true; };
+    const userEvents = ['pointerdown', 'keydown'] as const;
+    const listen = { capture: true, passive: true } as const;
+    userEvents.forEach((type) => window.addEventListener(type, onUserAction, listen));
+    let notice: { tone: 'error' | 'success'; text: string };
     try {
       const ref = doc(db, 'appointments', booking.id);
       const cancellation = { status: 'cancelled', statusUpdatedAt: Timestamp.now() };
@@ -466,16 +479,21 @@ export default function BookingForm({ preSelectedTreatmentId, preSelectNonce, on
       } else {
         await updateDoc(ref, cancellation);
       }
-      setBookingsNotice({ tone: 'success', text: `Your appointment on ${formatBookingDate(booking.date)} at ${booking.timeSlot} has been cancelled.` });
+      notice = { tone: 'success', text: `Your appointment on ${formatBookingDate(booking.date)} at ${booking.timeSlot} has been cancelled.` };
       setConfirmation((c) => (c && c.id === booking.id ? { ...c, cancelled: true } : c));
     } catch (err) {
       handleFirestoreError(err, OperationType.UPDATE, 'appointments');
-      setBookingsNotice({ tone: 'error', text: 'Could not cancel this appointment. Please call +91 93423 67446.' });
+      notice = { tone: 'error', text: 'Could not cancel this appointment. Please call +91 93423 67446.' };
+    } finally {
+      userEvents.forEach((type) => window.removeEventListener(type, onUserAction, listen));
     }
-    // The cancel button just disappeared; put focus on the result instead,
-    // unless the patient has moved on while a slow connection was saving it.
+    setBookingsNotice(notice);
+    // The cancel button just disappeared: move focus to the result if the
+    // patient is still here; otherwise just announce it, without moving them.
     const active = document.activeElement;
-    if (!active || active === document.body || bookingsRef.current?.contains(active)) revealNext('bookingsNotice');
+    const stayed = !movedOn && Math.abs(window.scrollY - startY) < window.innerHeight / 2;
+    if (bookingsRef.current?.contains(active) || (stayed && (!active || active === document.body))) revealNext('bookingsNotice');
+    else setTimeout(() => setSrStatus(notice.text), 50);
   };
 
   const getTreatmentName = (id: string) => TREATMENTS.find(t => t.id === id)?.name || 'General Check-Up';
@@ -484,6 +502,7 @@ export default function BookingForm({ preSelectedTreatmentId, preSelectNonce, on
 
   return (
     <div className={bare ? 'p-6 md:p-8 lg:p-10' : 'bg-white rounded-3xl p-6 md:p-8 border border-cool-gray/10 premium-shadow'}>
+      <p className="sr-only" role="status">{srStatus}</p>
       <div className="flex items-center gap-2 mb-6"><CalendarCheck className="w-6 h-6 text-secondary" /><h3 className="font-serif font-bold text-xl md:text-2xl text-primary">Dentist Appointment Booking</h3></div>
       <p className="font-sans text-xs text-on-surface-variant leading-relaxed mb-6">Book your appointment with Neudental instantly. We adhere rigidly to schedule times to eliminate clinic waiting lines.</p>
       {confirmation ? (
@@ -515,7 +534,7 @@ export default function BookingForm({ preSelectedTreatmentId, preSelectNonce, on
         <div className="space-y-1"><label htmlFor={fieldId('date')} className="text-xs font-display font-medium text-primary uppercase">Appointment Date</label><input ref={dateRef} id={fieldId('date')} type="date" min={todayStr} max={maxDateStr} value={date} onChange={(e) => { setDate(e.target.value); clearFieldError('date'); }} {...ariaFor('date')} className={fieldClass(!!fieldErrors.date)} /><FieldError id={errorId('date')} message={fieldErrors.date} /></div>
         <div ref={slotsRef} tabIndex={-1} role="group" aria-labelledby={fieldId('slots-label')} aria-describedby={fieldErrors.timeSlot ? errorId('timeSlot') : undefined} className="space-y-2 outline-none scroll-mt-24"><span id={fieldId('slots-label')} className="text-xs font-display font-medium text-primary uppercase block">Select Preferred Hour</span><p className="font-sans text-[11px] text-cool-gray">One patient per slot, so there's no waiting. Struck-through times are already booked or have passed.</p><FieldError id={errorId('timeSlot')} message={fieldErrors.timeSlot} /><div className="space-y-3">{timeSlots.map((group) => (<div key={group.label} className={`bg-[#F8FAFC] p-3 rounded-xl border ${fieldErrors.timeSlot ? 'border-rose-300' : 'border-cool-gray/5'}`}><span className="text-[10px] text-cool-gray uppercase font-bold tracking-wider block mb-2">{group.label}</span><div className="grid grid-cols-2 min-[360px]:grid-cols-3 sm:grid-cols-4 gap-2">{group.times.map((slot) => { const past = isSlotPast(slot); const booked = !past && isSlotBooked(slot); const disabled = past || booked; return <button type="button" key={slot} disabled={disabled} aria-pressed={timeSlot === slot} title={past ? 'This time has already passed today' : booked ? 'This time is already booked' : undefined} aria-label={booked ? `${slot}, already booked` : undefined} onClick={(e) => pickSlot(slot, e.currentTarget)} className={`min-h-11 px-1.5 whitespace-nowrap rounded-lg font-sans text-xs font-semibold transition-all ${disabled ? 'bg-cool-gray/5 border border-cool-gray/10 text-cool-gray/50 line-through cursor-not-allowed' : timeSlot === slot ? 'bg-secondary text-white shadow-md cursor-pointer' : 'bg-white border border-cool-gray/10 hover:border-cool-gray/30 text-on-surface cursor-pointer'}`}>{slot}</button>; })}</div></div>))}</div></div>
         <div className="space-y-1"><label htmlFor={fieldId('notes')} className="text-xs font-display font-medium text-primary uppercase">Notes (Optional)</label><textarea id={fieldId('notes')} placeholder="Symptoms or additional notes" rows={2} maxLength={2000} value={notes} onChange={(e) => setNotes(e.target.value)} className={`${fieldClass(false)} resize-none`} /></div>
-        <p className="sr-only" aria-live="assertive">{srError}</p>
+        <p className="sr-only" aria-live="assertive">{srError && fieldErrors[srError.key] ? srError.text : ''}</p>
         <p className="font-sans text-[11px] text-on-surface-variant leading-relaxed">By booking, you agree that neudental may call or WhatsApp you about this appointment, and use the details you share here, including any notes about symptoms, only to arrange and provide your dental care.</p>
         {formAlert && (
           <div key={formAlert.seq ?? 'note'} ref={alertRef} tabIndex={-1} role={formAlert.tone === 'error' ? 'alert' : 'status'} className={`scroll-mt-24 outline-none p-4 rounded-xl text-xs font-medium font-sans border-l-4 ${formAlert.tone === 'error' ? 'bg-rose-50 text-rose-800 border-rose-500' : 'bg-secondary/5 text-primary border-secondary'}`}>
@@ -538,7 +557,7 @@ export default function BookingForm({ preSelectedTreatmentId, preSelectNonce, on
       {myBookings.length > 0 && (
         <div ref={bookingsRef} className="mt-12 pt-8 border-t border-cool-gray/10">
           <div className="mb-4"><span className="text-xs font-bold uppercase tracking-wider text-primary">Your Bookings ({myBookings.length})</span></div>
-          {bookingsNotice && <div ref={bookingsNoticeRef} tabIndex={-1} role={bookingsNotice.tone === 'error' ? 'alert' : 'status'} className={`scroll-mt-24 outline-none mb-4 p-3 rounded-xl text-xs font-medium font-sans border-l-4 ${bookingsNotice.tone === 'error' ? 'bg-rose-50 text-rose-800 border-rose-500' : 'bg-emerald-50 text-emerald-800 border-emerald-500'}`}>{bookingsNotice.text}</div>}
+          {bookingsNotice && <div ref={bookingsNoticeRef} tabIndex={-1} className={`scroll-mt-24 outline-none mb-4 p-3 rounded-xl text-xs font-medium font-sans border-l-4 ${bookingsNotice.tone === 'error' ? 'bg-rose-50 text-rose-800 border-rose-500' : 'bg-emerald-50 text-emerald-800 border-emerald-500'}`}>{bookingsNotice.text}</div>}
           <div className="space-y-3">{myBookings.map((booking) => {
             const status = PATIENT_STATUS[booking.status] || PATIENT_STATUS.confirmed;
             // Once the slot has started, staff record what happened instead.
