@@ -26,10 +26,39 @@ service cloud.firestore {
       return status in ['pending', 'confirmed', 'rescheduled', 'no_response'];
     }
 
-    // Mirrors APPOINTMENT_SLOT_GROUPS in src/data.ts.
+    // Mirrors APPOINTMENT_SLOT_GROUPS in src/data.ts: each slot and the
+    // HHMM code holdIdFor() in src/lib/booking.ts uses for its slotHolds id.
+    function slotCodes() {
+      return {'10:00 AM': '1000', '10:30 AM': '1030', '11:00 AM': '1100', '11:30 AM': '1130',
+        '12:00 PM': '1200', '12:30 PM': '1230', '01:00 PM': '1300', '01:30 PM': '1330',
+        '05:00 PM': '1700', '05:30 PM': '1730', '06:00 PM': '1800', '06:30 PM': '1830', '07:00 PM': '1900',
+        '07:30 PM': '1930', '08:00 PM': '2000', '08:30 PM': '2030', '09:00 PM': '2100', '09:30 PM': '2130'};
+    }
+
     function isBookingSlot(slot) {
-      return slot in ['10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM', '12:00 PM', '12:30 PM', '01:00 PM', '01:30 PM',
-        '05:00 PM', '05:30 PM', '06:00 PM', '06:30 PM', '07:00 PM', '07:30 PM', '08:00 PM', '08:30 PM', '09:00 PM', '09:30 PM'];
+      return slot is string && slot in slotCodes();
+    }
+
+    function holdIdFor(date, slot) {
+      return date + '_' + slotCodes()[slot];
+    }
+
+    function holdPath(holdId) {
+      return /databases/$(database)/documents/slotHolds/$(holdId);
+    }
+
+    function appointmentPath(appointmentId) {
+      return /databases/$(database)/documents/appointments/$(appointmentId);
+    }
+
+    // Today (IST) up to BOOKING_WINDOW_DAYS (30) ahead, as in the booking
+    // form. request.time is UTC and the date has no timezone, so allow a day
+    // either side; the form enforces the exact IST window.
+    function isBookableDate(date) {
+      let parts = date.split('-');
+      let day = timestamp.date(int(parts[0]), int(parts[1]), int(parts[2]));
+      return day > request.time - duration.value(1, 'd')
+        && day <= request.time + duration.value(31, 'd');
     }
 
     function isOptionalString(data, field, maxSize) {
@@ -38,9 +67,9 @@ service cloud.firestore {
 
     match /appointments/{appointmentId} {
       allow read: if isAdmin() || isOwner(resource.data.userId);
-      // Bookings are auto-confirmed on create. 'pending' stays accepted so a
-      // visitor still running the previous site build can finish booking.
-      // Staff-only fields (tags, rescheduledFrom...) can't be planted here.
+      // Bookings are auto-confirmed on create, together with the slot's hold
+      // (one patient per slot), in the same batch. Staff-only fields (tags,
+      // rescheduledFrom...) can't be planted here.
       allow create: if isSignedIn()
         && request.resource.data.keys().hasOnly(['id', 'patientName', 'phone', 'email', 'treatmentId', 'date', 'timeSlot',
           'notes', 'userId', 'createdAt', 'status', 'confirmedAt', 'confirmedBy'])
@@ -50,21 +79,20 @@ service cloud.firestore {
         && request.resource.data.patientName.size() > 0
         && request.resource.data.patientName.size() <= 100
         && request.resource.data.phone is string
-        && request.resource.data.phone.size() <= 20
+        && request.resource.data.phone.matches('^[6-9][0-9]{9}$')
         && isOptionalString(request.resource.data, 'email', 200)
         && request.resource.data.treatmentId is string
         && request.resource.data.treatmentId.size() <= 60
         && request.resource.data.date is string
         && request.resource.data.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && isBookableDate(request.resource.data.date)
         && isBookingSlot(request.resource.data.timeSlot)
         && isOptionalString(request.resource.data, 'notes', 2000)
         && request.resource.data.createdAt is timestamp
-        && ((request.resource.data.status == 'pending'
-              && !('confirmedBy' in request.resource.data)
-              && !('confirmedAt' in request.resource.data))
-          || (request.resource.data.status == 'confirmed'
-              && request.resource.data.confirmedBy == 'auto'
-              && request.resource.data.confirmedAt is timestamp));
+        && request.resource.data.status == 'confirmed'
+        && request.resource.data.confirmedBy == 'auto'
+        && request.resource.data.confirmedAt is timestamp
+        && getAfter(holdPath(holdIdFor(request.resource.data.date, request.resource.data.timeSlot))).data.appointmentId == appointmentId;
       // Staff record every outcome; a patient may only cancel their own
       // upcoming booking, and can't touch any other field.
       allow update: if isAdmin()
@@ -73,6 +101,36 @@ service cloud.firestore {
           && request.resource.data.status == 'cancelled'
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'statusUpdatedAt']));
       allow delete: if false;
+    }
+
+    // One document per booked slot, id "<date>_<HHMM>" -- creating it fails
+    // once the slot is taken, which is what limits a slot to one patient.
+    // Holds carry no patient details, so any visitor may read them to grey
+    // out booked slots. The admin portal deletes holds whose appointment was
+    // cancelled or moved and claims holds for bookings made before them.
+    match /slotHolds/{holdId} {
+      allow read: if isSignedIn();
+      allow create: if request.resource.data.keys().hasOnly(['date', 'timeSlot', 'appointmentId'])
+        && request.resource.data.date is string
+        && isBookingSlot(request.resource.data.timeSlot)
+        && request.resource.data.appointmentId is string
+        && holdId == holdIdFor(request.resource.data.date, request.resource.data.timeSlot)
+        && (isAdmin() || isPatientHold(request.resource.data));
+      // A patient frees the slot only as they cancel the booking holding it.
+      allow delete: if isAdmin()
+        || (isSignedIn()
+          && getAfter(appointmentPath(resource.data.appointmentId)).data.userId == request.auth.uid
+          && getAfter(appointmentPath(resource.data.appointmentId)).data.status == 'cancelled');
+      allow update: if false;
+    }
+
+    function isPatientHold(hold) {
+      let appointment = getAfter(appointmentPath(hold.appointmentId)).data;
+      return isSignedIn()
+        && appointment.userId == request.auth.uid
+        && appointment.date == hold.date
+        && appointment.timeSlot == hold.timeSlot
+        && appointment.status in ['confirmed', 'rescheduled'];
     }
   }
 }

@@ -5,7 +5,7 @@ import React, { useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight, Download, Sun, Moon, Phone, Mail } from 'lucide-react';
 import {
   AppointmentRecord, STATUS_STYLES, TAG_STYLES, todayIST, slotToMinutes, isMorningSlot,
-  formatDateDisplay, getTreatmentName, appointmentsToCsv, downloadCsv, statusLabel, findSlotClashes,
+  formatDateDisplay, getTreatmentName, appointmentsToCsv, downloadCsv, statusLabel, occupiedSlots, findSlotClashes,
 } from './adminShared';
 import AppointmentActions from './AppointmentActions';
 
@@ -62,6 +62,7 @@ export default function AdminCalendarTab({ appointments, onStatusChange, onResch
     [appointments, selectedDate]
   );
   const clashes = useMemo(() => findSlotClashes(appointments), [appointments]);
+  const occupied = useMemo(() => occupiedSlots(appointments), [appointments]);
   const dayMorning = dayAppointments.filter((a) => isMorningSlot(a.timeSlot));
   const dayEvening = dayAppointments.filter((a) => !isMorningSlot(a.timeSlot));
 
@@ -145,7 +146,7 @@ export default function AdminCalendarTab({ appointments, onStatusChange, onResch
                           {a.tags.map((t) => <span key={t} className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${TAG_STYLES[t] || 'bg-surface-alt text-cool-gray border-cool-gray/15'}`}>{t}</span>)}
                         </div>
                       )}
-                      <AppointmentActions appointment={a} compact updating={updatingId === a.docId} onStatusChange={onStatusChange} onReschedule={onReschedule} />
+                      <AppointmentActions appointment={a} occupied={occupied} compact updating={updatingId === a.docId} onStatusChange={onStatusChange} onReschedule={onReschedule} />
                     </div>
                   ))}
                 </div>
