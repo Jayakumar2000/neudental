@@ -25,6 +25,11 @@
 html {
   scroll-behavior: smooth;
 }
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
 
 .no-scrollbar::-webkit-scrollbar {
   display: none;

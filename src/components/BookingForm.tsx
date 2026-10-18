@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useId } from 'react';
+import { flushSync } from 'react-dom';
 import { TREATMENTS, APPOINTMENT_SLOT_GROUPS } from '../data';
 import { Appointment, AppointmentStatus } from '../types';
-import { Calendar, Clock, Check, Trash2, CalendarCheck, Phone, User, Activity, AlertCircle, MessageCircle, Loader2 } from 'lucide-react';
+import { Calendar, Clock, Check, Trash2, CalendarCheck, Phone, User, Activity, AlertCircle, MessageCircle, Loader2, CalendarX } from 'lucide-react';
 import { collection, query, where, orderBy, onSnapshot, setDoc, doc, Timestamp, updateDoc, writeBatch, getDoc } from 'firebase/firestore';
 import { db, OperationType, handleFirestoreError, ensureAnonymousAuth } from '../firebase';
 import { trackConversion, trackEvent, trackClarityEvent } from '../lib/analytics';
@@ -68,8 +69,8 @@ type FieldErrors = Partial<Record<FieldKey, string>>;
 const FIELD_ORDER: FieldKey[] = ['patientName', 'phone', 'email', 'date', 'timeSlot'];
 
 interface FormAlert { tone: 'error' | 'info'; text: string; contact?: boolean; refresh?: boolean }
-interface Confirmation { name: string; treatmentId: string; date: string; timeSlot: string; confirmed: boolean }
-type RevealTarget = FieldKey | 'alert' | 'confirmation';
+interface Confirmation { id: string; name: string; treatmentId: string; date: string; timeSlot: string; confirmed: boolean; cancelled?: boolean }
+type RevealTarget = FieldKey | 'alert' | 'restoreNote' | 'confirmation' | 'bookingsNotice';
 
 // A booking that failed only because this tab was running an outdated build
 // is kept here across the reload that fetches the current one. sessionStorage
@@ -78,15 +79,17 @@ const DRAFT_KEY = 'neudental:bookingDraft';
 const DRAFT_MAX_AGE_MS = 30 * 60 * 1000;
 interface BookingDraft { patientName: string; phone: string; email: string; treatmentId: string; date: string; timeSlot: string; notes: string; savedAt: number }
 
+// A usable draft is cleared by the component once restored (see below);
+// an expired or unreadable one is removed here.
 function readDraft(): BookingDraft | null {
   try {
     const raw = sessionStorage.getItem(DRAFT_KEY);
     if (!raw) return null;
     const draft = JSON.parse(raw) as BookingDraft;
-    return Date.now() - draft.savedAt < DRAFT_MAX_AGE_MS ? draft : null;
-  } catch {
-    return null;
-  }
+    if (typeof draft?.savedAt === 'number' && Date.now() - draft.savedAt < DRAFT_MAX_AGE_MS) return draft;
+  } catch { /* unreadable: drop it below */ }
+  clearDraft();
+  return null;
 }
 
 function clearDraft() {
@@ -102,12 +105,16 @@ function saveDraft(draft: Omit<BookingDraft, 'savedAt'>): boolean {
   }
 }
 
-// Brings a message or field into view below the sticky header (centred, so
-// the header never covers it) and optionally moves focus there.
+// Brings a message or field into view and optionally moves focus there.
+// Short targets are centred, clear of the sticky header; one too tall for
+// the screen (the time-slot picker on a small phone) is lined up with its
+// top just under the header (its scroll-mt) so its error text shows.
+// 'instant' rather than 'auto': index.css sets html { scroll-behavior: smooth }.
 function reveal(el: HTMLElement | null, focus: boolean) {
   if (!el) return;
   const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-  el.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
+  const tall = el.getBoundingClientRect().height > window.innerHeight - 160;
+  el.scrollIntoView({ behavior: reduceMotion ? 'instant' : 'smooth', block: tall ? 'start' : 'center' });
   if (focus) el.focus({ preventScroll: true });
 }
 
@@ -154,6 +161,7 @@ export default function BookingForm({ preSelectedTreatmentId, onClose, bare = fa
   const slotsRef = useRef<HTMLDivElement>(null);
   const alertRef = useRef<HTMLDivElement>(null);
   const confirmationRef = useRef<HTMLDivElement>(null);
+  const bookingsNoticeRef = useRef<HTMLDivElement>(null);
 
   const revealNext = (target: RevealTarget) => setRevealRequest({ target, n: Date.now() });
   const showAlert = (alert: FormAlert) => { setFormAlert(alert); revealNext('alert'); };
@@ -165,23 +173,42 @@ export default function BookingForm({ preSelectedTreatmentId, onClose, bare = fa
     if (!revealRequest) return;
     const { target } = revealRequest;
     const fields: Record<FieldKey, HTMLElement | null> = { patientName: nameRef.current, phone: phoneRef.current, email: emailRef.current, date: dateRef.current, timeSlot: slotsRef.current };
+    // Save errors leave focus on the Book button, ready for a retry.
     if (target === 'alert') reveal(alertRef.current, false);
+    else if (target === 'restoreNote') reveal(alertRef.current, true);
     else if (target === 'confirmation') reveal(confirmationRef.current, true);
+    else if (target === 'bookingsNotice') reveal(bookingsNoticeRef.current, true);
     else reveal(fields[target], true);
   }, [revealRequest]);
 
-  useEffect(() => { if (preSelectedTreatmentId) setTreatmentId(preSelectedTreatmentId); }, [preSelectedTreatmentId]);
+  // The parent's treatment pick is applied when it changes. Its value at
+  // mount is already in the initial state, where a restored draft wins.
+  const appliedPreselectRef = useRef(preSelectedTreatmentId);
+  useEffect(() => {
+    if (!preSelectedTreatmentId || preSelectedTreatmentId === appliedPreselectRef.current) return;
+    appliedPreselectRef.current = preSelectedTreatmentId;
+    setTreatmentId(preSelectedTreatmentId);
+  }, [preSelectedTreatmentId]);
 
   useEffect(() => {
     if (!restoredDraft) return;
     clearDraft();
     setFormAlert({ tone: 'info', text: 'We updated the site while this page was open. Your details are still filled in, so just tap Book Appointment to confirm your slot.' });
-    revealNext('alert');
-    // Images above the form may still be loading and push it down.
+    revealNext('restoreNote');
+    // Images above the form may still be loading and push it down: look
+    // again once they have, unless the patient has started scrolling,
+    // tapping or typing by then.
     if (document.readyState === 'complete') return;
-    const onLoad = () => revealNext('alert');
+    const onLoad = () => revealNext('restoreNote');
+    const userEvents = ['pointerdown', 'touchstart', 'wheel', 'keydown'] as const;
+    const listen = { capture: true, passive: true } as const;
+    const stop = () => {
+      window.removeEventListener('load', onLoad);
+      userEvents.forEach((type) => window.removeEventListener(type, stop, listen));
+    };
     window.addEventListener('load', onLoad, { once: true });
-    return () => window.removeEventListener('load', onLoad);
+    userEvents.forEach((type) => window.addEventListener(type, stop, listen));
+    return stop;
   }, [restoredDraft]);
 
   // Re-render every minute so slots that just moved into the past grey out
@@ -202,12 +229,15 @@ export default function BookingForm({ preSelectedTreatmentId, onClose, bare = fa
     if (!userId) return;
     setDbLoading(true);
     const q = query(collection(db, 'appointments'), where('userId', '==', userId), orderBy('createdAt', 'desc'));
-    // Firestore shows a write locally before the server accepts it; list a
-    // booking only once it's saved, so a refused one never flashes up here.
+    // Firestore shows a write locally before the server accepts it. A new
+    // booking is listed only once saved, so a refused one never flashes up;
+    // a change to a saved one (a cancel) still shows straight away.
+    const savedIds = new Set<string>();
     const unsubscribe = onSnapshot(q, { includeMetadataChanges: true }, (snapshot) => {
       const bookings: Appointment[] = [];
       snapshot.forEach((docSnapshot) => {
-        if (docSnapshot.metadata.hasPendingWrites) return;
+        if (!docSnapshot.metadata.hasPendingWrites) savedIds.add(docSnapshot.id);
+        else if (!savedIds.has(docSnapshot.id)) return;
         const data = docSnapshot.data();
         bookings.push({ id: docSnapshot.id, patientName: data.patientName || '', phone: data.phone || '', email: data.email || '', treatmentId: data.treatmentId || '', date: data.date || '', timeSlot: data.timeSlot || '', status: data.status || 'pending', notes: data.notes || '' });
       });
@@ -343,7 +373,7 @@ export default function BookingForm({ preSelectedTreatmentId, onClose, bare = fa
           }
         }
       }
-      setConfirmation({ name: patientName.trim(), treatmentId, date, timeSlot, confirmed });
+      setConfirmation({ id: docId, name: patientName.trim(), treatmentId, date, timeSlot, confirmed });
       revealNext('confirmation');
       trackConversion('generate_lead', 'booking', { treatment_id: treatmentId });
       setPatientName(''); setPhone(''); setEmail(''); setNotes(''); setTimeSlot('');
@@ -374,6 +404,16 @@ export default function BookingForm({ preSelectedTreatmentId, onClose, bare = fa
         setSubmitting(false);
       }
     }
+  };
+
+  // Picking a time clears the error above the grid, which moves the grid up
+  // under the patient's finger; scroll by the same amount so the tapped slot
+  // stays put and a second tap doesn't land on a different time.
+  const pickSlot = (slot: string, button: HTMLElement) => {
+    const before = button.getBoundingClientRect().top;
+    flushSync(() => { setTimeSlot(slot); clearFieldError('timeSlot'); });
+    const shift = button.getBoundingClientRect().top - before;
+    if (shift) window.scrollBy({ top: shift, behavior: 'instant' });
   };
 
   const handleBookAnother = () => {
@@ -409,10 +449,13 @@ export default function BookingForm({ preSelectedTreatmentId, onClose, bare = fa
         await updateDoc(ref, cancellation);
       }
       setBookingsNotice({ tone: 'success', text: `Your appointment on ${formatBookingDate(booking.date)} at ${booking.timeSlot} has been cancelled.` });
+      setConfirmation((c) => (c && c.id === booking.id ? { ...c, cancelled: true } : c));
     } catch (err) {
       handleFirestoreError(err, OperationType.UPDATE, 'appointments');
       setBookingsNotice({ tone: 'error', text: 'Could not cancel this appointment. Please call +91 93423 67446.' });
     }
+    // The cancel button just disappeared; put focus on the result instead.
+    revealNext('bookingsNotice');
   };
 
   const getTreatmentName = (id: string) => TREATMENTS.find(t => t.id === id)?.name || 'General Check-Up';
@@ -424,17 +467,21 @@ export default function BookingForm({ preSelectedTreatmentId, onClose, bare = fa
       <div className="flex items-center gap-2 mb-6"><CalendarCheck className="w-6 h-6 text-secondary" /><h3 className="font-serif font-bold text-xl md:text-2xl text-primary">Dentist Appointment Booking</h3></div>
       <p className="font-sans text-xs text-on-surface-variant leading-relaxed mb-6">Book your appointment with Neudental instantly. We adhere rigidly to schedule times to eliminate clinic waiting lines.</p>
       {confirmation ? (
-        <div ref={confirmationRef} tabIndex={-1} role="status" className="outline-none rounded-2xl border border-emerald-200 bg-emerald-50/60 p-6 text-center font-sans">
-          <div className="mx-auto w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center"><Check className="w-6 h-6 text-emerald-700" aria-hidden="true" /></div>
-          <h4 className="font-serif font-bold text-lg text-primary mt-3">{confirmation.confirmed ? 'Appointment confirmed' : 'Booking received'}</h4>
-          <p className="text-xs text-on-surface-variant mt-1">{confirmation.confirmed ? `Thank you, ${confirmation.name}. We look forward to seeing you.` : `Thank you, ${confirmation.name}. Our team will confirm it by phone or WhatsApp shortly.`}</p>
-          <dl className="mt-5 bg-white rounded-xl border border-emerald-100 p-4 text-left text-xs space-y-2.5">
-            <div className="flex items-center gap-2.5"><dt className="sr-only">Date</dt><Calendar className="w-4 h-4 text-secondary shrink-0" aria-hidden="true" /><dd className="font-bold text-primary">{formatBookingDate(confirmation.date)}</dd></div>
-            <div className="flex items-center gap-2.5"><dt className="sr-only">Time</dt><Clock className="w-4 h-4 text-secondary shrink-0" aria-hidden="true" /><dd className="font-bold text-primary">{confirmation.timeSlot}</dd></div>
-            <div className="flex items-center gap-2.5"><dt className="sr-only">Treatment</dt><Activity className="w-4 h-4 text-secondary shrink-0" aria-hidden="true" /><dd className="text-on-surface-variant">{getTreatmentName(confirmation.treatmentId)}</dd></div>
-          </dl>
-          {/* A call to change a booking isn't a new lead, so this reports to GA4 only, not as an Ads conversion. */}
-          <p className="text-[11px] text-cool-gray mt-4 leading-relaxed">Need to change it? Call <a href="tel:+919342367446" onClick={() => trackEvent('call_click', { link_location: 'booking_confirmation' })} className="font-bold text-secondary whitespace-nowrap">+91 93423 67446</a>, or cancel it under Your Bookings below.</p>
+        <div ref={confirmationRef} tabIndex={-1} role="status" className={`scroll-mt-24 outline-none rounded-2xl border p-6 text-center font-sans ${confirmation.cancelled ? 'border-cool-gray/15 bg-surface-alt' : 'border-emerald-200 bg-emerald-50/60'}`}>
+          <div className={`mx-auto w-12 h-12 rounded-full flex items-center justify-center ${confirmation.cancelled ? 'bg-rose-50' : 'bg-emerald-100'}`}>{confirmation.cancelled ? <CalendarX className="w-6 h-6 text-rose-600" aria-hidden="true" /> : <Check className="w-6 h-6 text-emerald-700" aria-hidden="true" />}</div>
+          <h4 className="font-serif font-bold text-lg text-primary mt-3">{confirmation.cancelled ? 'Appointment cancelled' : confirmation.confirmed ? 'Appointment confirmed' : 'Booking received'}</h4>
+          <p className="text-xs text-on-surface-variant mt-1">{confirmation.cancelled ? `Your appointment on ${formatBookingDate(confirmation.date)} at ${confirmation.timeSlot} has been cancelled.` : confirmation.confirmed ? `Thank you, ${confirmation.name}. We look forward to seeing you.` : `Thank you, ${confirmation.name}. Our team will confirm it by phone or WhatsApp shortly.`}</p>
+          {!confirmation.cancelled && (
+            <>
+              <dl className="mt-5 bg-white rounded-xl border border-emerald-100 p-4 text-left text-xs space-y-2.5">
+                <div className="flex items-center gap-2.5"><dt className="sr-only">Date</dt><Calendar className="w-4 h-4 text-secondary shrink-0" aria-hidden="true" /><dd className="font-bold text-primary">{formatBookingDate(confirmation.date)}</dd></div>
+                <div className="flex items-center gap-2.5"><dt className="sr-only">Time</dt><Clock className="w-4 h-4 text-secondary shrink-0" aria-hidden="true" /><dd className="font-bold text-primary">{confirmation.timeSlot}</dd></div>
+                <div className="flex items-center gap-2.5"><dt className="sr-only">Treatment</dt><Activity className="w-4 h-4 text-secondary shrink-0" aria-hidden="true" /><dd className="text-on-surface-variant">{getTreatmentName(confirmation.treatmentId)}</dd></div>
+              </dl>
+              {/* A call to change a booking isn't a new lead, so this reports to GA4 only, not as an Ads conversion. */}
+              <p className="text-[11px] text-cool-gray mt-4 leading-relaxed">Need to change it? Call <a href="tel:+919342367446" onClick={() => trackEvent('call_click', { link_location: 'booking_confirmation' })} className="font-bold text-secondary whitespace-nowrap">+91 93423 67446</a>, or cancel it under Your Bookings below.</p>
+            </>
+          )}
           <button type="button" onClick={handleBookAnother} className="mt-5 w-full sm:w-auto inline-flex items-center justify-center min-h-11 px-5 py-3 rounded-xl border border-primary/15 bg-white hover:border-secondary text-primary font-sans text-xs uppercase tracking-wider font-bold cursor-pointer transition-colors">Book another appointment</button>
         </div>
       ) : (
@@ -446,11 +493,11 @@ export default function BookingForm({ preSelectedTreatmentId, onClose, bare = fa
         </div>
         <div className="space-y-1"><label htmlFor={fieldId('treatment')} className="text-xs font-display font-medium text-primary uppercase">Target Treatment Course</label><select id={fieldId('treatment')} value={treatmentId} onChange={(e) => setTreatmentId(e.target.value)} className={fieldClass(false)}>{TREATMENTS.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></div>
         <div className="space-y-1"><label htmlFor={fieldId('date')} className="text-xs font-display font-medium text-primary uppercase">Appointment Date</label><input ref={dateRef} id={fieldId('date')} type="date" min={todayStr} max={maxDateStr} value={date} onChange={(e) => { setDate(e.target.value); clearFieldError('date'); }} {...ariaFor('date')} className={fieldClass(!!fieldErrors.date)} /><FieldError id={errorId('date')} message={fieldErrors.date} /></div>
-        <div ref={slotsRef} tabIndex={-1} role="group" aria-labelledby={fieldId('slots-label')} aria-describedby={fieldErrors.timeSlot ? errorId('timeSlot') : undefined} className="space-y-2 outline-none"><span id={fieldId('slots-label')} className="text-xs font-display font-medium text-primary uppercase block">Select Preferred Hour</span><p className="font-sans text-[11px] text-cool-gray">One patient per slot, so there's no waiting. Struck-through times are already booked or have passed.</p><FieldError id={errorId('timeSlot')} message={fieldErrors.timeSlot} /><div className="space-y-3">{timeSlots.map((group) => (<div key={group.label} className={`bg-[#F8FAFC] p-3 rounded-xl border ${fieldErrors.timeSlot ? 'border-rose-300' : 'border-cool-gray/5'}`}><span className="text-[10px] text-cool-gray uppercase font-bold tracking-wider block mb-2">{group.label}</span><div className="grid grid-cols-3 sm:grid-cols-4 gap-2">{group.times.map((slot) => { const past = isSlotPast(slot); const booked = !past && isSlotBooked(slot); const disabled = past || booked; return <button type="button" key={slot} disabled={disabled} aria-pressed={timeSlot === slot} title={past ? 'This time has already passed today' : booked ? 'This time is already booked' : undefined} aria-label={booked ? `${slot}, already booked` : undefined} onClick={() => { setTimeSlot(slot); clearFieldError('timeSlot'); }} className={`min-h-11 px-2 rounded-lg font-sans text-xs font-semibold transition-all ${disabled ? 'bg-cool-gray/5 border border-cool-gray/10 text-cool-gray/50 line-through cursor-not-allowed' : timeSlot === slot ? 'bg-secondary text-white shadow-md cursor-pointer' : 'bg-white border border-cool-gray/10 hover:border-cool-gray/30 text-on-surface cursor-pointer'}`}>{slot}</button>; })}</div></div>))}</div></div>
+        <div ref={slotsRef} tabIndex={-1} role="group" aria-labelledby={fieldId('slots-label')} aria-describedby={fieldErrors.timeSlot ? errorId('timeSlot') : undefined} className="space-y-2 outline-none scroll-mt-24"><span id={fieldId('slots-label')} className="text-xs font-display font-medium text-primary uppercase block">Select Preferred Hour</span><p className="font-sans text-[11px] text-cool-gray">One patient per slot, so there's no waiting. Struck-through times are already booked or have passed.</p><FieldError id={errorId('timeSlot')} message={fieldErrors.timeSlot} /><div className="space-y-3">{timeSlots.map((group) => (<div key={group.label} className={`bg-[#F8FAFC] p-3 rounded-xl border ${fieldErrors.timeSlot ? 'border-rose-300' : 'border-cool-gray/5'}`}><span className="text-[10px] text-cool-gray uppercase font-bold tracking-wider block mb-2">{group.label}</span><div className="grid grid-cols-2 min-[360px]:grid-cols-3 sm:grid-cols-4 gap-2">{group.times.map((slot) => { const past = isSlotPast(slot); const booked = !past && isSlotBooked(slot); const disabled = past || booked; return <button type="button" key={slot} disabled={disabled} aria-pressed={timeSlot === slot} title={past ? 'This time has already passed today' : booked ? 'This time is already booked' : undefined} aria-label={booked ? `${slot}, already booked` : undefined} onClick={(e) => pickSlot(slot, e.currentTarget)} className={`min-h-11 px-1.5 whitespace-nowrap rounded-lg font-sans text-xs font-semibold transition-all ${disabled ? 'bg-cool-gray/5 border border-cool-gray/10 text-cool-gray/50 line-through cursor-not-allowed' : timeSlot === slot ? 'bg-secondary text-white shadow-md cursor-pointer' : 'bg-white border border-cool-gray/10 hover:border-cool-gray/30 text-on-surface cursor-pointer'}`}>{slot}</button>; })}</div></div>))}</div></div>
         <div className="space-y-1"><label htmlFor={fieldId('notes')} className="text-xs font-display font-medium text-primary uppercase">Notes (Optional)</label><textarea id={fieldId('notes')} placeholder="Symptoms or additional notes" rows={2} maxLength={2000} value={notes} onChange={(e) => setNotes(e.target.value)} className={`${fieldClass(false)} resize-none`} /></div>
         <p className="font-sans text-[11px] text-on-surface-variant leading-relaxed">By booking, you agree that neudental may call or WhatsApp you about this appointment, and use the details you share here, including any notes about symptoms, only to arrange and provide your dental care.</p>
         {formAlert && (
-          <div ref={alertRef} role={formAlert.tone === 'error' ? 'alert' : 'status'} className={`p-4 rounded-xl text-xs font-medium font-sans border-l-4 ${formAlert.tone === 'error' ? 'bg-rose-50 text-rose-800 border-rose-500' : 'bg-secondary/5 text-primary border-secondary'}`}>
+          <div ref={alertRef} tabIndex={-1} role={formAlert.tone === 'error' ? 'alert' : 'status'} className={`outline-none p-4 rounded-xl text-xs font-medium font-sans border-l-4 ${formAlert.tone === 'error' ? 'bg-rose-50 text-rose-800 border-rose-500' : 'bg-secondary/5 text-primary border-secondary'}`}>
             <p>{formAlert.text}</p>
             {formAlert.refresh && <button type="button" onClick={() => window.location.reload()} className="mt-3 min-h-11 px-5 rounded-lg bg-primary hover:bg-secondary text-white text-[11px] font-bold uppercase tracking-wider cursor-pointer">Refresh page</button>}
             {formAlert.contact && (
@@ -470,7 +517,7 @@ export default function BookingForm({ preSelectedTreatmentId, onClose, bare = fa
       {myBookings.length > 0 && (
         <div className="mt-12 pt-8 border-t border-cool-gray/10">
           <div className="mb-4"><span className="text-xs font-bold uppercase tracking-wider text-primary">Your Bookings ({myBookings.length})</span></div>
-          {bookingsNotice && <div role={bookingsNotice.tone === 'error' ? 'alert' : 'status'} className={`mb-4 p-3 rounded-xl text-xs font-medium font-sans border-l-4 ${bookingsNotice.tone === 'error' ? 'bg-rose-50 text-rose-800 border-rose-500' : 'bg-emerald-50 text-emerald-800 border-emerald-500'}`}>{bookingsNotice.text}</div>}
+          {bookingsNotice && <div ref={bookingsNoticeRef} tabIndex={-1} role={bookingsNotice.tone === 'error' ? 'alert' : 'status'} className={`outline-none mb-4 p-3 rounded-xl text-xs font-medium font-sans border-l-4 ${bookingsNotice.tone === 'error' ? 'bg-rose-50 text-rose-800 border-rose-500' : 'bg-emerald-50 text-emerald-800 border-emerald-500'}`}>{bookingsNotice.text}</div>}
           <div className="space-y-3">{myBookings.map((booking) => {
             const status = PATIENT_STATUS[booking.status] || PATIENT_STATUS.confirmed;
             // Once the slot has started, staff record what happened instead.
