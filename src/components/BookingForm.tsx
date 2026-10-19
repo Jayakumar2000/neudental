@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useId } from 'react';
 import { flushSync } from 'react-dom';
 import { TREATMENTS, APPOINTMENT_SLOT_GROUPS } from '../data';
 import { Appointment, AppointmentStatus } from '../types';
-import { Calendar, Clock, Check, Trash2, CalendarCheck, Phone, User, Activity, AlertCircle, MessageCircle, Loader2, CalendarX } from 'lucide-react';
+import { Calendar, Clock, Check, Trash2, CalendarCheck, Phone, User, Activity, AlertCircle, MessageCircle, Loader2, CalendarX, ArrowRight } from 'lucide-react';
 import { collection, query, where, orderBy, onSnapshot, setDoc, doc, Timestamp, updateDoc, writeBatch, getDoc } from 'firebase/firestore';
 import { db, OperationType, handleFirestoreError, ensureAnonymousAuth } from '../firebase';
 import { trackConversion, trackEvent, trackClarityEvent } from '../lib/analytics';
@@ -40,6 +40,17 @@ function formatBookingDate(dateStr: string): string {
   const part = (options: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat('en-IN', { ...options, timeZone: 'UTC' }).format(day);
   return `${part({ weekday: 'short' })}, ${d} ${part({ month: 'short' })} ${y}`;
 }
+
+// "2026-10-20" -> { weekday: 'Tue', day: 20, month: 'Oct' } for the date strip.
+function dayParts(dateStr: string) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const day = new Date(Date.UTC(y, m - 1, d));
+  const part = (options: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat('en-IN', { ...options, timeZone: 'UTC' }).format(day);
+  return { weekday: part({ weekday: 'short' }), day: d, month: part({ month: 'short' }) };
+}
+
+// Days offered as one-tap chips; later dates in the booking window are on the calendar.
+const DATE_STRIP_DAYS = 14;
 
 // What a patient sees for each status in "Your Bookings" -- staff-only
 // outcomes like "no response" are worded as a next step, not a verdict.
@@ -82,7 +93,7 @@ const isOffline = () => navigator.onLine === false;
 type FieldKey = 'patientName' | 'phone' | 'email' | 'date' | 'timeSlot';
 type FieldErrors = Partial<Record<FieldKey, string>>;
 // The order the fields appear in, so the first error is the one nearest the top.
-const FIELD_ORDER: FieldKey[] = ['patientName', 'phone', 'email', 'date', 'timeSlot'];
+const FIELD_ORDER: FieldKey[] = ['date', 'timeSlot', 'patientName', 'phone', 'email'];
 
 // seq gives each shown error a fresh node, so a repeat of the same message is announced again.
 interface FormAlert { tone: 'error' | 'info'; text: string; contact?: boolean; refresh?: boolean; seq?: number }
@@ -140,7 +151,9 @@ function FieldError({ id, message }: { id: string; message?: string }) {
   return <p id={id} className="flex items-start gap-1 font-sans text-xs font-medium text-rose-700 mt-1.5"><AlertCircle className="w-3.5 h-3.5 shrink-0 mt-px" aria-hidden="true" />{message}</p>;
 }
 
-const fieldClass = (invalid: boolean, padding = 'px-4') => `w-full ${padding} py-3 bg-[#F8FAFC] border-0 border-b-2 ${invalid ? 'border-rose-500 focus:border-rose-600' : 'border-cool-gray/20 focus:border-secondary'} focus:ring-0 outline-none text-base sm:text-sm text-primary transition-colors font-sans rounded-t`;
+const fieldClass = (invalid: boolean, padding = 'px-4') => `w-full ${padding} py-3 bg-white border ${invalid ? 'border-rose-500 focus:border-rose-600 focus:ring-rose-500/15' : 'border-[#CBD5E1] focus:border-secondary focus:ring-secondary/15'} focus:ring-4 outline-none text-base sm:text-sm text-primary transition-[border-color,box-shadow] font-sans rounded-xl`;
+const labelClass = 'block text-xs font-sans font-bold tracking-[0.08em] uppercase text-primary mb-2';
+const optionalClass = 'normal-case tracking-normal font-medium text-cool-gray';
 
 export default function BookingForm({ preSelectedTreatmentId, preSelectNonce, onClose, bare = false }: BookingFormProps) {
   // Read once on mount; cleared in an effect so StrictMode's double render
@@ -172,6 +185,7 @@ export default function BookingForm({ preSelectedTreatmentId, preSelectNonce, on
   const reloadedForUpdateRef = useRef(restoredDraft !== null);
   const [, forceTick] = useState(0);
   const [bookedSlots, setBookedSlots] = useState<Set<string>>(new Set());
+  const [showCalendar, setShowCalendar] = useState(false);
 
   const ids = useId();
   const fieldId = (key: string) => `${ids}-${key}`;
@@ -179,7 +193,7 @@ export default function BookingForm({ preSelectedTreatmentId, preSelectNonce, on
   const nameRef = useRef<HTMLInputElement>(null);
   const phoneRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
-  const dateRef = useRef<HTMLInputElement>(null);
+  const dateRef = useRef<HTMLDivElement>(null);
   const slotsRef = useRef<HTMLDivElement>(null);
   const alertRef = useRef<HTMLDivElement>(null);
   const confirmationRef = useRef<HTMLDivElement>(null);
@@ -317,6 +331,10 @@ export default function BookingForm({ preSelectedTreatmentId, preSelectNonce, on
   const maxDateStr = addDaysStr(todayStr, BOOKING_WINDOW_DAYS);
   const isSlotPast = (slot: string) => isToday && slotToMinutes(slot) <= istNow.minutesSinceMidnight;
   const isSlotBooked = (slot: string) => bookedSlots.has(slot);
+  const stripDays = Array.from({ length: DATE_STRIP_DAYS }, (_, i) => addDaysStr(todayStr, i));
+  // A restored draft can hold a date past the strip; show it on the calendar.
+  const calendarOpen = showCalendar || (!!date && !stripDays.includes(date));
+  const pickDate = (value: string) => { setDate(value); clearFieldError('date'); };
 
   // If the date changes (or the clock ticks past it), drop a selection that's
   // no longer bookable instead of silently submitting a past slot.
@@ -535,10 +553,15 @@ export default function BookingForm({ preSelectedTreatmentId, preSelectNonce, on
   const ariaFor = (key: FieldKey) => ({ 'aria-invalid': fieldErrors[key] ? true : undefined, 'aria-describedby': fieldErrors[key] ? errorId(key) : undefined });
 
   return (
-    <div className={bare ? 'p-6 md:p-8 lg:p-10' : 'bg-white rounded-3xl p-6 md:p-8 border border-cool-gray/10 premium-shadow'}>
+    <div className={bare ? 'p-6 md:p-10' : 'bg-white rounded-3xl p-6 md:p-8 border border-cool-gray/10 premium-shadow'}>
       <p className="sr-only" role="status">{srStatus}</p>
-      <div className="flex items-center gap-2 mb-6"><CalendarCheck className="w-6 h-6 text-secondary" /><h3 className="font-serif font-bold text-xl md:text-2xl text-primary">Dentist Appointment Booking</h3></div>
-      <p className="font-sans text-xs text-on-surface-variant leading-relaxed mb-6">Book your appointment with Neudental instantly. We adhere rigidly to schedule times to eliminate clinic waiting lines.</p>
+      {/* The home page's booking section has its own heading. */}
+      {!bare && (
+        <>
+          <div className="flex items-center gap-2 mb-6"><CalendarCheck className="w-6 h-6 text-secondary" /><h3 className="font-serif font-bold text-xl md:text-2xl text-primary">Dentist Appointment Booking</h3></div>
+          <p className="font-sans text-xs text-on-surface-variant leading-relaxed mb-6">Book your appointment with Neudental instantly. We adhere rigidly to schedule times to eliminate clinic waiting lines.</p>
+        </>
+      )}
       {confirmation ? (
         <div ref={confirmationRef} tabIndex={-1} className={`scroll-mt-24 outline-none rounded-2xl border p-6 text-center font-sans ${confirmation.cancelled ? 'border-cool-gray/15 bg-surface-alt' : 'border-emerald-200 bg-emerald-50/60'}`}>
           <div className={`mx-auto w-12 h-12 rounded-full flex items-center justify-center ${confirmation.cancelled ? 'bg-rose-50' : 'bg-emerald-100'}`}>{confirmation.cancelled ? <CalendarX className="w-6 h-6 text-rose-600" aria-hidden="true" /> : <Check className="w-6 h-6 text-emerald-700" aria-hidden="true" />}</div>
@@ -558,18 +581,69 @@ export default function BookingForm({ preSelectedTreatmentId, preSelectNonce, on
           <button type="button" onClick={handleBookAnother} className="mt-5 w-full sm:w-auto inline-flex items-center justify-center min-h-11 px-5 py-3 rounded-xl border border-primary/15 bg-white hover:border-secondary text-primary font-sans text-xs uppercase tracking-wider font-bold cursor-pointer transition-colors">Book another appointment</button>
         </div>
       ) : (
-      <form onSubmit={handleBooking} noValidate className="space-y-5">
-        <div className="space-y-1"><label htmlFor={fieldId('name')} className="text-xs font-display font-medium text-primary uppercase">Patient Name</label><div className="relative"><User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-cool-gray" /><input ref={nameRef} id={fieldId('name')} type="text" autoComplete="name" placeholder="E.g., Jayakumar" maxLength={100} value={patientName} onChange={(e) => { setPatientName(e.target.value); clearFieldError('patientName'); }} {...ariaFor('patientName')} className={fieldClass(!!fieldErrors.patientName, 'pl-10 pr-4')} /></div><FieldError id={errorId('patientName')} message={fieldErrors.patientName} /></div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1"><label htmlFor={fieldId('phone')} className="text-xs font-display font-medium text-primary uppercase">Mobile Number<span className="sr-only"> (10 digits, +91 is already added)</span></label><div className="relative"><Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-cool-gray" /><span aria-hidden="true" className="absolute left-10 top-1/2 -translate-y-1/2 font-sans text-base sm:text-sm text-primary/70 pointer-events-none">+91</span><input ref={phoneRef} id={fieldId('phone')} type="tel" autoComplete="tel-national" placeholder="9876543210" inputMode="numeric" value={phone} onChange={(e) => { setPhone(e.target.value); clearFieldError('phone'); }} onBlur={() => { if (phone) afterPress(() => setFieldErrors((prev) => ({ ...prev, phone: mobileError(phone) }))); }} {...ariaFor('phone')} className={fieldClass(!!fieldErrors.phone, 'pl-[4.75rem] pr-4')} /></div><FieldError id={errorId('phone')} message={fieldErrors.phone} /></div>
-          <div className="space-y-1"><label htmlFor={fieldId('email')} className="text-xs font-display font-medium text-primary uppercase">Email (Optional)</label><input ref={emailRef} id={fieldId('email')} type="email" autoComplete="email" placeholder="contact@gmail.com" maxLength={200} value={email} onChange={(e) => { setEmail(e.target.value); clearFieldError('email'); }} onBlur={() => afterPress(() => setFieldErrors((prev) => ({ ...prev, email: emailError(email) })))} {...ariaFor('email')} className={fieldClass(!!fieldErrors.email)} /><FieldError id={errorId('email')} message={fieldErrors.email} /></div>
+      <form onSubmit={handleBooking} noValidate className="space-y-6">
+        <div><label htmlFor={fieldId('treatment')} className={labelClass}>Treatment</label><select id={fieldId('treatment')} value={treatmentId} onChange={(e) => setTreatmentId(e.target.value)} className={`${fieldClass(false)} cursor-pointer`}>{TREATMENTS.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></div>
+
+        <div ref={dateRef} tabIndex={-1} role="group" aria-labelledby={fieldId('date-label')} aria-describedby={fieldErrors.date ? errorId('date') : undefined} className="outline-none scroll-mt-24">
+          <span id={fieldId('date-label')} className={labelClass}>Date</span>
+          <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
+            {stripDays.map((d, i) => {
+              const parts = dayParts(d);
+              const on = d === date;
+              return (
+                <button
+                  type="button"
+                  key={d}
+                  aria-pressed={on}
+                  aria-label={formatBookingDate(d)}
+                  onClick={() => pickDate(d)}
+                  className={`flex flex-col items-center gap-0.5 py-2 rounded-xl border font-sans cursor-pointer transition-colors ${on ? 'bg-primary border-primary text-white' : 'bg-white border-[#E2E8F0] text-primary hover:border-secondary'}`}
+                >
+                  <span className="text-[10px] sm:text-[11px] font-semibold uppercase opacity-80">{i === 0 ? 'Today' : parts.weekday}</span>
+                  <span className="font-display text-lg sm:text-xl font-bold leading-tight">{parts.day}</span>
+                  <span className="text-[10px] opacity-70">{parts.month}</span>
+                </button>
+              );
+            })}
+          </div>
+          {calendarOpen ? (
+            <div className="mt-3">
+              <label htmlFor={fieldId('date')} className="sr-only">Pick a later date</label>
+              <input id={fieldId('date')} type="date" min={todayStr} max={maxDateStr} value={date} onChange={(e) => pickDate(e.target.value)} aria-invalid={fieldErrors.date ? true : undefined} className={fieldClass(!!fieldErrors.date)} />
+            </div>
+          ) : (
+            <button type="button" onClick={() => setShowCalendar(true)} className="mt-2 min-h-11 font-sans text-[13px] font-semibold text-secondary hover:text-primary cursor-pointer">Need a later date? Pick one up to {BOOKING_WINDOW_DAYS} days ahead</button>
+          )}
+          <FieldError id={errorId('date')} message={fieldErrors.date} />
         </div>
-        <div className="space-y-1"><label htmlFor={fieldId('treatment')} className="text-xs font-display font-medium text-primary uppercase">Target Treatment Course</label><select id={fieldId('treatment')} value={treatmentId} onChange={(e) => setTreatmentId(e.target.value)} className={fieldClass(false)}>{TREATMENTS.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></div>
-        <div className="space-y-1"><label htmlFor={fieldId('date')} className="text-xs font-display font-medium text-primary uppercase">Appointment Date</label><input ref={dateRef} id={fieldId('date')} type="date" min={todayStr} max={maxDateStr} value={date} onChange={(e) => { setDate(e.target.value); clearFieldError('date'); }} {...ariaFor('date')} className={fieldClass(!!fieldErrors.date)} /><FieldError id={errorId('date')} message={fieldErrors.date} /></div>
-        <div ref={slotsRef} tabIndex={-1} role="group" aria-labelledby={fieldId('slots-label')} aria-describedby={fieldErrors.timeSlot ? errorId('timeSlot') : undefined} className="space-y-2 outline-none scroll-mt-24"><span id={fieldId('slots-label')} className="text-xs font-display font-medium text-primary uppercase block">Select Preferred Hour</span><p className="font-sans text-[11px] text-cool-gray">One patient per slot, so there's no waiting. Struck-through times are already booked or have passed.</p><FieldError id={errorId('timeSlot')} message={fieldErrors.timeSlot} /><div className="space-y-3">{timeSlots.map((group) => (<div key={group.label} className={`bg-[#F8FAFC] p-3 rounded-xl border ${fieldErrors.timeSlot ? 'border-rose-300' : 'border-cool-gray/5'}`}><span className="text-[10px] text-cool-gray uppercase font-bold tracking-wider block mb-2">{group.label}</span><div className="grid grid-cols-2 min-[360px]:grid-cols-3 sm:grid-cols-4 gap-2">{group.times.map((slot) => { const past = isSlotPast(slot); const booked = !past && isSlotBooked(slot); const disabled = past || booked; return <button type="button" key={slot} disabled={disabled} aria-pressed={timeSlot === slot} title={past ? 'This time has already passed today' : booked ? 'This time is already booked' : undefined} aria-label={booked ? `${slot}, already booked` : undefined} onClick={(e) => pickSlot(slot, e.currentTarget)} className={`min-h-11 px-1.5 whitespace-nowrap rounded-lg font-sans text-xs font-semibold transition-all ${disabled ? 'bg-cool-gray/5 border border-cool-gray/10 text-cool-gray/50 line-through cursor-not-allowed' : timeSlot === slot ? 'bg-secondary text-white shadow-md cursor-pointer' : 'bg-white border border-cool-gray/10 hover:border-cool-gray/30 text-on-surface cursor-pointer'}`}>{slot}</button>; })}</div></div>))}</div></div>
-        <div className="space-y-1"><label htmlFor={fieldId('notes')} className="text-xs font-display font-medium text-primary uppercase">Notes (Optional)</label><textarea id={fieldId('notes')} placeholder="Symptoms or additional notes" rows={2} maxLength={2000} value={notes} onChange={(e) => setNotes(e.target.value)} className={`${fieldClass(false)} resize-none`} /></div>
+
+        <div ref={slotsRef} tabIndex={-1} role="group" aria-labelledby={fieldId('slots-label')} aria-describedby={fieldErrors.timeSlot ? errorId('timeSlot') : undefined} className="outline-none scroll-mt-24">
+          <span id={fieldId('slots-label')} className={labelClass}>Time <span className={optionalClass}>· one patient per slot</span></span>
+          <FieldError id={errorId('timeSlot')} message={fieldErrors.timeSlot} />
+          <div className={`mt-1 flex flex-col gap-3 ${fieldErrors.timeSlot ? 'p-3 rounded-xl border border-rose-300' : ''}`}>
+            {timeSlots.map((group) => (
+              <div key={group.label} className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-3">
+                <span className="sm:w-20 shrink-0 sm:pt-3 font-sans text-[13px] font-semibold text-on-surface-variant">{group.label.split(' ')[0]}</span>
+                <div className="flex-1 grid grid-cols-3 min-[420px]:grid-cols-4 gap-2">
+                  {group.times.map((slot) => {
+                    const past = isSlotPast(slot);
+                    const booked = !past && isSlotBooked(slot);
+                    const disabled = past || booked;
+                    return <button type="button" key={slot} disabled={disabled} aria-pressed={timeSlot === slot} title={past ? 'This time has already passed today' : booked ? 'This time is already booked' : undefined} aria-label={booked ? `${slot}, already booked` : undefined} onClick={(e) => pickSlot(slot, e.currentTarget)} className={`min-h-11 px-1 whitespace-nowrap rounded-xl border font-sans text-[13px] font-semibold transition-colors ${disabled ? 'bg-[#F1F5F9] border-[#E2E8F0] text-[#94A3B8] line-through cursor-not-allowed' : timeSlot === slot ? 'bg-[#00fff2] border-[#00D4C9] text-primary cursor-pointer' : 'bg-white border-[#E2E8F0] hover:border-secondary text-primary cursor-pointer'}`}>{slot}</button>;
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div><label htmlFor={fieldId('name')} className={labelClass}>Patient name</label><div className="relative"><User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-cool-gray" /><input ref={nameRef} id={fieldId('name')} type="text" autoComplete="name" placeholder="Full name" maxLength={100} value={patientName} onChange={(e) => { setPatientName(e.target.value); clearFieldError('patientName'); }} {...ariaFor('patientName')} className={fieldClass(!!fieldErrors.patientName, 'pl-10 pr-4')} /></div><FieldError id={errorId('patientName')} message={fieldErrors.patientName} /></div>
+          <div><label htmlFor={fieldId('phone')} className={labelClass}>Mobile number<span className="sr-only"> (10 digits, +91 is already added)</span></label><div className="relative"><Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-cool-gray" /><span aria-hidden="true" className="absolute left-10 top-1/2 -translate-y-1/2 font-sans text-base sm:text-sm text-primary/70 pointer-events-none">+91</span><input ref={phoneRef} id={fieldId('phone')} type="tel" autoComplete="tel-national" placeholder="9876543210" inputMode="numeric" value={phone} onChange={(e) => { setPhone(e.target.value); clearFieldError('phone'); }} onBlur={() => { if (phone) afterPress(() => setFieldErrors((prev) => ({ ...prev, phone: mobileError(phone) }))); }} {...ariaFor('phone')} className={fieldClass(!!fieldErrors.phone, 'pl-[4.75rem] pr-4')} /></div><FieldError id={errorId('phone')} message={fieldErrors.phone} /></div>
+          <div><label htmlFor={fieldId('email')} className={labelClass}>Email <span className={optionalClass}>(optional)</span></label><input ref={emailRef} id={fieldId('email')} type="email" autoComplete="email" placeholder="you@example.com" maxLength={200} value={email} onChange={(e) => { setEmail(e.target.value); clearFieldError('email'); }} onBlur={() => afterPress(() => setFieldErrors((prev) => ({ ...prev, email: emailError(email) })))} {...ariaFor('email')} className={fieldClass(!!fieldErrors.email)} /><FieldError id={errorId('email')} message={fieldErrors.email} /></div>
+          <div><label htmlFor={fieldId('notes')} className={labelClass}>Notes <span className={optionalClass}>(optional)</span></label><input id={fieldId('notes')} type="text" placeholder="Symptoms or anything we should know" maxLength={2000} value={notes} onChange={(e) => setNotes(e.target.value)} className={fieldClass(false)} /></div>
+        </div>
         <p className="sr-only" aria-live="assertive">{srError && fieldErrors[srError.key] ? srError.text : ''}</p>
-        <p className="font-sans text-[11px] text-on-surface-variant leading-relaxed">By booking, you agree that neudental may call or WhatsApp you about this appointment, and use the details you share here, including any notes about symptoms, only to arrange and provide your dental care.</p>
         {formAlert && (
           <div key={formAlert.seq ?? 'note'} ref={alertRef} tabIndex={-1} role={formAlert.tone === 'error' ? 'alert' : 'status'} className={`scroll-mt-24 outline-none p-4 rounded-xl text-xs font-medium font-sans border-l-4 ${formAlert.tone === 'error' ? 'bg-rose-50 text-rose-800 border-rose-500' : 'bg-secondary/5 text-primary border-secondary'}`}>
             <p>{formAlert.text}</p>
@@ -585,7 +659,12 @@ export default function BookingForm({ preSelectedTreatmentId, preSelectNonce, on
             )}
           </div>
         )}
-        <button type="submit" aria-disabled={submitting} aria-busy={submitting} className="w-full inline-flex items-center justify-center gap-2 bg-primary hover:bg-secondary aria-disabled:opacity-60 aria-disabled:cursor-wait text-white py-4 cursor-pointer rounded-xl font-sans text-xs uppercase tracking-widest font-bold transition-all duration-200">{submitting ? <><Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> Booking…</> : 'Book Appointment'}</button>
+        <div className="space-y-3">
+          <button type="submit" aria-disabled={submitting} aria-busy={submitting} className="w-full inline-flex items-center justify-center gap-2.5 min-h-14 px-4 bg-primary hover:bg-secondary aria-disabled:opacity-60 aria-disabled:cursor-wait text-white cursor-pointer rounded-2xl font-sans text-sm font-bold transition-colors duration-200">
+            {submitting ? <><Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> Booking…</> : <>Book appointment{date && timeSlot ? <span className="font-medium text-white/80">· {dayParts(date).weekday} {dayParts(date).day} {dayParts(date).month}, {timeSlot}</span> : null}<ArrowRight className="w-4 h-4 text-[#00fff2]" aria-hidden="true" /></>}
+          </button>
+          <p className="font-sans text-[11px] text-cool-gray leading-relaxed">By booking, you agree that neudental may call or WhatsApp you about this appointment, and use the details you share here, including any notes about symptoms, only to arrange and provide your dental care.</p>
+        </div>
       </form>
       )}
       {myBookings.length > 0 && (

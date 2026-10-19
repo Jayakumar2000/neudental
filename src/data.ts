@@ -40,8 +40,7 @@ export const DOCTOR: Doctor = {
 };
 
 // Public review figures shown on the site (hero badge, testimonials, booking
-// trust banner); keep
-// index.html's aggregateRating in step when they change.
+// panel); keep index.html's aggregateRating in step when they change.
 export const REVIEW_RATING = '4.97';
 export const REVIEW_COUNT_LABEL = '200+';
 

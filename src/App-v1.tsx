@@ -7,7 +7,8 @@ import About from './components/About';
 import Services from './components/Services';
 import SymptomChecker from './components/SymptomChecker';
 import BookingForm from './components/BookingForm';
-import DoctorTrustBanner from './components/DoctorTrustBanner';
+import BookingVisitPanel from './components/BookingVisitPanel';
+import { SmileCurve } from './components/BrandShapes';
 import Testimonials from './components/Testimonials';
 import LocationDetails from './components/LocationDetails';
 import Footer from './components/Footer';
@@ -320,11 +321,25 @@ export default function App() {
       <Hero onScrollToBooking={handleScrollToBooking} />
       <About />
       <Services onSelectTreatment={handleSelectTreatment} selectedTreatmentId={preSelectedTreatmentId} />
-      <section id="booking-section" className="py-14 lg:py-20 bg-gray-50 scroll-mt-24">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-3xl border border-cool-gray/10 premium-shadow overflow-hidden">
-            <DoctorTrustBanner />
-            <BookingForm preSelectedTreatmentId={preSelectedTreatmentId} preSelectNonce={treatmentPick} bare />
+      <section id="booking-section" className="py-14 lg:py-20 bg-surface-alt scroll-mt-24">
+        <div className="max-w-[1120px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto">
+            <span className="text-secondary font-sans text-xs font-bold tracking-[0.2em] uppercase">Book an Appointment</span>
+            <h2 className="font-serif text-3xl md:text-4xl text-primary font-bold mt-3 leading-tight">
+              Book your visit in under a{' '}
+              <span className="relative inline-block italic font-semibold">
+                minute
+                <SmileCurve stroke="#00D4C9" className="absolute -left-[4%] -bottom-2.5 w-[108%] h-4" />
+              </span>
+            </h2>
+            <p className="font-sans text-base text-on-surface-variant mt-5 leading-relaxed">Pick a real, open time. Your slot is confirmed the moment you book.</p>
+          </div>
+          {/* Form first on phones and tablets; the visit panel sits beside it from lg up. */}
+          <div className="mt-10 md:mt-12 flex flex-col lg:flex-row bg-white rounded-[32px] border border-[#E2E8F0] overflow-hidden shadow-[0_30px_70px_-30px_rgba(11,19,65,0.35)]">
+            <BookingVisitPanel className="order-2 lg:order-1 lg:w-[38%] shrink-0" />
+            <div className="order-1 lg:order-2 flex-1 min-w-0">
+              <BookingForm preSelectedTreatmentId={preSelectedTreatmentId} preSelectNonce={treatmentPick} bare />
+            </div>
           </div>
         </div>
       </section>

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { TESTIMONIALS, REVIEW_RATING, REVIEW_COUNT_LABEL, CLINIC_GOOGLE_URL } from '../data';
 import { Star, ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Rings, SmileCurve } from './BrandShapes';
 
 // Only platforms with a real, square icon-only mark on file go here — a full
 // wordmark logo doesn't fit these small circular slots legibly.
@@ -17,26 +18,6 @@ const SOURCE_LABELS: Partial<Record<string, string>> = {
 };
 
 const SOURCES = ['google', 'practo', 'justdial'] as const;
-
-// Concentric rings echoing the brand mark, purely decorative.
-function Rings({ className, count = 3 }: { className: string; count?: number }) {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 720 720" className={`absolute pointer-events-none ${className}`}>
-      {[340, 270, 200, 130].slice(4 - count).map((r) => (
-        <circle key={r} cx="360" cy="360" r={r} fill="none" stroke="#00fff2" strokeWidth="2" />
-      ))}
-    </svg>
-  );
-}
-
-// Hand-drawn smile, the section's signature underline.
-function SmileCurve({ className }: { className: string }) {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 220 28" preserveAspectRatio="none" className={className}>
-      <path d="M4 6 C 60 30, 160 30, 216 6" fill="none" stroke="#00fff2" strokeWidth="5" strokeLinecap="round" />
-    </svg>
-  );
-}
 
 function Stars({ className }: { className: string }) {
   return (
