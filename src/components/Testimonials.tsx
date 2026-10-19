@@ -66,7 +66,7 @@ export default function Testimonials({ onScrollToBooking }: TestimonialsProps) {
   };
 
   return (
-    <section id="testimonials" className="relative overflow-hidden bg-primary text-white py-16 lg:py-24 scroll-mt-24">
+    <section id="testimonials" className="relative overflow-hidden bg-primary text-white py-14 lg:py-20 scroll-mt-24">
       <Rings className="hidden md:block -right-56 -top-64 w-[720px] h-[720px] opacity-[0.07]" />
       <Rings count={2} className="hidden md:block -left-64 -bottom-72 w-[560px] h-[560px] opacity-[0.05]" />
 
@@ -77,11 +77,11 @@ export default function Testimonials({ onScrollToBooking }: TestimonialsProps) {
             <span className="text-[#00fff2] font-sans text-xs font-bold tracking-[0.2em] uppercase">
               Genuine Patient Stories
             </span>
-            <h2 className="font-serif font-bold text-4xl md:text-[52px] leading-[1.12] mt-3">
+            <h2 className="font-serif font-bold text-3xl md:text-4xl leading-tight mt-3">
               Loved by{' '}
               <span className="relative inline-block italic font-semibold">
                 families
-                <SmileCurve className="absolute -left-[4%] -bottom-3 md:-bottom-4 w-[108%] h-5 md:h-6" />
+                <SmileCurve className="absolute -left-[4%] -bottom-2.5 w-[108%] h-4" />
               </span>{' '}
               across Chennai
             </h2>
@@ -93,7 +93,7 @@ export default function Testimonials({ onScrollToBooking }: TestimonialsProps) {
 
         {/* The wall: featured story and rating side by side, then the rest.
         One column on phones, two on tablets, four on desktop. */}
-        <div className="mt-12 md:mt-14 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 lg:grid-flow-dense gap-4">
+        <div className="mt-10 md:mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 lg:grid-flow-dense gap-4">
           <article className="md:col-span-2 lg:row-span-2 bg-white text-primary rounded-[28px] p-7 md:p-10 flex flex-col justify-between gap-7 shadow-[0_30px_60px_-20px_rgba(0,0,0,0.45)] motion-safe:transition-transform motion-safe:duration-300 motion-safe:hover:-translate-y-1">
             <div className="flex flex-col gap-5">
               <div className="flex items-center justify-between">
@@ -104,14 +104,14 @@ export default function Testimonials({ onScrollToBooking }: TestimonialsProps) {
                   <path d="M0 48V28C0 12 8 3 24 0l3 7C17 10 13 16 13 24h12v24zm36 0V28c0-16 8-25 24-28l3 7c-10 3-14 9-14 17h12v24z" fill="#0557BC" opacity="0.14" />
                 </svg>
               </div>
-              <p className="font-serif italic text-xl md:text-[25px] leading-relaxed md:leading-[1.55]">
+              <p className="font-serif italic text-lg md:text-xl leading-relaxed">
                 {before}
                 {marked && <mark className="highlight-mark bg-transparent text-inherit not-italic font-semibold">{marked}</mark>}
                 {after}
               </p>
             </div>
             <div className="flex items-center gap-3.5 border-t border-[#E2E8F0] pt-5">
-              <span aria-hidden="true" className="w-13 h-13 rounded-full bg-secondary text-white flex items-center justify-center font-display font-bold text-xl shrink-0">
+              <span aria-hidden="true" className="w-11 h-11 rounded-full bg-secondary text-white flex items-center justify-center font-display font-bold text-lg shrink-0">
                 {featured.initials}
               </span>
               <div className="font-sans leading-tight">
@@ -125,22 +125,22 @@ export default function Testimonials({ onScrollToBooking }: TestimonialsProps) {
           </article>
 
           {/* Rating: the same size as the featured story */}
-          <div className="md:col-span-2 lg:row-span-2 relative overflow-hidden rounded-[28px] px-6 py-10 md:px-10 md:pt-11 md:pb-9 bg-[radial-gradient(120%_90%_at_50%_0%,#0A6BE0_0%,#0557BC_32%,#0B1341_88%)] border border-[#00fff2]/40 shadow-[0_0_0_8px_rgba(0,255,242,0.05),0_30px_60px_-24px_rgba(0,0,0,0.55)] flex flex-col items-center justify-between gap-7 text-center">
-            <Rings count={4} className="left-1/2 top-1/2 -translate-x-1/2 -translate-y-[58%] w-[640px] h-[640px] opacity-[0.13]" />
-            <span className="relative font-sans text-xs font-bold tracking-[0.24em] uppercase text-[#00fff2]">
+          <div className="md:col-span-2 lg:row-span-2 relative overflow-hidden rounded-[28px] px-6 py-9 md:px-10 md:py-9 bg-[radial-gradient(120%_90%_at_50%_0%,#0A6BE0_0%,#0557BC_32%,#0B1341_88%)] border border-[#00fff2]/40 shadow-[0_0_0_8px_rgba(0,255,242,0.05),0_30px_60px_-24px_rgba(0,0,0,0.55)] flex flex-col items-center justify-between gap-7 text-center">
+            <Rings count={4} className="left-1/2 top-1/2 -translate-x-1/2 -translate-y-[58%] w-[520px] h-[520px] opacity-[0.13]" />
+            <span className="relative font-sans text-[11px] font-bold tracking-[0.2em] uppercase text-[#00fff2]">
               Average patient rating
             </span>
             <div className="relative flex flex-col items-center gap-4">
               <p className="flex items-start gap-2" aria-label={`${REVIEW_RATING} out of 5`}>
-                <span className="font-display font-bold text-[112px] md:text-[150px] lg:text-[176px] leading-[0.82] tracking-[-0.05em] [text-shadow:0_10px_40px_rgba(0,255,242,0.25)]">
+                <span className="font-display font-bold text-7xl md:text-[96px] lg:text-[104px] leading-[0.85] tracking-[-0.04em] [text-shadow:0_10px_40px_rgba(0,255,242,0.25)]">
                   {REVIEW_RATING}
                 </span>
-                <span aria-hidden="true" className="font-display font-medium text-2xl md:text-[30px] text-[#9FB3E8] mt-2.5">/5</span>
+                <span aria-hidden="true" className="font-display font-medium text-lg md:text-xl text-[#9FB3E8] mt-1.5">/5</span>
               </p>
-              <SmileCurve className="w-52 md:w-64 h-6 -mt-1" />
-              <Stars className="w-8 h-8 md:w-[38px] md:h-[38px]" />
-              <p className="font-sans text-base md:text-[17px] text-[#E2E8F8] mt-1">
-                from <strong className="font-display text-[22px] text-white">{REVIEW_COUNT_LABEL}</strong> verified patient reviews
+              <SmileCurve className="w-36 md:w-44 h-4 -mt-1" />
+              <Stars className="w-6 h-6 md:w-7 md:h-7" />
+              <p className="font-sans text-sm md:text-base text-[#E2E8F8]">
+                from <strong className="font-display text-lg text-white">{REVIEW_COUNT_LABEL}</strong> verified patient reviews
               </p>
             </div>
             <ul className="relative w-full grid grid-cols-3 gap-2.5">
@@ -161,11 +161,11 @@ export default function Testimonials({ onScrollToBooking }: TestimonialsProps) {
               className={`${t.text.length > WIDE_REVIEW_CHARS ? 'md:col-span-2' : ''} rounded-3xl p-6 md:p-7 bg-white/[0.06] border border-white/[0.12] flex flex-col justify-between gap-5 transition-colors duration-300 hover:border-[#00fff2]/45 hover:bg-white/[0.08] motion-safe:transition-[transform,background-color,border-color] motion-safe:hover:-translate-y-1`}
             >
               <div className="flex flex-col gap-3">
-                <h3 className="flex items-center gap-2 font-serif italic text-xl text-[#00fff2]">
+                <h3 className="flex items-center gap-2 font-serif italic text-lg text-[#00fff2]">
                   <Star aria-hidden="true" className="w-3.5 h-3.5 fill-current text-[#F5B942] shrink-0" />
                   &ldquo;{t.praise}&rdquo;
                 </h3>
-                <p className="font-sans text-[14.5px] leading-relaxed text-[#C7CDE6]">{t.text}</p>
+                <p className="font-sans text-sm leading-relaxed text-[#C7CDE6]">{t.text}</p>
               </div>
               <div className="flex flex-wrap items-center justify-between gap-2.5">
                 <span className="flex items-center gap-2 font-sans text-sm font-bold">
@@ -185,7 +185,7 @@ export default function Testimonials({ onScrollToBooking }: TestimonialsProps) {
 
           <div className="md:col-span-2 rounded-3xl border-2 border-dashed border-[#00fff2]/45 p-7 md:px-8 flex flex-col justify-center gap-5">
             <div className="flex flex-col gap-1.5">
-              <p className="font-serif text-2xl md:text-[26px] font-bold">
+              <p className="font-serif text-xl md:text-2xl font-bold">
                 Your smile could be <em className="text-[#00fff2]">next.</em>
               </p>
               <p className="font-sans text-sm text-[#C7CDE6]">One patient per slot, so there's no waiting around.</p>
