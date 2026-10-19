@@ -618,7 +618,7 @@ export default function BookingForm({ preSelectedTreatmentId, preSelectNonce, on
         </div>
 
         <div ref={slotsRef} tabIndex={-1} role="group" aria-labelledby={fieldId('slots-label')} aria-describedby={fieldErrors.timeSlot ? errorId('timeSlot') : undefined} className="outline-none scroll-mt-24">
-          <span id={fieldId('slots-label')} className={labelClass}>Time <span className={optionalClass}>· one patient per slot; struck-through times are taken or have passed</span></span>
+          <span id={fieldId('slots-label')} className={labelClass}>Time <span className={optionalClass}>· one patient per slot</span></span>
           <FieldError id={errorId('timeSlot')} message={fieldErrors.timeSlot} />
           <div className={`mt-1 flex flex-col gap-3 ${fieldErrors.timeSlot ? 'p-3 rounded-xl border border-rose-300' : ''}`}>
             {timeSlots.map((group) => (
