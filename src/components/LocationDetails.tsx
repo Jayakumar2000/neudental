@@ -1,10 +1,11 @@
 import React from 'react';
 import { Clock, MapPin, Phone, Navigation, ExternalLink, Calendar } from 'lucide-react';
+import { CLINIC_GOOGLE_URL } from '../data';
 
 export default function LocationDetails() {
 const clinicLat = 13.1309218;
 const clinicLng = 80.2535879;
-const googleMapsUrl = "https://www.google.com/maps/place/Neudental+Clinic+(Formerly+Bludental)+%7C+Dentist+in+Chennai+%7C+Dental+Clinic+in+Kodungaiyur/@13.1309218,80.2535879,17z/data=!3m1!4b1!4m6!3m5!1s0x3a52659b841d30d3:0xc53ff4dcde940735!8m2!3d13.1309218!4d80.2535879!16s%2Fg%2F11z2d1y0y6";
+const googleMapsUrl = CLINIC_GOOGLE_URL;
 const directionUrl = `https://www.google.com/maps/dir/?api=1&destination=${clinicLat},${clinicLng}`;
 
 return (

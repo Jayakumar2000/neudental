@@ -328,7 +328,7 @@ export default function App() {
           </div>
         </div>
       </section>
-      <Testimonials />
+      <Testimonials onScrollToBooking={handleScrollToBooking} />
       <LocationDetails onScrollToBooking={handleScrollToBooking} />
       <section className="py-14 lg:py-20 bg-surface-alt px-6 md:px-10 lg:px-16 border-b border-cool-gray/5">
         <div className="max-w-3xl mx-auto w-full">

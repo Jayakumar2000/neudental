@@ -1,6 +1,7 @@
 import React from 'react';
 import { Star, ShieldCheck } from 'lucide-react';
 import { IconUserPatient } from './icons/DentalIcons';
+import { REVIEW_RATING, REVIEW_COUNT_LABEL } from '../data';
 
 const FEATURED_ON = [
 { name: 'Google', logo: '/logos/google-icon.png', showLabel: true },
@@ -70,12 +71,12 @@ Gentle, comfortable dentistry for every age, starting from a child's first denta
 <div className="w-px h-9 bg-cool-gray/15 shrink-0" />
 <div className="leading-tight">
 <div className="flex items-baseline gap-2 whitespace-nowrap">
-<span className="text-xl font-bold text-primary font-sans">4.9</span>
+<span className="text-xl font-bold text-primary font-sans">{REVIEW_RATING}</span>
 <div className="flex items-center gap-0.5 text-[#FBBF24]">
 <Star className="w-3 h-3 fill-current" /><Star className="w-3 h-3 fill-current" /><Star className="w-3 h-3 fill-current" /><Star className="w-3 h-3 fill-current" /><Star className="w-3 h-3 fill-current" />
 </div>
 </div>
-<p className="text-[11px] font-bold text-cool-gray font-sans uppercase tracking-wide mt-1 whitespace-nowrap">150+ Ratings on Google</p>
+<p className="text-[11px] font-bold text-cool-gray font-sans uppercase tracking-wide mt-1 whitespace-nowrap">{REVIEW_COUNT_LABEL} Ratings on Google</p>
 </div>
 </div>
 </div>
