@@ -55,27 +55,18 @@ const PATIENT_STATUS: Record<AppointmentStatus, { label: string; className: stri
 
 const CANCELLABLE_STATUSES: AppointmentStatus[] = ['pending', 'confirmed', 'rescheduled', 'no_response'];
 
-// Digits only, exactly as typed -- never trimmed or shifted, so a mistyped
-// extra digit stays visible to be fixed (a real number can itself start with
-// 91, so typed digits are never treated as a country code). Only a pasted or
-// autofilled number ("+91 98765 43210", "098765 43210", "0091 98765 43210")
-// has its prefix removed. Typing stops at 12 digits.
-function normalizeMobileInput(value: string, pastedOrAutofilled: boolean): string {
-  let digits = value.replace(/\D/g, '');
-  if (pastedOrAutofilled) {
-    const prefixed = digits.match(/^(?:00)?(?:91)?0?([6-9]\d{9})$/);
-    if (prefixed) digits = prefixed[1];
-  }
-  return digits.slice(0, 12);
-}
-
+// The mobile number field is never changed for the patient -- nothing typed,
+// pasted or autofilled is removed or rewritten. These messages say exactly
+// what to fix instead.
 function mobileError(phone: string): string | undefined {
   if (!phone) return 'Enter a mobile number so we can reach you about this visit.';
+  if (/^\s*\+/.test(phone)) return "Leave out the +91 at the start (it's already added) and enter just the 10-digit number.";
+  if (/\D/.test(phone)) return 'Use digits only, without spaces, dashes or other symbols.';
   if (phone.length < 10) return `Enter all 10 digits of your mobile number (${phone.length} entered).`;
-  if (phone.length === 12 && phone.startsWith('91')) return 'This has 12 digits. If you typed 91 at the start, remove it (+91 is already added).';
   if (phone.length === 11 && phone.startsWith('0')) return 'Leave out the 0 at the start and enter the 10-digit mobile number.';
+  if (phone.length === 12 && phone.startsWith('91')) return 'This has 12 digits. If you typed 91 at the start, remove it (+91 is already added).';
   if (phone.length > 10) return `Mobile numbers have 10 digits; this has ${phone.length}. Please remove the extra digit${phone.length > 11 ? 's' : ''}.`;
-  if (!/^[6-9]/.test(phone)) return 'Indian mobile numbers start with 6, 7, 8 or 9 (leave out any 0 or +91 at the start).';
+  if (!/^[6-9]/.test(phone)) return 'Indian mobile numbers start with 6, 7, 8 or 9.';
   return undefined;
 }
 
@@ -570,7 +561,7 @@ export default function BookingForm({ preSelectedTreatmentId, preSelectNonce, on
       <form onSubmit={handleBooking} noValidate className="space-y-5">
         <div className="space-y-1"><label htmlFor={fieldId('name')} className="text-xs font-display font-medium text-primary uppercase">Patient Name</label><div className="relative"><User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-cool-gray" /><input ref={nameRef} id={fieldId('name')} type="text" autoComplete="name" placeholder="E.g., Jayakumar" maxLength={100} value={patientName} onChange={(e) => { setPatientName(e.target.value); clearFieldError('patientName'); }} {...ariaFor('patientName')} className={fieldClass(!!fieldErrors.patientName, 'pl-10 pr-4')} /></div><FieldError id={errorId('patientName')} message={fieldErrors.patientName} /></div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1"><label htmlFor={fieldId('phone')} className="text-xs font-display font-medium text-primary uppercase">Mobile Number<span className="sr-only"> (10 digits, +91 is already added)</span></label><div className="relative"><Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-cool-gray" /><span aria-hidden="true" className="absolute left-10 top-1/2 -translate-y-1/2 font-sans text-base sm:text-sm text-primary/70 pointer-events-none">+91</span><input ref={phoneRef} id={fieldId('phone')} type="tel" autoComplete="tel-national" placeholder="9876543210" inputMode="numeric" value={phone} onChange={(e) => { const added = e.target.value.replace(/\D/g, '').length - phone.length; setPhone(normalizeMobileInput(e.target.value, added > 1 || (e.nativeEvent as InputEvent).inputType === 'insertFromPaste')); clearFieldError('phone'); }} onBlur={() => { if (phone) afterPress(() => setFieldErrors((prev) => ({ ...prev, phone: mobileError(phone) }))); }} {...ariaFor('phone')} className={fieldClass(!!fieldErrors.phone, 'pl-[4.75rem] pr-4')} /></div><FieldError id={errorId('phone')} message={fieldErrors.phone} /></div>
+          <div className="space-y-1"><label htmlFor={fieldId('phone')} className="text-xs font-display font-medium text-primary uppercase">Mobile Number<span className="sr-only"> (10 digits, +91 is already added)</span></label><div className="relative"><Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-cool-gray" /><span aria-hidden="true" className="absolute left-10 top-1/2 -translate-y-1/2 font-sans text-base sm:text-sm text-primary/70 pointer-events-none">+91</span><input ref={phoneRef} id={fieldId('phone')} type="tel" autoComplete="tel-national" placeholder="9876543210" inputMode="numeric" value={phone} onChange={(e) => { setPhone(e.target.value); clearFieldError('phone'); }} onBlur={() => { if (phone) afterPress(() => setFieldErrors((prev) => ({ ...prev, phone: mobileError(phone) }))); }} {...ariaFor('phone')} className={fieldClass(!!fieldErrors.phone, 'pl-[4.75rem] pr-4')} /></div><FieldError id={errorId('phone')} message={fieldErrors.phone} /></div>
           <div className="space-y-1"><label htmlFor={fieldId('email')} className="text-xs font-display font-medium text-primary uppercase">Email (Optional)</label><input ref={emailRef} id={fieldId('email')} type="email" autoComplete="email" placeholder="contact@gmail.com" maxLength={200} value={email} onChange={(e) => { setEmail(e.target.value); clearFieldError('email'); }} onBlur={() => afterPress(() => setFieldErrors((prev) => ({ ...prev, email: emailError(email) })))} {...ariaFor('email')} className={fieldClass(!!fieldErrors.email)} /><FieldError id={errorId('email')} message={fieldErrors.email} /></div>
         </div>
         <div className="space-y-1"><label htmlFor={fieldId('treatment')} className="text-xs font-display font-medium text-primary uppercase">Target Treatment Course</label><select id={fieldId('treatment')} value={treatmentId} onChange={(e) => setTreatmentId(e.target.value)} className={fieldClass(false)}>{TREATMENTS.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></div>
