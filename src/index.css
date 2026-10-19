@@ -79,14 +79,6 @@ html {
   .marquee-track {
     animation: none;
   }
-  /* Rows of buttons (testimonial praise ribbons) stay reachable by swiping
-     when they no longer move; the looping duplicate copy is dropped. */
-  .marquee-row.marquee-swipe {
-    overflow-x: auto;
-  }
-  .marquee-swipe .marquee-copy {
-    display: none;
-  }
 }
 
 /* Highlighter-pen mark behind the key phrase of a review */
