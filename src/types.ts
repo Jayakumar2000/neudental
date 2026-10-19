@@ -36,6 +36,10 @@ export interface Testimonial {
   imgAlt: string;
   initials: string;
   sourceLogo?: 'google' | 'practo' | 'justdial';
+  // Words from `text` (verbatim) marked like a highlighter in the spotlight.
+  highlight: string;
+  // Two short phrases drawn from the review for the scrolling praise ribbons.
+  praise: [string, string];
 }
 
 export interface Symptom {

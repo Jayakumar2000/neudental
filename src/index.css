@@ -71,11 +71,28 @@ html {
   animation-name: marquee-right;
   animation-duration: 32s;
 }
-.marquee-row:hover .marquee-track {
+.marquee-row:hover .marquee-track,
+.marquee-row:focus-within .marquee-track {
   animation-play-state: paused;
 }
 @media (prefers-reduced-motion: reduce) {
   .marquee-track {
     animation: none;
   }
+  /* Rows of buttons (testimonial praise ribbons) stay reachable by swiping
+     when they no longer move; the looping duplicate copy is dropped. */
+  .marquee-row.marquee-swipe {
+    overflow-x: auto;
+  }
+  .marquee-swipe .marquee-copy {
+    display: none;
+  }
+}
+
+/* Highlighter-pen mark behind the key phrase of a review */
+.highlight-mark {
+  background-image: linear-gradient(transparent 60%, rgba(0, 255, 242, 0.55) 60%);
+  padding: 0 2px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
 }
