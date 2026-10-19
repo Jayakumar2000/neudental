@@ -55,10 +55,29 @@ const PATIENT_STATUS: Record<AppointmentStatus, { label: string; className: stri
 
 const CANCELLABLE_STATUSES: AppointmentStatus[] = ['pending', 'confirmed', 'rescheduled', 'no_response'];
 
-// Keep the last 10 digits so a typed or pasted "+91 98765 43210" or
-// "098765 43210" ends up as the mobile number itself, not "9198765432".
-function normalizeMobile(value: string): string {
-  return value.replace(/\D/g, '').slice(-10);
+// Digits only. A pasted or autofilled number carrying the country code
+// ("+91 98765 43210") or a leading 0 ("098765 43210") becomes the 10-digit
+// mobile number. Otherwise the digits stay exactly as typed -- never trimmed
+// from the front -- so a mistyped extra digit stays visible to be fixed.
+// Nothing longer than 12 digits can be a valid entry, so typing stops there.
+function normalizeMobileInput(value: string): string {
+  const digits = value.replace(/\D/g, '');
+  if (digits.length === 12 && digits.startsWith('91')) return digits.slice(2);
+  if (digits.length === 11 && digits.startsWith('0')) return digits.slice(1);
+  return digits.slice(0, 12);
+}
+
+function mobileError(phone: string): string | undefined {
+  if (!phone) return 'Enter a mobile number so we can reach you about this visit.';
+  if (phone.length < 10) return `Enter all 10 digits of your mobile number (${phone.length} entered).`;
+  if (phone.length > 10) return `Mobile numbers have 10 digits; this has ${phone.length}. Please remove the extra digit${phone.length > 11 ? 's' : ''}.`;
+  if (!/^[6-9]/.test(phone)) return 'Indian mobile numbers start with 6, 7, 8 or 9 (leave out any 0 or +91 at the start).';
+  return undefined;
+}
+
+function emailError(email: string): string | undefined {
+  const value = email.trim();
+  return value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? 'Enter a valid email address, or leave this blank.' : undefined;
 }
 
 const isPermissionDenied = (err: unknown) => (err as { code?: string })?.code === 'permission-denied';
@@ -293,9 +312,8 @@ export default function BookingForm({ preSelectedTreatmentId, preSelectNonce, on
   const validate = (): FieldErrors => {
     const errors: FieldErrors = {};
     if (!patientName.trim()) errors.patientName = "Enter the patient's name.";
-    if (!phone) errors.phone = 'Enter a mobile number so we can reach you about this visit.';
-    else if (!/^[6-9]\d{9}$/.test(phone)) errors.phone = 'Enter a valid 10-digit mobile number (starting with 6, 7, 8 or 9).';
-    if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) errors.email = 'Enter a valid email address, or leave this blank.';
+    errors.phone = mobileError(phone);
+    errors.email = emailError(email);
     if (!date) errors.date = 'Choose a date for your visit.';
     else if (date < todayStr) errors.date = 'Choose today or a later date.';
     else if (date > maxDateStr) errors.date = `Appointments can be booked up to ${BOOKING_WINDOW_DAYS} days ahead. For a later date, please call +91 93423 67446.`;
@@ -527,8 +545,8 @@ export default function BookingForm({ preSelectedTreatmentId, preSelectNonce, on
       <form onSubmit={handleBooking} noValidate className="space-y-5">
         <div className="space-y-1"><label htmlFor={fieldId('name')} className="text-xs font-display font-medium text-primary uppercase">Patient Name</label><div className="relative"><User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-cool-gray" /><input ref={nameRef} id={fieldId('name')} type="text" autoComplete="name" placeholder="E.g., Jayakumar" maxLength={100} value={patientName} onChange={(e) => { setPatientName(e.target.value); clearFieldError('patientName'); }} {...ariaFor('patientName')} className={fieldClass(!!fieldErrors.patientName, 'pl-10 pr-4')} /></div><FieldError id={errorId('patientName')} message={fieldErrors.patientName} /></div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1"><label htmlFor={fieldId('phone')} className="text-xs font-display font-medium text-primary uppercase">Mobile Number</label><div className="relative"><Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-cool-gray" /><input ref={phoneRef} id={fieldId('phone')} type="tel" autoComplete="tel-national" placeholder="9876543210" inputMode="numeric" value={phone} onChange={(e) => { setPhone(normalizeMobile(e.target.value)); clearFieldError('phone'); }} {...ariaFor('phone')} className={fieldClass(!!fieldErrors.phone, 'pl-10 pr-4')} /></div><FieldError id={errorId('phone')} message={fieldErrors.phone} /></div>
-          <div className="space-y-1"><label htmlFor={fieldId('email')} className="text-xs font-display font-medium text-primary uppercase">Email (Optional)</label><input ref={emailRef} id={fieldId('email')} type="email" autoComplete="email" placeholder="contact@gmail.com" maxLength={200} value={email} onChange={(e) => { setEmail(e.target.value); clearFieldError('email'); }} {...ariaFor('email')} className={fieldClass(!!fieldErrors.email)} /><FieldError id={errorId('email')} message={fieldErrors.email} /></div>
+          <div className="space-y-1"><label htmlFor={fieldId('phone')} className="text-xs font-display font-medium text-primary uppercase">Mobile Number<span className="sr-only"> (10 digits, +91 is already added)</span></label><div className="relative"><Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-cool-gray" /><span aria-hidden="true" className="absolute left-10 top-1/2 -translate-y-1/2 font-sans text-base sm:text-sm text-primary/70 pointer-events-none">+91</span><input ref={phoneRef} id={fieldId('phone')} type="tel" autoComplete="tel-national" placeholder="9876543210" inputMode="numeric" value={phone} onChange={(e) => { setPhone(normalizeMobileInput(e.target.value)); clearFieldError('phone'); }} onBlur={() => { if (phone) setFieldErrors((prev) => ({ ...prev, phone: mobileError(phone) })); }} {...ariaFor('phone')} className={fieldClass(!!fieldErrors.phone, 'pl-[4.75rem] pr-4')} /></div><FieldError id={errorId('phone')} message={fieldErrors.phone} /></div>
+          <div className="space-y-1"><label htmlFor={fieldId('email')} className="text-xs font-display font-medium text-primary uppercase">Email (Optional)</label><input ref={emailRef} id={fieldId('email')} type="email" autoComplete="email" placeholder="contact@gmail.com" maxLength={200} value={email} onChange={(e) => { setEmail(e.target.value); clearFieldError('email'); }} onBlur={() => setFieldErrors((prev) => ({ ...prev, email: emailError(email) }))} {...ariaFor('email')} className={fieldClass(!!fieldErrors.email)} /><FieldError id={errorId('email')} message={fieldErrors.email} /></div>
         </div>
         <div className="space-y-1"><label htmlFor={fieldId('treatment')} className="text-xs font-display font-medium text-primary uppercase">Target Treatment Course</label><select id={fieldId('treatment')} value={treatmentId} onChange={(e) => setTreatmentId(e.target.value)} className={fieldClass(false)}>{TREATMENTS.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></div>
         <div className="space-y-1"><label htmlFor={fieldId('date')} className="text-xs font-display font-medium text-primary uppercase">Appointment Date</label><input ref={dateRef} id={fieldId('date')} type="date" min={todayStr} max={maxDateStr} value={date} onChange={(e) => { setDate(e.target.value); clearFieldError('date'); }} {...ariaFor('date')} className={fieldClass(!!fieldErrors.date)} /><FieldError id={errorId('date')} message={fieldErrors.date} /></div>
