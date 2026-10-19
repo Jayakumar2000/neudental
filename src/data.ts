@@ -39,7 +39,8 @@ export const DOCTOR: Doctor = {
   skills: ['Root Canal Treatment', 'Smile Designing', 'Clear Aligners', 'Dental Implants', 'Cosmetic Dentistry', 'Dentures', 'Pediatric/Kids Dentistry'],
 };
 
-// Public review figures shown on the site (testimonials, trust banner); keep
+// Public review figures shown on the site (hero badge, testimonials, booking
+// trust banner); keep
 // index.html's aggregateRating in step when they change.
 export const REVIEW_RATING = '4.97';
 export const REVIEW_COUNT_LABEL = '200+';
