@@ -240,12 +240,9 @@ export default function Testimonials({ onScrollToBooking }: TestimonialsProps) {
           </div>
 
           <div className="md:col-span-2 rounded-3xl border-2 border-dashed border-[#00fff2]/45 p-7 md:px-8 flex flex-col md:flex-row md:items-center md:justify-between gap-5">
-            <div className="flex flex-col gap-1.5">
-              <p className="font-serif text-xl md:text-2xl font-bold">
-                Your smile could be <em className="text-[#00fff2]">next.</em>
-              </p>
-              <p className="font-sans text-sm text-[#C7CDE6]">One patient per slot, so there's no waiting around.</p>
-            </div>
+            <p className="font-serif text-xl md:text-2xl font-bold">
+              Your smile could be <em className="text-[#00fff2]">next.</em>
+            </p>
             <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
               <button
                 type="button"
