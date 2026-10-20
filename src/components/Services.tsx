@@ -92,6 +92,34 @@ const isCustomPackIcon = (name: string) => name.startsWith('Icon');
 
 const getCategoryLabel = (key: string) => CATEGORIES.find((c) => c.key === key)?.label ?? key;
 
+// Mobile card-stack pieces, shared by the visible cards and the invisible
+// copies that set the deck's height.
+const renderCardHeader = (treatment: Treatment) => (<>
+<span className="text-mint font-sans text-[11px] uppercase tracking-widest font-bold block mb-1">{getCategoryLabel(treatment.category)} Treatment Info</span>
+<h3 className="font-serif font-bold text-xl text-white mb-2">{treatment.name}</h3>
+</>);
+const renderFrontBody = (treatment: Treatment) => (<>
+<p className="font-sans text-sm text-white/80 leading-relaxed mb-5">{treatment.description}</p>
+<div className="grid grid-cols-2 gap-4 p-4 rounded-xl bg-white/10 border border-white/10 mb-5 text-xs">
+<div className="flex items-center gap-2"><Clock className="w-4 h-4 text-white/60" /><div><p className="text-white/60 font-medium">Duration</p><p className="font-bold text-white">{treatment.duration}</p></div></div>
+<div className="flex items-center gap-2"><IndianRupee className="w-4 h-4 text-white/60" /><div><p className="text-white/60 font-medium">Treatment Cost*</p><p className="font-bold text-white">{treatment.startingPrice.toLocaleString('en-IN')}</p></div></div>
+</div>
+<p className="text-[10px] text-white/50 font-sans -mt-3 mb-5">*Indicative starting price, not the final charge — actual cost is confirmed after clinical consultation.</p>
+<div className="space-y-3 mb-6">
+<p className="text-xs font-bold uppercase tracking-wider text-white">Treatment Highlights:</p>
+{treatment.features.map((feat) => (
+<div key={feat} className="flex items-start gap-2.5 text-xs text-white/80"><div className="w-4 h-4 rounded-full bg-mint/90 text-primary flex items-center justify-center shrink-0 mt-0.5"><Check className="w-3 h-3" /></div><span className="leading-normal">{feat}</span></div>
+))}
+</div>
+{/* Pinned to the bottom of the fixed-height card via mt-auto so the CTA
+sits in the same place regardless of how many highlights a treatment
+has, instead of leaving dead space below it for shorter lists. */}
+<div className="space-y-3 mt-auto">
+<button onClick={() => onSelectTreatment(treatment.id)} className="w-full bg-white text-primary active:bg-mint cursor-pointer py-4 rounded-xl font-sans text-xs uppercase tracking-widest font-bold transition-all duration-200">Book Appointment</button>
+{onViewDetailSubpage && (<button onClick={() => onViewDetailSubpage(treatment.id)} className="w-full bg-white/10 border border-white/20 active:bg-white/15 text-white cursor-pointer py-3.5 rounded-xl font-sans text-xs uppercase tracking-widest font-bold transition-all duration-200 flex items-center justify-center gap-1.5"><span>View Comprehensive Patient Guide</span><ArrowRight className="w-3.5 h-3.5" /></button>)}
+</div>
+</>);
+
 const filteredTreatments = activeCategory === 'all' ? TREATMENTS : TREATMENTS.filter(t => t.category === activeCategory);
 
 return (
@@ -135,7 +163,15 @@ className="bg-white border border-secondary/15 rounded-2xl p-3 flex flex-col ite
 ))}
 </div>
 <div id="treatments-deck" className="lg:hidden mb-2 scroll-mt-24">
-<div className="relative h-[460px]" style={{ perspective: '1200px' }}>
+<div className="relative grid min-h-[460px]" style={{ perspective: '1200px' }}>
+{/* Invisible copies of every front card, stacked in one grid cell, size the
+deck to its tallest treatment so no card has to scroll inside itself. */}
+{filteredTreatments.map((treatment) => (
+<div key={`sizer-${treatment.id}`} aria-hidden="true" inert className="invisible [grid-area:1/1] p-6 flex flex-col">
+{renderCardHeader(treatment)}
+{renderFrontBody(treatment)}
+</div>
+))}
 {filteredTreatments.map((treatment, i) => {
 const depth = i - stackIndex;
 if (depth < 0 || depth > 2) return null;
@@ -150,30 +186,11 @@ transform: `translateY(${depth * 18}px) scaleX(${1 - depth * 0.05})`,
 transformOrigin: 'top center',
 opacity: isFront ? 1 : depth === 1 ? 0.9 : 0.75,
 }}
-className={`absolute inset-0 rounded-3xl premium-shadow bg-gradient-to-br from-primary via-primary to-secondary transition-all duration-500 ease-out ${isFront ? 'p-6 overflow-y-auto flex flex-col' : 'p-6 cursor-pointer overflow-hidden'}`}
+className={`absolute inset-0 rounded-3xl premium-shadow bg-gradient-to-br from-primary via-primary to-secondary transition-all duration-500 ease-out p-6 overflow-hidden ${isFront ? 'flex flex-col' : 'cursor-pointer'}`}
 >
-<span className="text-mint font-sans text-[11px] uppercase tracking-widest font-bold block mb-1">{getCategoryLabel(treatment.category)} Treatment Info</span>
-<h3 className="font-serif font-bold text-xl text-white mb-2">{treatment.name}</h3>
+{renderCardHeader(treatment)}
 {isFront && (<>
-<p className="font-sans text-sm text-white/80 leading-relaxed mb-5">{treatment.description}</p>
-<div className="grid grid-cols-2 gap-4 p-4 rounded-xl bg-white/10 border border-white/10 mb-5 text-xs">
-<div className="flex items-center gap-2"><Clock className="w-4 h-4 text-white/60" /><div><p className="text-white/60 font-medium">Duration</p><p className="font-bold text-white">{treatment.duration}</p></div></div>
-<div className="flex items-center gap-2"><IndianRupee className="w-4 h-4 text-white/60" /><div><p className="text-white/60 font-medium">Treatment Cost*</p><p className="font-bold text-white">{treatment.startingPrice.toLocaleString('en-IN')}</p></div></div>
-</div>
-<p className="text-[10px] text-white/50 font-sans -mt-3 mb-5">*Indicative starting price, not the final charge — actual cost is confirmed after clinical consultation.</p>
-<div className="space-y-3 mb-6">
-<p className="text-xs font-bold uppercase tracking-wider text-white">Treatment Highlights:</p>
-{treatment.features.map((feat) => (
-<div key={feat} className="flex items-start gap-2.5 text-xs text-white/80"><div className="w-4 h-4 rounded-full bg-mint/90 text-primary flex items-center justify-center shrink-0 mt-0.5"><Check className="w-3 h-3" /></div><span className="leading-normal">{feat}</span></div>
-))}
-</div>
-{/* Pinned to the bottom of the fixed-height card via mt-auto so the CTA
-sits in the same place regardless of how many highlights a treatment
-has, instead of leaving dead space below it for shorter lists. */}
-<div className="space-y-3 mt-auto">
-<button onClick={() => onSelectTreatment(treatment.id)} className="w-full bg-white text-primary active:bg-mint cursor-pointer py-4 rounded-xl font-sans text-xs uppercase tracking-widest font-bold transition-all duration-200">Book Appointment</button>
-{onViewDetailSubpage && (<button onClick={() => onViewDetailSubpage(treatment.id)} className="w-full bg-white/10 border border-white/20 active:bg-white/15 text-white cursor-pointer py-3.5 rounded-xl font-sans text-xs uppercase tracking-widest font-bold transition-all duration-200 flex items-center justify-center gap-1.5"><span>View Comprehensive Patient Guide</span><ArrowRight className="w-3.5 h-3.5" /></button>)}
-</div>
+{renderFrontBody(treatment)}
 </>)}
 </div>
 );
