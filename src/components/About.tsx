@@ -1,13 +1,15 @@
 import React from 'react';
 import { DOCTORS } from '../data';
+import { SmileCurve } from './BrandShapes';
 import { GraduationCap, Camera, Award, Users, Activity, Sparkles, Home } from 'lucide-react';
 
+// `featured` gets the filled navy ring so the eye lands on it first.
 const TRUST_STATS = [
-  { icon: Award, value: '5+', label: 'Years of Trusted Dental Care' },
-  { icon: Users, value: '3,000+', label: 'Happy Patients Treated' },
-  { icon: Activity, value: '5,000+', label: 'Procedures Completed' },
-  { icon: Home, value: '200+', label: 'Home Visits for Senior Citizens' },
-  { icon: Sparkles, value: '99.8%', label: 'Sterilization Success Rate' },
+  { icon: Award, value: '5+', label: 'Years of trusted dental care' },
+  { icon: Users, value: '3,000+', label: 'Happy patients treated', featured: true },
+  { icon: Activity, value: '5,000+', label: 'Procedures completed' },
+  { icon: Home, value: '200+', label: 'Home visits for senior citizens' },
+  { icon: Sparkles, value: '99.8%', label: 'Sterilization success rate' },
 ];
 
 interface GalleryPhoto {
@@ -34,33 +36,55 @@ const CLINIC_PHOTOS: GalleryPhoto[] = [
 const CLINIC_ROW_1 = CLINIC_PHOTOS.filter((_, i) => i % 2 === 0);
 const CLINIC_ROW_2 = CLINIC_PHOTOS.filter((_, i) => i % 2 === 1);
 
-export default function About() {
+export default function About({ onScrollToBooking }: { onScrollToBooking?: () => void }) {
 const doc = DOCTORS[0];
 
 return (
 <section id="about" className="py-14 lg:py-20 bg-white px-6 md:px-10 lg:px-16 scroll-mt-24">
 <div className="max-w-[1280px] mx-auto w-full">
 {/* Section Title */}
-<div className="text-center max-w-2xl mx-auto mb-14">
+<div className="text-center max-w-2xl mx-auto mb-12 lg:mb-14">
 <span className="text-secondary font-sans text-xs font-bold tracking-[0.2em] uppercase">
 Why Patients Trust Us
 </span>
 <h2 className="font-serif text-3xl md:text-4xl text-primary font-bold mt-3 leading-tight">
-Excellence You Can See In The Numbers
+Excellence you can see in the{' '}
+<span className="relative inline-block italic font-semibold">
+numbers
+<SmileCurve stroke="#00D4C9" className="absolute -left-[4%] -bottom-2.5 w-[108%] h-4" />
+</span>
 </h2>
-<div className="w-12 h-1 bg-secondary mx-auto mt-6" />
 </div>
-{/* Trust Stats Strip */}
-<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6 max-w-6xl mx-auto mb-20">
-{TRUST_STATS.map((stat, i) => (
-<div key={stat.label} className={`bg-surface-container-low border border-cool-gray/5 rounded-2xl p-6 text-center hover:border-secondary/20 hover:-translate-y-0.5 transition-all ${i === TRUST_STATS.length - 1 ? 'col-span-2 sm:col-span-1' : ''}`}>
-<div className="w-11 h-11 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center mx-auto mb-4">
-<stat.icon className="w-5 h-5" />
+{/* Trust stats: milestone rings joined by a dotted smile curve (desktop),
+a vertical timeline of small rings (phones and tablets). */}
+<div className="max-w-6xl mx-auto mb-20">
+<ul className="relative flex flex-col gap-4 max-w-sm mx-auto lg:max-w-none lg:flex-row lg:justify-between lg:gap-4">
+<svg aria-hidden="true" viewBox="0 0 1000 60" preserveAspectRatio="none" className="hidden lg:block absolute left-[8%] w-[84%] top-[39px] xl:top-[45px] h-[60px] pointer-events-none">
+<path d="M0 30 C 125 -10, 125 70, 250 30 S 375 -10, 500 30 S 625 70, 750 30 S 875 -10, 1000 30" fill="none" stroke="#00D4C9" strokeWidth="3" strokeDasharray="2 10" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+</svg>
+<span aria-hidden="true" className="lg:hidden absolute left-[33px] top-9 bottom-9 border-l-[3px] border-dotted border-[#00D4C9]" />
+{TRUST_STATS.map((stat) => (
+<li key={stat.label} className="relative flex items-center gap-4 lg:flex-1 lg:flex-col lg:gap-0 lg:text-center">
+<div className={`shrink-0 rounded-full border-2 flex flex-col items-center justify-center w-[68px] h-[68px] lg:w-[132px] lg:h-[132px] xl:w-[150px] xl:h-[150px] lg:gap-1.5 shadow-[0_20px_40px_-20px_rgba(11,19,65,0.4)] ${stat.featured ? 'bg-primary border-[#00fff2] ring-8 ring-[#00fff2]/12' : 'bg-white border-[#00D4C9] ring-8 ring-[#00D4C9]/8'}`}>
+<stat.icon aria-hidden="true" className={`w-5 h-5 lg:w-[18px] lg:h-[18px] ${stat.featured ? 'text-[#00fff2]' : 'text-secondary'}`} />
+<span className={`hidden lg:block font-display font-bold leading-none lg:text-[27px] xl:text-[31px] ${stat.featured ? 'text-white' : 'text-primary'}`}>{stat.value}</span>
 </div>
-<p className="font-serif text-2xl md:text-3xl font-bold text-primary leading-none">{stat.value}</p>
-<p className="font-sans text-[11px] font-bold uppercase tracking-wider text-cool-gray mt-3 leading-snug">{stat.label}</p>
+<div className="lg:mt-6">
+<p className="lg:hidden font-display font-bold text-2xl text-primary leading-none">{stat.value}</p>
+<p className="font-sans text-[13px] lg:text-sm font-semibold lg:font-bold text-cool-gray lg:text-primary mt-1 lg:mt-0 leading-snug lg:max-w-[170px] lg:mx-auto">{stat.label}</p>
 </div>
+</li>
 ))}
+</ul>
+{onScrollToBooking && (
+<div className="mt-10 lg:mt-12 flex justify-center">
+<p className="inline-flex items-center gap-3 bg-white border border-cool-gray/15 rounded-full py-2 pl-5 pr-2 font-sans text-sm text-on-surface-variant whitespace-nowrap">
+<span className="hidden sm:inline">Be one of the next 3,000 smiles</span>
+<span className="sm:hidden">Join 3,000+ happy patients</span>
+<button type="button" onClick={onScrollToBooking} className="bg-primary hover:bg-secondary text-white rounded-full min-h-10 px-4 font-bold text-[13px] transition-colors cursor-pointer">Book your visit</button>
+</p>
+</div>
+)}
 </div>
 {/* Meet the Doctor + Clinic Tour — one flowing composition, not two boxed-off panes */}
 <div id="our-doctor" className="max-w-5xl mx-auto pt-8 scroll-mt-24">
