@@ -1,13 +1,76 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Clock, MapPin, Phone, Navigation, ExternalLink, Calendar } from 'lucide-react';
 import { CLINIC_GOOGLE_URL } from '../data';
 
 // Google's map embed takes focus when it finishes loading, and the browser
-// then scrolls the page down to it -- a lazy-loaded one did this to visitors
-// still scrolling past the booking form and reviews. It now loads only when
-// asked for, which also keeps its heavy scripts off the initial page load.
+// then scrolls the page to it -- a lazy-loaded one pulled visitors who were
+// still scrolling past the booking form and reviews down to this section.
+// So it loads only once its whole box is on screen (nothing left to scroll
+// to), or when Show map is tapped, and a focus grab that moves the page
+// anyway is undone.
 export default function LocationDetails() {
 const [mapRequested, setMapRequested] = useState(false);
+const mapBoxRef = useRef<HTMLDivElement>(null);
+const mapFrameRef = useRef<HTMLIFrameElement>(null);
+
+useEffect(() => {
+const box = mapBoxRef.current;
+if (mapRequested || !box) return;
+const io = new IntersectionObserver(([entry]) => {
+// Fully in view, or filling the screen on one too short to show all of it.
+const fills = entry.intersectionRect.height >= Math.min(entry.boundingClientRect.height, window.innerHeight) - 2;
+if (entry.isIntersecting && fills) setMapRequested(true);
+}, { threshold: [0, 0.25, 0.5, 0.75, 0.9, 1] });
+io.observe(box);
+return () => io.disconnect();
+}, [mapRequested]);
+
+useEffect(() => {
+const frame = mapFrameRef.current;
+if (!mapRequested || !frame) return;
+// Where the page was a moment ago, in case the focus grab already moved it.
+const history: Array<[number, number]> = [[performance.now() - 1000, window.scrollY]];
+let pointerOverMap = false;
+let holdY: number | null = null;
+let holdUntil = 0;
+const onScroll = () => {
+const now = performance.now();
+if (holdY !== null && now < holdUntil && Math.abs(window.scrollY - holdY) > 2) {
+window.scrollTo({ top: holdY, behavior: 'instant' });
+return;
+}
+history.push([now, window.scrollY]);
+if (history.length > 30) history.shift();
+};
+// Any scroll, tap or key from the visitor ends the hold at once.
+const onInput = () => { holdY = null; };
+const onEnter = () => { pointerOverMap = true; };
+const onLeave = () => { pointerOverMap = false; };
+// The map taking focus makes this window lose it. Unless the visitor
+// clicked into the map, keep the page where it was for a second.
+const onBlur = () => {
+if (document.activeElement !== frame || pointerOverMap) return;
+const now = performance.now();
+const before = [...history].reverse().find(([t]) => now - t > 60);
+holdY = before ? before[1] : window.scrollY;
+holdUntil = now + 1000;
+if (Math.abs(window.scrollY - holdY) > 2) window.scrollTo({ top: holdY, behavior: 'instant' });
+};
+const inputs = ['wheel', 'touchstart', 'keydown', 'pointerdown'] as const;
+const listen = { capture: true, passive: true } as const;
+window.addEventListener('scroll', onScroll, { passive: true });
+inputs.forEach((type) => window.addEventListener(type, onInput, listen));
+window.addEventListener('blur', onBlur);
+frame.addEventListener('mouseenter', onEnter);
+frame.addEventListener('mouseleave', onLeave);
+return () => {
+window.removeEventListener('scroll', onScroll);
+inputs.forEach((type) => window.removeEventListener(type, onInput, listen));
+window.removeEventListener('blur', onBlur);
+frame.removeEventListener('mouseenter', onEnter);
+frame.removeEventListener('mouseleave', onLeave);
+};
+}, [mapRequested]);
 const clinicLat = 13.1309218;
 const clinicLng = 80.2535879;
 const googleMapsUrl = CLINIC_GOOGLE_URL;
@@ -57,9 +120,9 @@ return (
 <div><h4 className="font-serif text-2xl md:text-3xl font-bold text-primary">Map view of Neudental Clinic</h4></div>
 <a href={googleMapsUrl} target="_blank" rel="noreferrer" className="text-xs text-secondary font-bold hover:underline inline-flex items-center gap-1 font-sans">Open in Google Maps <ExternalLink className="w-3.5 h-3.5" /></a>
 </div>
-<div className="w-full grow min-h-[350px] rounded-2xl overflow-hidden border border-cool-gray/15 select-none bg-cool-gray/5 relative">
+<div ref={mapBoxRef} className="w-full grow min-h-[350px] rounded-2xl overflow-hidden border border-cool-gray/15 select-none bg-cool-gray/5 relative">
 {mapRequested ? (
-<iframe title="Google map exact directions neudental clinic chennai" src={`https://maps.google.com/maps?q=${clinicLat},${clinicLng}&z=17&output=embed`} className="w-full h-full border-none absolute inset-0" allowFullScreen={true} referrerPolicy="no-referrer-when-downgrade" />
+<iframe ref={mapFrameRef} title="Google map exact directions neudental clinic chennai" src={`https://maps.google.com/maps?q=${clinicLat},${clinicLng}&z=17&output=embed`} className="w-full h-full border-none absolute inset-0" allowFullScreen={true} referrerPolicy="no-referrer-when-downgrade" />
 ) : (
 <div className="absolute inset-0 flex flex-col items-center justify-center gap-5 px-6 text-center bg-[#EEF4FB] bg-[linear-gradient(rgba(5,87,188,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(5,87,188,0.06)_1px,transparent_1px)] bg-[size:32px_32px]">
 <span className="w-16 h-16 rounded-full bg-primary flex items-center justify-center shadow-[0_12px_30px_-10px_rgba(11,19,65,0.6)]"><MapPin className="w-7 h-7 text-[#00fff2]" aria-hidden="true" /></span>
