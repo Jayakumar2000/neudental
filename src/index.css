@@ -21,6 +21,12 @@
   --color-cool-gray: #64748B;
 }
 
+/* One light design: keep browsers' automatic dark modes from repainting it
+   (see the color-scheme meta in index.html). */
+:root {
+  color-scheme: only light;
+}
+
 /* Scroll smooth fallback and animations */
 html {
   scroll-behavior: smooth;
