@@ -320,7 +320,7 @@ export default function App() {
     <div className="min-h-screen bg-white">
       <Navbar onSelectTreatment={handleViewTreatmentInServices} onScrollToBooking={handleScrollToBooking} onLogoClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} onNavigateSection={navigateToSection} onOpenBlogs={handleOpenBlogs} />
       <Hero onScrollToBooking={handleScrollToBooking} />
-      <About />
+      <About onScrollToBooking={handleScrollToBooking} />
       <Services onSelectTreatment={handleSelectTreatment} selectedTreatmentId={preSelectedTreatmentId} />
       <section id="booking-section" className="py-14 lg:py-20 bg-surface-alt scroll-mt-24">
         <div className="max-w-[1120px] mx-auto px-4 sm:px-6 lg:px-8">
