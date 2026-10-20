@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Phone, Menu, X, Shield, Clock, MapPin, ChevronDown } from 'lucide-react';
 import { TREATMENTS } from '../data';
 import BrandLogo, { BRAND } from './BrandLogo';
@@ -15,6 +15,26 @@ onOpenBlogs: () => void;
 export default function Navbar({ onScrollToBooking, onSelectTreatment, onLogoClick, onNavigateSection, onOpenBlogs }: NavbarProps) {
 const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 const [treatmentsOpen, setTreatmentsOpen] = useState(false);
+
+// Lock the page behind the open mobile menu so a swipe on the menu can't
+// scroll the page underneath it. overflow:hidden covers wheel and Android;
+// iOS Safari ignores it for touch, so touch-drags outside the menu panel are
+// cancelled too. Released before any menu link navigates.
+const mobileMenuRef = useRef<HTMLDivElement>(null);
+useEffect(() => {
+if (!mobileMenuOpen) return;
+const root = document.documentElement;
+const prev = root.style.overflow;
+root.style.overflow = 'hidden';
+const blockTouch = (e: TouchEvent) => {
+if (!mobileMenuRef.current?.contains(e.target as Node)) e.preventDefault();
+};
+document.addEventListener('touchmove', blockTouch, { passive: false });
+return () => {
+root.style.overflow = prev;
+document.removeEventListener('touchmove', blockTouch);
+};
+}, [mobileMenuOpen]);
 
 const handleSelectTreatment = (treatmentId: string) => {
 setTreatmentsOpen(false);
@@ -53,7 +73,7 @@ return (
 <>
 <div className="bg-primary text-white text-[12px] font-sans py-2 px-6 md:px-10 lg:px-16 text-center hidden sm:flex sm:flex-row justify-center items-center gap-2 border-b border-white/10 select-none">
 <span className="inline-flex items-center gap-1.5 font-medium">
-<span className="w-2 h-2 rounded-full bg-[#10B981] animate-ping" />
+<span className="w-2 h-2 rounded-full bg-[#10B981] motion-safe:animate-ping" />
 <span className="text-emerald-400 font-bold">MILESTONE:</span>
 neudental is now an officially Registered Trademark&reg;
 </span>
@@ -113,7 +133,7 @@ return (<a key={item.name} href={item.href} onClick={(e) => handleLinkClick(e, i
 </div>
 
 {mobileMenuOpen && (
-<div className="lg:hidden bg-white border-t border-cool-gray/10 px-6 py-6 flex flex-col gap-5 max-h-[85vh] overflow-y-auto animate-in fade-in slide-in-from-top-4 duration-200">
+<div ref={mobileMenuRef} className="lg:hidden bg-white border-t border-cool-gray/10 px-6 py-6 flex flex-col gap-5 max-h-[85vh] overflow-y-auto overscroll-contain animate-in fade-in slide-in-from-top-4 duration-200">
 <nav className="flex flex-col gap-3">
 {navItems.map((item) => {
 if (item.name === 'Treatments') {

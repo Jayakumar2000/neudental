@@ -76,7 +76,8 @@ html {
   animation-play-state: paused;
 }
 @media (prefers-reduced-motion: reduce) {
-  .marquee-track {
+  .marquee-track,
+  .marquee-track.marquee-reverse {
     animation: none;
   }
 }
