@@ -334,10 +334,10 @@ export default function App() {
             </h2>
             <p className="font-sans text-base text-on-surface-variant mt-5 leading-relaxed">Pick a real, open time. Your slot is confirmed the moment you book.</p>
           </div>
-          {/* Form first on phones and tablets; the visit panel sits beside it from lg up. */}
+          {/* The visit panel sits above the form on phones and tablets, beside it from lg up. */}
           <div className="mt-10 md:mt-12 flex flex-col lg:flex-row bg-white rounded-[32px] border border-[#E2E8F0] overflow-hidden shadow-[0_30px_70px_-30px_rgba(11,19,65,0.35)]">
-            <BookingVisitPanel className="order-2 lg:order-1 lg:w-[38%] shrink-0" />
-            <div className="order-1 lg:order-2 flex-1 min-w-0">
+            <BookingVisitPanel className="lg:w-[38%] shrink-0" />
+            <div className="flex-1 min-w-0">
               <BookingForm preSelectedTreatmentId={preSelectedTreatmentId} preSelectNonce={treatmentPick} bare />
             </div>
           </div>

@@ -1,8 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Clock, MapPin, Phone, Navigation, ExternalLink, Calendar } from 'lucide-react';
 import { CLINIC_GOOGLE_URL } from '../data';
 
+// Google's map embed takes focus when it finishes loading, and the browser
+// then scrolls the page down to it -- a lazy-loaded one did this to visitors
+// still scrolling past the booking form and reviews. It now loads only when
+// asked for, which also keeps its heavy scripts off the initial page load.
 export default function LocationDetails() {
+const [mapRequested, setMapRequested] = useState(false);
 const clinicLat = 13.1309218;
 const clinicLng = 80.2535879;
 const googleMapsUrl = CLINIC_GOOGLE_URL;
@@ -53,7 +58,21 @@ return (
 <a href={googleMapsUrl} target="_blank" rel="noreferrer" className="text-xs text-secondary font-bold hover:underline inline-flex items-center gap-1 font-sans">Open in Google Maps <ExternalLink className="w-3.5 h-3.5" /></a>
 </div>
 <div className="w-full grow min-h-[350px] rounded-2xl overflow-hidden border border-cool-gray/15 select-none bg-cool-gray/5 relative">
-<iframe title="Google map exact directions neudental clinic chennai" src={`https://maps.google.com/maps?q=${clinicLat},${clinicLng}&z=17&output=embed`} className="w-full h-full border-none absolute inset-0" allowFullScreen={true} loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
+{mapRequested ? (
+<iframe title="Google map exact directions neudental clinic chennai" src={`https://maps.google.com/maps?q=${clinicLat},${clinicLng}&z=17&output=embed`} className="w-full h-full border-none absolute inset-0" allowFullScreen={true} referrerPolicy="no-referrer-when-downgrade" />
+) : (
+<div className="absolute inset-0 flex flex-col items-center justify-center gap-5 px-6 text-center bg-[#EEF4FB] bg-[linear-gradient(rgba(5,87,188,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(5,87,188,0.06)_1px,transparent_1px)] bg-[size:32px_32px]">
+<span className="w-16 h-16 rounded-full bg-primary flex items-center justify-center shadow-[0_12px_30px_-10px_rgba(11,19,65,0.6)]"><MapPin className="w-7 h-7 text-[#00fff2]" aria-hidden="true" /></span>
+<div className="font-sans">
+<p className="font-bold text-primary">Neudental Clinic, Kodungaiyur</p>
+<p className="text-xs text-on-surface-variant mt-1">Near Vasugi Nagar Park and Sidco Bus Stop, Chennai 600118</p>
+</div>
+<div className="flex flex-wrap items-center justify-center gap-3">
+<button type="button" onClick={() => setMapRequested(true)} className="inline-flex items-center gap-2 min-h-11 bg-primary hover:bg-secondary text-white text-xs uppercase tracking-widest font-bold px-6 rounded-xl transition-colors cursor-pointer"><MapPin className="w-4 h-4" aria-hidden="true" /> Show map</button>
+<a href={directionUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 min-h-11 bg-white border border-cool-gray/20 hover:border-secondary text-primary text-xs uppercase tracking-widest font-bold px-6 rounded-xl transition-colors"><Navigation className="w-4 h-4" aria-hidden="true" /> Get directions</a>
+</div>
+</div>
+)}
 </div>
 </div>
 </div>
