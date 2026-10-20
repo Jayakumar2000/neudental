@@ -36,6 +36,8 @@ export interface Testimonial {
   imgAlt: string;
   initials: string;
   sourceLogo?: 'google' | 'practo' | 'justdial';
+  // Words from `text` (verbatim) marked like a highlighter in the story card.
+  highlight: string;
 }
 
 export interface Symptom {

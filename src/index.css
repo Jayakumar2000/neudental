@@ -77,11 +77,21 @@ html {
   animation-name: marquee-right;
   animation-duration: 32s;
 }
-.marquee-row:hover .marquee-track {
+.marquee-row:hover .marquee-track,
+.marquee-row:focus-within .marquee-track {
   animation-play-state: paused;
 }
 @media (prefers-reduced-motion: reduce) {
-  .marquee-track {
+  .marquee-track,
+  .marquee-track.marquee-reverse {
     animation: none;
   }
+}
+
+/* Highlighter-pen mark behind the key phrase of a review */
+.highlight-mark {
+  background-image: linear-gradient(transparent 60%, rgba(0, 255, 242, 0.55) 60%);
+  padding: 0 2px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
 }
