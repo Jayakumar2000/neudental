@@ -4,6 +4,7 @@
 // the logo, brand name and tagline can never drift apart again.
 
 import React from 'react';
+import NeudentalWordmark from './NeudentalWordmark';
 
 export const BRAND = {
   name: 'neudental',
@@ -60,14 +61,8 @@ export default function BrandLogo({
         className={`${markClassName} shrink-0 select-none object-contain`}
       />
       <span className="flex flex-col justify-center">
-        <img
-          src={light ? BRAND.assets.wordmarkLight : BRAND.assets.wordmark}
-          alt={BRAND.name}
-          width={720}
-          height={124}
-          draggable={false}
-          className={`${wordmarkClassName} select-none object-contain object-left`}
-        />
+        {/* Drawn as a vector, not an <img>, so dark modes recolour it with the page. */}
+        <NeudentalWordmark tone={light ? 'light' : 'dark'} label={BRAND.name} className={`${wordmarkClassName} select-none`} />
         {showTagline && <span className={taglineClassName}>{BRAND.tagline}</span>}
       </span>
     </span>

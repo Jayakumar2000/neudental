@@ -17,6 +17,13 @@ const SOURCE_LABELS: Partial<Record<string, string>> = {
   justdial: 'Justdial',
 };
 
+// Each source logo on its white 30px circle, pre-rendered at 4x (see the rating tile).
+const SOURCE_CIRCLES: Record<string, string> = {
+  google: '/logos/google-circle.png',
+  practo: '/logos/practo-circle.png',
+  justdial: '/logos/justdial-circle.png',
+};
+
 const SOURCES = ['google', 'practo', 'justdial'] as const;
 
 function Stars({ className }: { className: string }) {
@@ -230,9 +237,8 @@ export default function Testimonials({ onScrollToBooking }: TestimonialsProps) {
             <ul className="relative w-full grid grid-cols-3 gap-2.5">
               {SOURCES.map((src) => (
                 <li key={src} className="flex flex-col lg:flex-row items-center justify-center gap-2 lg:gap-2.5 px-2 py-3 rounded-2xl bg-white/[0.08] border border-white/[0.14] font-sans text-sm font-semibold">
-                  <span className="w-[30px] h-[30px] rounded-full bg-white overflow-hidden flex items-center justify-center p-1.5 shrink-0">
-                    <img src={SOURCE_LOGOS[src]} alt="" loading="lazy" className="w-full h-full object-contain" />
-                  </span>
+                  {/* The white circle is part of the image, so a browser dark mode can't turn it dark. */}
+                  <img src={SOURCE_CIRCLES[src]} alt="" loading="lazy" className="w-[30px] h-[30px] shrink-0" />
                   {SOURCE_LABELS[src]}
                 </li>
               ))}
