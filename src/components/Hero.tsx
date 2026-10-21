@@ -4,11 +4,11 @@ import { IconUserPatient } from './icons/DentalIcons';
 import { REVIEW_RATING, REVIEW_COUNT_LABEL } from '../data';
 
 // Practo and Justdial are dark-on-white logos, so their files carry their own
-// white backing (padding = 1/8 of the logo height on each side): a browser dark
-// mode that darkens the chip can't leave them dark-on-dark. They are PNGs on
-// purpose -- dark modes recolour shapes inside an SVG image (pale letters on
-// the white backing). The chip's side padding is reduced by the backing's
-// width, so nothing moves.
+// white pill backing (1/8 of the logo height above and below, 1/4 at the sides
+// so the round ends clear the logo): a browser dark mode that darkens the chip
+// can't leave them dark-on-dark. They are PNGs on purpose -- dark modes
+// recolour shapes inside an SVG image (pale letters on the white backing).
+// The chip's side padding is reduced by the backing's width, so nothing moves.
 const FEATURED_ON = [
 { name: 'Google', logo: '/logos/google-icon.png', showLabel: true },
 { name: 'Practo', logo: '/logos/practo-plate.png', plate: true },
@@ -54,7 +54,7 @@ Gentle, comfortable dentistry for every age, starting from a child's first denta
 <p className="font-sans text-[10px] font-bold uppercase tracking-widest text-cool-gray mb-2.5">Featured &amp; Reviewed On</p>
 <div className="flex items-center flex-nowrap sm:flex-wrap gap-1.5 sm:gap-2.5">
 {FEATURED_ON.map((item) => (
-<span key={item.name} className={`inline-flex items-center gap-1 sm:gap-2 bg-white border border-cool-gray/15 rounded-full h-11 sm:h-10 shadow-sm shrink-0 ${item.plate ? 'px-3 sm:px-[13.5px]' : 'px-3.5 sm:px-4'}`}>
+<span key={item.name} className={`inline-flex items-center gap-1 sm:gap-2 bg-white border border-cool-gray/15 rounded-full h-11 sm:h-10 shadow-sm shrink-0 ${item.plate ? 'px-2.5 sm:px-[11px]' : 'px-3.5 sm:px-4'}`}>
 <img src={item.logo} alt={item.name} className={`${item.plate ? 'h-5 sm:h-[25px]' : 'h-4 sm:h-5'} w-auto object-contain`} />
 {item.showLabel && <span className="text-[11px] sm:text-xs font-sans font-semibold text-on-surface-variant">{item.name}</span>}
 </span>

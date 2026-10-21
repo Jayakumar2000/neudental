@@ -29,10 +29,11 @@ interface NeudentalWordmarkProps {
 
 export default function NeudentalWordmark({ tone = 'dark', className = '', label = 'neudental' }: NeudentalWordmarkProps) {
   const t = TONES[tone];
-  // xMin: if a flex column stretches the box, draw from the left, as the PNG
-  // did with object-left.
+  // As the PNG did: max-w-full lets it shrink to a narrow column (preflight
+  // gives <img> max-width:100%, not <svg>), and xMin draws it from the left
+  // when a flex column stretches the box (the PNG's object-left).
   return (
-    <svg viewBox="0 0 720 124" preserveAspectRatio="xMinYMid meet" role="img" aria-label={label} focusable="false" className={`aspect-[720/124] w-auto ${className}`}>
+    <svg viewBox="0 0 720 124" preserveAspectRatio="xMinYMid meet" role="img" aria-label={label} focusable="false" className={`aspect-[720/124] w-auto max-w-full ${className}`}>
       <path fill={t.neu} fillOpacity={t.neuOpacity} fillRule="evenodd" d={NEU} />
       <path fill={t.dental} fillOpacity={t.dentalOpacity} fillRule="evenodd" d={DENTAL} />
     </svg>
