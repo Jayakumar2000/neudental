@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useId } from 'react';
 import { flushSync } from 'react-dom';
-import { TREATMENTS, APPOINTMENT_SLOT_GROUPS } from '../data';
+import { TREATMENTS, APPOINTMENT_SLOT_GROUPS, WHATSAPP_URL } from '../data';
 import { Appointment, AppointmentStatus } from '../types';
 import { Calendar, Clock, Check, Trash2, CalendarCheck, Phone, User, Activity, AlertCircle, MessageCircle, Loader2, CalendarX, ArrowRight } from 'lucide-react';
 import { collection, query, where, orderBy, onSnapshot, setDoc, doc, Timestamp, updateDoc, writeBatch, getDoc } from 'firebase/firestore';
@@ -653,7 +653,7 @@ export default function BookingForm({ preSelectedTreatmentId, preSelectNonce, on
                 <p className="text-rose-800/80">Or book directly with the clinic on <span className="whitespace-nowrap">+91 93423 67446</span>.</p>
                 <div className="mt-2 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
                   <a href="tel:+919342367446" aria-label="Call +91 93423 67446" onClick={() => trackConversion('call_click', 'call', { link_location: 'booking_error' })} className="inline-flex items-center justify-center gap-1.5 min-h-11 px-4 rounded-lg bg-white border border-rose-200 text-primary font-bold whitespace-nowrap"><Phone className="w-3.5 h-3.5" aria-hidden="true" /> Call</a>
-                  <a href="https://wa.me/919342367446?text=Hello%20neudental%2C%20I%20would%20like%20to%20book%20an%20appointment." target="_blank" rel="noopener noreferrer" onClick={() => trackConversion('whatsapp_click', 'whatsapp', { link_location: 'booking_error' })} className="inline-flex items-center justify-center gap-1.5 min-h-11 px-4 rounded-lg bg-white border border-rose-200 text-primary font-bold whitespace-nowrap"><MessageCircle className="w-3.5 h-3.5" aria-hidden="true" /> WhatsApp</a>
+                  <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" onClick={() => trackConversion('whatsapp_click', 'whatsapp', { link_location: 'booking_error' })} className="inline-flex items-center justify-center gap-1.5 min-h-11 px-4 rounded-lg bg-white border border-rose-200 text-primary font-bold whitespace-nowrap"><MessageCircle className="w-3.5 h-3.5" aria-hidden="true" /> WhatsApp</a>
                 </div>
               </div>
             )}

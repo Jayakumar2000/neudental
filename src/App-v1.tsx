@@ -14,7 +14,7 @@ import LocationDetails from './components/LocationDetails';
 import Footer from './components/Footer';
 import FloatingWhatsApp from './components/FloatingWhatsApp';
 import NotFound from './components/NotFound';
-import { FAQS, BLOGS } from './data';
+import { FAQS, BLOGS, WHATSAPP_URL } from './data';
 import { ChevronDown, ChevronUp, ArrowLeft, Phone, RefreshCw } from 'lucide-react';
 import type { FAQItem } from './types';
 import { trackConversion, trackPageView, stopClarityRecording } from './lib/analytics';
@@ -378,7 +378,7 @@ export default function App() {
               <p className="font-serif font-bold text-primary">Still have questions?</p>
               <p className="font-sans text-xs text-on-surface-variant mt-1">Our team is happy to help — reach out directly.</p>
             </div>
-            <a href="https://wa.me/919342367446" target="_blank" rel="noopener noreferrer" onClick={() => trackConversion('whatsapp_click', 'whatsapp', { link_location: 'faq_talk_to_us' })} className="inline-flex items-center gap-2 bg-primary hover:bg-secondary text-white text-xs uppercase tracking-widest font-bold px-6 py-3.5 rounded-xl transition-all duration-200 whitespace-nowrap shrink-0"><Phone className="w-4 h-4" /> Talk to Us</a>
+            <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" onClick={() => trackConversion('whatsapp_click', 'whatsapp', { link_location: 'faq_talk_to_us' })} className="inline-flex items-center gap-2 bg-primary hover:bg-secondary text-white text-xs uppercase tracking-widest font-bold px-6 py-3.5 rounded-xl transition-all duration-200 whitespace-nowrap shrink-0"><Phone className="w-4 h-4" /> Talk to Us</a>
           </div>
         </div>
       </section>
