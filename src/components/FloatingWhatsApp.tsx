@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { WHATSAPP_URL } from '../data';
 import { trackConversion } from '../lib/analytics';
 
 const TAPPABLE = 'a, button, input, select, textarea, label, iframe, [role="button"]';
@@ -49,7 +50,7 @@ export default function FloatingWhatsApp() {
   return (
     <a
       ref={ref}
-      href="https://wa.me/919342367446?text=Hello%20neudental%2C%20I%20would%20like%20to%20book%20an%20appointment."
+      href={WHATSAPP_URL}
       target="_blank"
       rel="noopener noreferrer"
       onClick={() => trackConversion('whatsapp_click', 'whatsapp', { link_location: 'floating_button' })}
