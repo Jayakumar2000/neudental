@@ -19,11 +19,12 @@ export default function FloatingWhatsApp() {
       if (!el || el.contains(document.activeElement)) { setCovering(false); return; }
       const r = el.getBoundingClientRect();
       // Sample points about every 16px across the button (the wide desktop pill
-      // as well as the round phone button) to catch anything under its edges.
+      // as well as the round phone button), reaching 4px past its edges so a
+      // control it merely touches counts as covered too.
       const points: [number, number][] = [];
       const nx = Math.max(3, Math.ceil(r.width / 16)), ny = Math.max(3, Math.ceil(r.height / 16));
       for (let i = 0; i < nx; i++) for (let j = 0; j < ny; j++) {
-        points.push([r.left + 4 + ((r.width - 8) * i) / (nx - 1), r.top + 4 + ((r.height - 8) * j) / (ny - 1)]);
+        points.push([r.left - 4 + ((r.width + 8) * i) / (nx - 1), r.top - 4 + ((r.height + 8) * j) / (ny - 1)]);
       }
       setCovering(points.some(([x, y]) => document.elementsFromPoint(x, y)
         .some((hit) => !el.contains(hit) && hit.closest(TAPPABLE))));

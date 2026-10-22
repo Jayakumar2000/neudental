@@ -78,9 +78,9 @@ a vertical timeline of small rings (phones and tablets). */}
 </ul>
 {onScrollToBooking && (
 <div className="mt-10 lg:mt-12 flex justify-center">
-<p className="inline-flex items-center gap-3 bg-white border border-cool-gray/15 rounded-full py-2 pl-5 pr-2 font-sans text-sm text-on-surface-variant whitespace-nowrap">
+<p className="inline-flex items-center gap-3 bg-white border border-cool-gray/15 rounded-full py-2 pl-5 max-[359px]:pl-2 pr-2 font-sans text-sm text-on-surface-variant whitespace-nowrap">
 <span className="hidden sm:inline">Be one of the next 3,000 smiles</span>
-<span className="sm:hidden">Join 3,000+ happy patients</span>
+<span className="sm:hidden max-[359px]:hidden">Join 3,000+ happy patients</span>
 <button type="button" onClick={onScrollToBooking} className="bg-primary hover:bg-secondary text-white rounded-full min-h-10 px-4 font-bold text-[13px] transition-colors cursor-pointer">Book your visit</button>
 </p>
 </div>
