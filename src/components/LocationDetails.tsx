@@ -1,12 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { MapPin, Phone, Navigation, ExternalLink, Sun, Moon, Check, MessageCircle, SquareParking } from 'lucide-react';
-import { CLINIC_GOOGLE_URL } from '../data';
+import { MapPin, Phone, Navigation, Sun, Moon, Check, SquareParking } from 'lucide-react';
 import { trackConversion } from '../lib/analytics';
 import { Rings, SmileCurve } from './BrandShapes';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const NEARBY_AREAS = ['Perambur', 'Madhavaram', 'Kolathur', 'Vyasarpadi', 'Moolakadai', 'Korukkupet', 'Villivakkam', 'Sowcarpet'];
-const WHATSAPP_URL = 'https://wa.me/919342367446?text=Hello%20neudental%2C%20I%20would%20like%20to%20book%20an%20appointment.';
 
 // The map starts loading as soon as the page has settled, so it is already
 // there by the time visitors scroll down to it. Google's embed takes focus
@@ -99,7 +97,6 @@ frame.removeEventListener('mouseleave', onLeave);
 }, [mapRequested]);
 const clinicLat = 13.1309218;
 const clinicLng = 80.2535879;
-const googleMapsUrl = CLINIC_GOOGLE_URL;
 const directionUrl = `https://www.google.com/maps/dir/?api=1&destination=${clinicLat},${clinicLng}`;
 
 return (
@@ -119,7 +116,7 @@ return (
 
     {/* Phones and tablets: two stacked cards, hours first. Desktop: one split card. */}
     <div className="mt-10 lg:mt-11 max-w-xl mx-auto lg:max-w-none flex flex-col gap-4 lg:gap-0 lg:flex-row lg:rounded-[32px] lg:overflow-hidden lg:bg-white lg:border lg:border-[#E2E8F0] lg:shadow-[0_30px_70px_-30px_rgba(11,19,65,0.45)]">
-      <aside className="relative overflow-hidden rounded-3xl lg:rounded-none lg:w-[400px] xl:w-[440px] shrink-0 bg-[radial-gradient(120%_80%_at_0%_0%,#0A6BE0_0%,#0557BC_30%,#0B1341_85%)] text-white p-5 sm:p-7 lg:p-9 flex flex-col gap-6 lg:gap-7 shadow-[0_30px_70px_-30px_rgba(11,19,65,0.45)] lg:shadow-none">
+      <aside className="relative overflow-hidden rounded-3xl lg:rounded-none lg:w-[400px] xl:w-[440px] shrink-0 bg-[radial-gradient(120%_80%_at_0%_0%,#0A6BE0_0%,#0557BC_30%,#0B1341_85%)] text-white p-5 sm:p-7 lg:p-9 flex flex-col lg:justify-between gap-6 lg:gap-7 shadow-[0_30px_70px_-30px_rgba(11,19,65,0.45)] lg:shadow-none">
         <Rings className="-right-60 -bottom-60 w-[520px] h-[520px] opacity-[0.12]" />
 
         <div className="relative flex flex-wrap items-center justify-between gap-3 lg:block">
@@ -174,15 +171,6 @@ return (
             ))}
           </div>
         </div>
-
-        <div className="relative mt-auto lg:pt-5 lg:border-t lg:border-white/[0.14] flex gap-2.5 font-sans">
-          <a href="tel:+919342367446" onClick={() => trackConversion('call_click', 'call', { link_location: 'location_hours' })} className="hidden lg:flex flex-[1.45] items-center justify-center gap-2 min-h-[50px] rounded-[14px] bg-[#00fff2] hover:bg-white text-primary text-[15px] font-bold transition-colors whitespace-nowrap">
-            <Phone className="w-4 h-4" aria-hidden="true" /> +91 93423 67446
-          </a>
-          <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" onClick={() => trackConversion('whatsapp_click', 'whatsapp', { link_location: 'location_hours' })} className="flex-1 flex items-center justify-center gap-2 min-h-[50px] rounded-[14px] border border-white/30 hover:border-[#00fff2] text-white text-[15px] font-bold transition-colors">
-            <MessageCircle className="w-4 h-4 text-[#00fff2]" aria-hidden="true" /> <span className="lg:hidden">Chat on WhatsApp</span><span className="hidden lg:inline">WhatsApp</span>
-          </a>
-        </div>
       </aside>
 
       <div className="min-w-0 flex-1 flex flex-col gap-6 p-4 sm:p-6 lg:p-7 bg-white rounded-3xl border border-[#E2E8F0] shadow-[0_30px_70px_-30px_rgba(11,19,65,0.35)] lg:rounded-none lg:border-0 lg:shadow-none">
@@ -203,17 +191,13 @@ return (
               <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#EEF5FC] border border-[#D6E6F7] text-[13px] font-semibold text-primary"><SquareParking className="w-3.5 h-3.5 text-secondary" aria-hidden="true" /> Parking available</span>
             </div>
           </div>
-          <div className="flex flex-col lg:flex-row lg:items-center lg:gap-5 xl:flex-col xl:items-stretch gap-1.5 shrink-0">
-            <div className="grid grid-cols-2 lg:flex gap-2.5">
-              <a href={directionUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 min-h-[52px] px-6 rounded-[14px] bg-primary hover:bg-secondary text-white text-[15px] font-bold transition-colors whitespace-nowrap">
-                <Navigation className="w-4 h-4 text-[#00fff2] fill-current" aria-hidden="true" /> Get directions
-              </a>
-              <a href="tel:+919342367446" onClick={() => trackConversion('call_click', 'call', { link_location: 'location_address' })} className="lg:hidden flex items-center justify-center gap-2 min-h-[52px] px-6 rounded-[14px] bg-[#00fff2] hover:bg-[#00D4C9] text-primary text-[15px] font-bold transition-colors">
-                <Phone className="w-4 h-4" aria-hidden="true" /> Call
-              </a>
-            </div>
-            <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-1.5 min-h-10 text-sm font-semibold text-secondary hover:underline">
-              Open in Google Maps <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
+          {/* The section's two actions: get here, or ask first. WhatsApp is the floating button. */}
+          <div className="grid grid-cols-2 xl:grid-cols-1 gap-2.5 shrink-0 xl:w-[230px]">
+            <a href={directionUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 min-h-[52px] px-4 rounded-[14px] bg-primary hover:bg-secondary text-white text-[15px] font-bold transition-colors whitespace-nowrap">
+              <Navigation className="w-4 h-4 text-[#00fff2] fill-current" aria-hidden="true" /> Get directions
+            </a>
+            <a href="tel:+919342367446" onClick={() => trackConversion('call_click', 'call', { link_location: 'location_section' })} className="flex items-center justify-center gap-2 min-h-[52px] px-4 rounded-[14px] bg-[#00fff2] hover:bg-[#00D4C9] text-primary text-[15px] font-bold transition-colors whitespace-nowrap">
+              <Phone className="w-4 h-4" aria-hidden="true" /> <span className="sm:hidden">Call</span><span className="hidden sm:inline">+91 93423 67446</span>
             </a>
           </div>
         </div>
