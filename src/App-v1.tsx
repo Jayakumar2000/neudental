@@ -134,7 +134,7 @@ export default function App() {
       const post = BLOGS.find((b) => b.id === activeBlogId);
       if (post) {
         const path = `/blogs/${post.id}`;
-        const title = `${post.title} | Neudental Blog`;
+        const title = post.seoTitle ?? `${post.title} | Neudental Blog`;
         setPageMeta({ title, description: post.excerpt, path });
         trackPageView(path, title);
         return;
@@ -297,7 +297,7 @@ export default function App() {
       <div className="min-h-screen bg-white">
         <Navbar onSelectTreatment={handleViewTreatmentInServices} onScrollToBooking={handleScrollToBooking} onLogoClick={handleCloseBlogs} onNavigateSection={navigateToSection} onOpenBlogs={handleOpenBlogs} />
         <Suspense fallback={<RouteLoading />}>
-          <BlogDetailView blogId={activeBlogId} onBack={handleBackToBlogsList} />
+          <BlogDetailView blogId={activeBlogId} onBack={handleBackToBlogsList} onSelectBlog={handleSelectBlog} onBookAppointment={handleScrollToBooking} />
         </Suspense>
         <Footer onNavigateSection={navigateToSection} onOpenBlogs={handleOpenBlogs} onSelectTreatment={handleViewTreatmentInServices} />
       </div>

@@ -48,9 +48,8 @@ edits, or removes a post, because Vercel auto-deploys on every push to
 
 ## Slug rules (the `id` field)
 
-The `id` is the post's slug. Even though the site doesn't currently expose
-per-post URLs (see the note at the bottom), keep it slug-clean from day one
-so nothing has to be renamed later:
+The `id` is the post's slug: the post is served at `/blogs/{id}`, so keep it
+slug-clean and never rename it once published:
 
 - lowercase letters, numbers, and hyphens only (`a-z`, `0-9`, `-`)
 - no spaces, no punctuation, no underscores
@@ -136,20 +135,34 @@ editor won't catch them for you:
   always one of the three issues above, and the error message will point
   at the line number in `data.ts`.
 
-## Current limitation worth knowing
+## Richer formatting (headings, lists, FAQs) — optional
 
-Blog posts don't yet have their own individual page URLs — the whole blog
-section runs on in-app state (clicking a card swaps the view, without
-changing the browser URL). That means:
+Plain strings in `content` are paragraphs, and that is all a short post needs.
+Longer guides can also mix in these blocks (see the
+`root-canal-treatment-does-it-hurt` post in `src/data.ts` for a full example):
 
-- Individual posts can't be shared as a direct link or indexed by Google as
-  separate pages yet — only the main `/` (blog list) content is crawlable
-  as-is.
-- The `id`/slug is still worth keeping clean now, because adding real
-  per-post URLs later (e.g. `/blog/why-regular-checkups-matter`) would
-  reuse these same `id` values with zero rework — you'd only need to add
-  routing, not touch a single post.
+```ts
+{ type: 'answer', text: 'A 40–60 word direct answer, shown in a highlighted box.' },
+{ type: 'contents' },                       // auto "In this article" list of headings
+{ type: 'heading', text: 'Does it hurt?' }, // section heading (H2)
+{ type: 'list', items: ['First', 'Second'] },          // add ordered: true for 1, 2, 3
+{ type: 'steps', items: [{ title: 'Step', text: 'What happens' }] },
+{ type: 'table', caption: 'At a glance', rows: [['Label', 'Value']] },
+{ type: 'note', text: 'A highlighted tip.' },
+{ type: 'quote', text: 'A pull quote.' },
+{ type: 'faq' },                            // where the post's `faqs` appear
+{ type: 'cta', title: 'Book a visit', text: 'Shown with address, phone, Book and WhatsApp buttons.' },
+```
 
-If per-post URLs and SEO for individual articles become a priority, that's
-a small follow-up project (adding a router or query-param-based deep
-links) — flag it and it can be scoped separately.
+Inside any text you can write `**bold**` and `[link text](/blogs/other-post-slug)`.
+
+Optional post fields for SEO: `seoTitle` (the browser/Google title, keep it
+under ~60 characters), `imageAlt`, `datePublished` (`'YYYY-MM-DD'`),
+`reviewedBy`, `faqs` (`[{ question, answer }]`, also published as FAQ schema
+for Google), and `related` (ids of other posts to link at the end).
+
+## After publishing a new post
+
+Add its URL to `public/sitemap.xml` (copy an existing `<url>` block), so
+search engines find it quickly. Each post lives at
+`https://www.neudental.in/blogs/{id}`.
