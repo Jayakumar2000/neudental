@@ -5,9 +5,11 @@
 // never run JavaScript -- GPTBot, ClaudeBot, PerplexityBot, social previews --
 // see each page's real head; the browser applies the same result on in-app
 // navigation (setPageMeta).
-import { BLOGS } from '../data';
+import { BLOGS, DOCTOR, TREATMENTS } from '../data';
+import { DOCTOR_PATH } from './routes';
+import { fillTokens, formatPriceRange, guideFor, treatmentById, treatmentPath } from './treatments';
 import type { Route } from './routes';
-import { SITE_URL, absoluteUrl, blogListJsonLd, blogPostJsonLd, homeJsonLd, postModifiedDate, postPublishedDate, siteJsonLd } from './schema';
+import { SITE_URL, absoluteUrl, blogListJsonLd, blogPostJsonLd, doctorJsonLd, homeJsonLd, postModifiedDate, postPublishedDate, siteJsonLd, treatmentJsonLd, treatmentsListJsonLd } from './schema';
 
 const DEFAULT_TITLE = 'Neudental | Family Dental Clinic in Kodungaiyur, Chennai';
 const DEFAULT_DESCRIPTION = 'Neudental — a trusted family dental clinic in Kodungaiyur, Chennai, rated among the best dentists near you in North Chennai. Painless root canal treatment (RCT), Invisalign clear aligners, teeth whitening and dental implants, by Dr. Swetha BDS, FGDS.';
@@ -15,6 +17,10 @@ const SHARE_DESCRIPTION = 'Modern Dental Care for Confident Smiles. Painless Rot
 const DEFAULT_IMAGE = { url: `${SITE_URL}/og-image.jpg`, width: 1200, height: 630, type: 'image/jpeg', alt: 'neudental — Modern Dental Care for Confident Smiles' };
 const BLOG_LIST_TITLE = 'Dental Health Blog | Neudental, Kodungaiyur, Chennai';
 const BLOG_LIST_DESCRIPTION = 'Practical, patient-friendly dental health and clinic guidance from the Neudental team in Kodungaiyur, Chennai.';
+const TREATMENTS_TITLE = 'Dental Treatments & Prices in Kodungaiyur | Neudental';
+const TREATMENTS_DESCRIPTION = `All ${TREATMENTS.length} dental treatments at Neudental, Kodungaiyur, Chennai, with typical durations and indicative prices: root canal, implants, braces, aligners, whitening and more.`;
+const DOCTOR_TITLE = `${DOCTOR.name}, ${DOCTOR.title}: Dentist in Kodungaiyur | Neudental`;
+const DOCTOR_DESCRIPTION = `${DOCTOR.name} (${DOCTOR.title}), ${DOCTOR.specialty} at Neudental, Kodungaiyur, Chennai: qualifications, experience, areas of expertise and how to book.`;
 
 export interface PageMeta {
   title: string;
@@ -23,7 +29,7 @@ export interface PageMeta {
   shareDescription?: string;
   path: string;
   noIndex?: boolean;
-  ogType: 'website' | 'article';
+  ogType: 'website' | 'article' | 'profile';
   image: { url: string; width?: number; height?: number; type?: string; alt: string };
   publishedTime?: string;
   modifiedTime?: string;
@@ -58,6 +64,43 @@ export function getRouteMeta(route: Route, pathname = '/', imageInfo?: ImageInfo
         ogType: 'website',
         image: DEFAULT_IMAGE,
         jsonLd: blogListJsonLd(BLOG_LIST_TITLE, BLOG_LIST_DESCRIPTION),
+      };
+    case 'treatment': {
+      const treatment = treatmentById(route.treatmentId);
+      if (!treatment) return getRouteMeta({ type: 'notFound' }, pathname);
+      const guide = guideFor(treatment.id);
+      const title = guide ? fillTokens(guide.seoTitle, treatment) : `${treatment.name} in Kodungaiyur: Cost & Procedure | Neudental`;
+      const description = guide
+        ? fillTokens(guide.metaDescription, treatment)
+        : `${treatment.name} at Neudental, Kodungaiyur, Chennai: ${treatment.description.toLowerCase()}. Typical duration ${treatment.duration}, indicative cost ${formatPriceRange(treatment.priceRange)}.`;
+      return {
+        title,
+        description,
+        path: treatmentPath(treatment),
+        ogType: guide ? 'article' : 'website',
+        image: DEFAULT_IMAGE,
+        publishedTime: guide?.datePublished,
+        modifiedTime: guide?.dateModified ?? guide?.datePublished,
+        jsonLd: treatmentJsonLd(treatment, guide, title, description),
+      };
+    }
+    case 'treatmentsList':
+      return {
+        title: TREATMENTS_TITLE,
+        description: TREATMENTS_DESCRIPTION,
+        path: '/treatments',
+        ogType: 'website',
+        image: DEFAULT_IMAGE,
+        jsonLd: treatmentsListJsonLd(TREATMENTS_TITLE, TREATMENTS_DESCRIPTION),
+      };
+    case 'doctor':
+      return {
+        title: DOCTOR_TITLE,
+        description: DOCTOR_DESCRIPTION,
+        path: DOCTOR_PATH,
+        ogType: 'profile',
+        image: { url: absoluteUrl('/doctor/dr-swetha.webp'), alt: `${DOCTOR.name}, ${DOCTOR.specialty} at neudental`, ...imageInfo?.('/doctor/dr-swetha.webp') },
+        jsonLd: doctorJsonLd(DOCTOR_TITLE, DOCTOR_DESCRIPTION),
       };
     case 'admin':
       return { title: 'Admin | Neudental', description: DEFAULT_DESCRIPTION, path: '/admin', noIndex: true, ogType: 'website', image: DEFAULT_IMAGE };

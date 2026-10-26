@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { TREATMENTS } from '../data';
 import { Treatment } from '../types';
+import { formatIndianNumber, treatmentPath } from '../lib/treatments';
+import { Link } from '../lib/navigation';
 import { ShieldAlert, Sparkles, Scissors, Smile, Check, Clock, ArrowRight, Search, Activity, Scan, Shield, Heart, Crown, GitBranch, Star, Anchor, Sun, Layers, Zap, Baby, IndianRupee, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { IconWisdomToothExtraction, IconCrownsAndBridges, IconCavityFilling, IconDentures, IconTeethWhitening, IconRegularCheckup, IconDentalCleaning, IconDentalImaging, IconBraces, IconRootCanal, IconGumDisease, IconToothDrill, IconDentalSurgery, IconTools, IconDentalCare, IconCrownSmile, IconDecay, IconToothache, IconToothExtraction } from './icons/DentalIcons';
 
 interface ServicesProps {
 onSelectTreatment: (treatmentId: string) => void;
 selectedTreatmentId: string;
-onViewDetailSubpage?: (treatmentId: string) => void;
 }
 
 const CATEGORIES = [
@@ -19,7 +20,7 @@ const CATEGORIES = [
 { key: 'pediatric', label: 'Kids Dentistry' },
 ] as const;
 
-export default function Services({ onSelectTreatment, selectedTreatmentId, onViewDetailSubpage }: ServicesProps) {
+export default function Services({ onSelectTreatment, selectedTreatmentId }: ServicesProps) {
 const [activeCategory, setActiveCategory] = useState<(typeof CATEGORIES)[number]['key']>('all');
 const [selectedTreatment, setSelectedTreatment] = useState<Treatment | null>(TREATMENTS.find(t => t.id === selectedTreatmentId) || TREATMENTS[0]);
 // Mobile-only card-stack position -- separate from desktop's selectedTreatment
@@ -102,7 +103,7 @@ const renderFrontBody = (treatment: Treatment) => (<>
 <p className="font-sans text-sm text-white/80 leading-relaxed mb-5">{treatment.description}</p>
 <div className="grid grid-cols-2 gap-4 p-4 rounded-xl bg-white/10 border border-white/10 mb-5 text-xs">
 <div className="flex items-center gap-2"><Clock className="w-4 h-4 text-white/60" /><div><p className="text-white/60 font-medium">Duration</p><p className="font-bold text-white">{treatment.duration}</p></div></div>
-<div className="flex items-center gap-2"><IndianRupee className="w-4 h-4 text-white/60" /><div><p className="text-white/60 font-medium">Treatment Cost*</p><p className="font-bold text-white">{treatment.startingPrice.toLocaleString('en-IN')}</p></div></div>
+<div className="flex items-center gap-2"><IndianRupee className="w-4 h-4 text-white/60" /><div><p className="text-white/60 font-medium">Treatment Cost*</p><p className="font-bold text-white">{formatIndianNumber(treatment.startingPrice)}</p></div></div>
 </div>
 <p className="text-[10px] text-white/50 font-sans -mt-3 mb-5">*Indicative starting price, not the final charge — actual cost is confirmed after clinical consultation.</p>
 <div className="space-y-3 mb-6">
@@ -116,7 +117,7 @@ sits in the same place regardless of how many highlights a treatment
 has, instead of leaving dead space below it for shorter lists. */}
 <div className="space-y-3 mt-auto">
 <button onClick={() => onSelectTreatment(treatment.id)} className="w-full bg-white text-primary active:bg-mint cursor-pointer py-4 rounded-xl font-sans text-xs uppercase tracking-widest font-bold transition-all duration-200">Book Appointment</button>
-{onViewDetailSubpage && (<button onClick={() => onViewDetailSubpage(treatment.id)} className="w-full bg-white/10 border border-white/20 active:bg-white/15 text-white cursor-pointer py-3.5 rounded-xl font-sans text-xs uppercase tracking-widest font-bold transition-all duration-200 flex items-center justify-center gap-1.5"><span>View Comprehensive Patient Guide</span><ArrowRight className="w-3.5 h-3.5" /></button>)}
+<Link to={treatmentPath(treatment)} className="w-full bg-white/10 border border-white/20 active:bg-white/15 text-white cursor-pointer py-3.5 rounded-xl font-sans text-xs uppercase tracking-widest font-bold transition-all duration-200 flex items-center justify-center gap-1.5"><span>Cost, steps &amp; recovery guide</span><ArrowRight className="w-3.5 h-3.5" /></Link>
 </div>
 </>);
 
@@ -253,7 +254,7 @@ className="w-11 h-11 rounded-full bg-white border border-cool-gray/15 premium-sh
 <p className="font-sans text-sm text-white/80 leading-relaxed mb-6">{selectedTreatment.description}</p>
 <div className="grid grid-cols-2 gap-4 p-4 rounded-xl bg-white/10 border border-white/10 mb-6 text-xs">
 <div className="flex items-center gap-2"><Clock className="w-4 h-4 text-white/60" /><div><p className="text-white/60 font-medium">Duration</p><p className="font-bold text-white">{selectedTreatment.duration}</p></div></div>
-<div className="flex items-center gap-2"><IndianRupee className="w-4 h-4 text-white/60" /><div><p className="text-white/60 font-medium">Treatment Cost*</p><p className="font-bold text-white">{selectedTreatment.startingPrice.toLocaleString('en-IN')}</p></div></div>
+<div className="flex items-center gap-2"><IndianRupee className="w-4 h-4 text-white/60" /><div><p className="text-white/60 font-medium">Treatment Cost*</p><p className="font-bold text-white">{formatIndianNumber(selectedTreatment.startingPrice)}</p></div></div>
 </div>
 <p className="text-[10px] text-white/50 font-sans -mt-4 mb-6">*Indicative starting price, not the final charge — actual cost is confirmed after clinical consultation.</p>
 <div className="space-y-3 mb-8">
@@ -264,10 +265,13 @@ className="w-11 h-11 rounded-full bg-white border border-cool-gray/15 premium-sh
 </div>
 <div className="space-y-3">
 <button onClick={() => onSelectTreatment(selectedTreatment.id)} className="w-full bg-white text-primary hover:bg-mint cursor-pointer py-4 rounded-xl font-sans text-xs uppercase tracking-widest font-bold transition-all duration-200">Book Appointment</button>
-{onViewDetailSubpage && (<button onClick={() => onViewDetailSubpage(selectedTreatment.id)} className="w-full bg-white/10 border border-white/20 hover:bg-white/15 text-white cursor-pointer py-3.5 rounded-xl font-sans text-xs uppercase tracking-widest font-bold transition-all duration-200 flex items-center justify-center gap-1.5"><span>View Comprehensive Patient Guide</span><ArrowRight className="w-3.5 h-3.5" /></button>)}
+<Link to={treatmentPath(selectedTreatment)} className="w-full bg-white/10 border border-white/20 hover:bg-white/15 text-white cursor-pointer py-3.5 rounded-xl font-sans text-xs uppercase tracking-widest font-bold transition-all duration-200 flex items-center justify-center gap-1.5"><span>Cost, steps &amp; recovery guide</span><ArrowRight className="w-3.5 h-3.5" /></Link>
 </div>
 </div>
 )}
+</div>
+<div className="mt-10 flex justify-center">
+<Link to="/treatments" className="inline-flex items-center gap-2 bg-white border border-cool-gray/20 hover:border-primary text-primary rounded-full px-6 py-3 font-sans text-xs uppercase tracking-widest font-bold transition-colors">All treatments &amp; prices <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" /></Link>
 </div>
 </div>
 </section>

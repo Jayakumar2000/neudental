@@ -2,16 +2,14 @@
 import React from 'react';
 import { BLOGS } from '../data';
 import { Calendar, Clock, ArrowRight } from 'lucide-react';
-import { inAppClick } from '../lib/routes';
+import { Link } from '../lib/navigation';
+import Breadcrumbs from './Breadcrumbs';
 
-interface BlogsListViewProps {
-  onSelectBlog: (blogId: string) => void;
-}
-
-export default function BlogsListView({ onSelectBlog }: BlogsListViewProps) {
+export default function BlogsListView() {
   return (
     <section className="min-h-[60vh] py-16 px-6 md:px-10 lg:px-16 bg-white">
       <div className="max-w-5xl mx-auto w-full">
+        <Breadcrumbs items={[['Home', '/'], ['Blog', '/blogs']]} className="mb-8" />
         <div className="text-center max-w-2xl mx-auto mb-14">
           <span className="text-secondary font-sans text-xs font-bold tracking-[0.2em] uppercase">Dental Health &amp; Clinic Resources</span>
           <h1 className="font-serif text-3xl md:text-4xl text-primary font-bold mt-3 leading-tight">From Our Blog</h1>
@@ -20,10 +18,9 @@ export default function BlogsListView({ onSelectBlog }: BlogsListViewProps) {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {BLOGS.map((post) => (
-            <a
+            <Link
               key={post.id}
-              href={`/blogs/${post.id}`}
-              onClick={inAppClick(() => onSelectBlog(post.id))}
+              to={`/blogs/${post.id}`}
               className="text-left bg-surface-container-low border border-cool-gray/5 rounded-2xl overflow-hidden hover:border-secondary/20 hover:-translate-y-0.5 transition-all cursor-pointer flex flex-col"
             >
               <div className="w-full aspect-[16/9] overflow-hidden">
@@ -39,7 +36,7 @@ export default function BlogsListView({ onSelectBlog }: BlogsListViewProps) {
               </div>
               <div className="flex items-center gap-1.5 text-xs font-bold text-secondary mt-4"><span>Read Article</span><ArrowRight className="w-3.5 h-3.5" /></div>
               </div>
-            </a>
+            </Link>
           ))}
         </div>
       </div>

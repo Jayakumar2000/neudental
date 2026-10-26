@@ -3,17 +3,15 @@ import { Phone, Menu, X, Shield, Clock, MapPin, ChevronDown } from 'lucide-react
 import { TREATMENTS } from '../data';
 import BrandLogo, { BRAND } from './BrandLogo';
 import { trackConversion } from '../lib/analytics';
-import { inAppClick } from '../lib/routes';
+import { Link } from '../lib/navigation';
+import { treatmentPath } from '../lib/treatments';
 
 interface NavbarProps {
 onScrollToBooking: () => void;
-onSelectTreatment: (treatmentId: string) => void;
-onLogoClick?: () => void;
 onNavigateSection: (sectionId: string) => void;
-onOpenBlogs: () => void;
 }
 
-export default function Navbar({ onScrollToBooking, onSelectTreatment, onLogoClick, onNavigateSection, onOpenBlogs }: NavbarProps) {
+export default function Navbar({ onScrollToBooking, onNavigateSection }: NavbarProps) {
 const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 const [treatmentsOpen, setTreatmentsOpen] = useState(false);
 
@@ -37,15 +35,6 @@ document.removeEventListener('touchmove', blockTouch);
 };
 }, [mobileMenuOpen]);
 
-const handleSelectTreatment = (treatmentId: string) => {
-setTreatmentsOpen(false);
-onSelectTreatment(treatmentId);
-};
-
-const handleLogoClick = inAppClick(() => {
-if (onLogoClick) onLogoClick();
-window.scrollTo({ top: 0, behavior: "smooth" });
-});
 
 const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
 e.preventDefault();
@@ -83,30 +72,30 @@ neudental is now an officially Registered Trademark&reg;
 
 <header className="sticky top-0 w-full z-40 bg-white/95 backdrop-blur-md border-b border-cool-gray/10 transition-all premium-shadow">
 <div className="flex items-center justify-between px-6 md:px-10 lg:px-10 xl:px-16 py-3 max-w-[1280px] mx-auto w-full">
-<a href="/" onClick={handleLogoClick} className="flex items-center select-none group shrink-0" aria-label={`${BRAND.name} — ${BRAND.tagline}`}>
+<Link to="/" onClick={() => setMobileMenuOpen(false)} className="flex items-center select-none group shrink-0" aria-label={`${BRAND.name} — ${BRAND.tagline}`}>
 <BrandLogo
 markClassName="h-10 w-auto sm:h-11 md:h-12"
 wordmarkClassName="h-[18px] w-auto sm:h-[22px] md:h-[26px]"
 taglineClassName="text-[9px] sm:text-[10px] text-cool-gray tracking-wide font-sans mt-1"
 />
-</a>
+</Link>
 
 <nav className="hidden lg:flex items-center gap-8 shrink-0">
 {navItems.map((item) => {
 if (item.name === 'Treatments') {
 return (
 <div key={item.name} className="relative shrink-0" onMouseEnter={() => setTreatmentsOpen(true)} onMouseLeave={() => setTreatmentsOpen(false)}>
-<button type="button" aria-haspopup="true" aria-expanded={treatmentsOpen} onClick={() => onNavigateSection('services')} onFocus={() => setTreatmentsOpen(true)} className="flex items-center gap-1.5 whitespace-nowrap text-on-surface-variant hover:text-secondary focus-visible:text-secondary text-sm font-sans font-medium transition-all duration-200 cursor-pointer py-2 outline-none">
+<Link to="/treatments" aria-haspopup="true" aria-expanded={treatmentsOpen} onClick={() => setTreatmentsOpen(false)} onFocus={() => setTreatmentsOpen(true)} className="flex items-center gap-1.5 whitespace-nowrap text-on-surface-variant hover:text-secondary focus-visible:text-secondary text-sm font-sans font-medium transition-all duration-200 cursor-pointer py-2 outline-none">
 <span>Treatments Offered</span>
 <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${treatmentsOpen ? 'rotate-180' : ''}`} />
-</button>
+</Link>
 <div className={`absolute top-full left-1/2 -translate-x-1/2 pt-2 transition-all duration-200 z-50 ${treatmentsOpen ? 'visible opacity-100 translate-y-0' : 'invisible opacity-0 translate-y-2 pointer-events-none'}`}>
 <div className="w-[760px] bg-white border border-cool-gray/10 rounded-2xl shadow-xl p-4 grid grid-cols-4 gap-2">
 {TREATMENTS.map((treat) => (
-<button key={treat.id} onClick={() => handleSelectTreatment(treat.id)} className="flex items-start gap-2 p-2.5 rounded-xl hover:bg-secondary/5 text-left text-[#1E293B] hover:text-secondary transition-all cursor-pointer group/item hover:translate-x-0.5">
+<Link key={treat.id} to={treatmentPath(treat)} onClick={() => setTreatmentsOpen(false)} className="flex items-start gap-2 p-2.5 rounded-xl hover:bg-secondary/5 text-left text-[#1E293B] hover:text-secondary transition-all cursor-pointer group/item hover:translate-x-0.5">
 <span className="text-secondary/80 group-hover/item:text-secondary shrink-0 mt-1"><span className="block w-1.5 h-1.5 rounded-full bg-secondary/30 group-hover/item:bg-secondary transition-all" /></span>
 <div className="leading-tight"><span className="text-xs font-semibold block font-sans">{treat.name}</span><span className="text-[10px] text-cool-gray line-clamp-2 block leading-normal mt-0.5 font-sans font-normal">{treat.description}</span></div>
-</button>
+</Link>
 ))}
 </div>
 </div>
@@ -114,7 +103,7 @@ return (
 );
 }
 if (item.name === 'Blogs') {
-return (<a key={item.name} href={item.href} onClick={inAppClick(onOpenBlogs)} className="shrink-0 whitespace-nowrap text-on-surface-variant hover:text-secondary text-sm font-sans font-medium hover:scale-105 transition-all duration-200 cursor-pointer">{item.name}</a>);
+return (<Link key={item.name} to={item.href} className="shrink-0 whitespace-nowrap text-on-surface-variant hover:text-secondary text-sm font-sans font-medium hover:scale-105 transition-all duration-200 cursor-pointer">{item.name}</Link>);
 }
 return (<a key={item.name} href={item.href} onClick={(e) => handleLinkClick(e, item.href)} className="shrink-0 whitespace-nowrap text-on-surface-variant hover:text-secondary text-sm font-sans font-medium hover:scale-105 transition-all duration-200">{item.name}</a>);
 })}
@@ -139,17 +128,17 @@ return (<a key={item.name} href={item.href} onClick={(e) => handleLinkClick(e, i
 if (item.name === 'Treatments') {
 return (
 <div key={item.name} className="flex flex-col border-b border-cool-gray/5 pb-2">
-<button type="button" onClick={() => closeMobileMenuThen(() => onNavigateSection('services'))} className="text-primary text-sm font-sans font-bold uppercase tracking-wider py-1.5 text-left text-cool-gray cursor-pointer">Treatments Offered</button>
+<Link to="/treatments" onClick={() => setMobileMenuOpen(false)} className="text-primary text-sm font-sans font-bold uppercase tracking-wider py-1.5 text-left text-cool-gray cursor-pointer">Treatments Offered</Link>
 <div className="grid grid-cols-2 gap-1.5 pl-2 pt-1">
 {TREATMENTS.map((treat) => (
-<button key={treat.id} onClick={() => closeMobileMenuThen(() => onSelectTreatment(treat.id))} className="text-stone-700 hover:text-secondary text-[11px] font-sans font-medium text-left py-2 hover:bg-secondary/5 px-2 rounded-lg transition-colors cursor-pointer block truncate">• {treat.name}</button>
+<Link key={treat.id} to={treatmentPath(treat)} onClick={() => setMobileMenuOpen(false)} className="text-stone-700 hover:text-secondary text-[11px] font-sans font-medium text-left py-2 hover:bg-secondary/5 px-2 rounded-lg transition-colors cursor-pointer block truncate">• {treat.name}</Link>
 ))}
 </div>
 </div>
 );
 }
 if (item.name === 'Blogs') {
-return (<a key={item.name} href={item.href} onClick={inAppClick(() => { setMobileMenuOpen(false); onOpenBlogs(); })} className="text-primary hover:text-secondary text-base font-sans font-semibold py-2 border-b border-cool-gray/5 text-left cursor-pointer">{item.name}</a>);
+return (<Link key={item.name} to={item.href} onClick={() => setMobileMenuOpen(false)} className="text-primary hover:text-secondary text-base font-sans font-semibold py-2 border-b border-cool-gray/5 text-left cursor-pointer">{item.name}</Link>);
 }
 return (<a key={item.name} href={item.href} className="text-primary hover:text-secondary text-base font-sans font-semibold py-2 border-b border-cool-gray/5" onClick={(e) => { e.preventDefault(); closeMobileMenuThen(() => onNavigateSection(item.href.slice(1))); }}>{item.name}</a>);
 })}

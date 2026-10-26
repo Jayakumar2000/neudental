@@ -5,7 +5,9 @@
 // graphs point at by @id: the clinic (#dentist), the website (#website) and
 // Dr. Swetha (#dr-swetha).
 import { BLOGS, CLINIC, CLINIC_GOOGLE_URL, DOCTOR, FAQS, REVIEW_COUNT_LABEL, REVIEW_RATING, TREATMENTS } from '../data';
-import type { BlogBlock, BlogPost } from '../types';
+import type { BlogBlock, BlogFAQ, BlogPost, Treatment, TreatmentGuide } from '../types';
+import { DOCTOR_PATH } from './routes';
+import { fillTokens, priceBounds, treatmentPath } from './treatments';
 
 export const SITE_URL = 'https://www.neudental.in';
 const DENTIST_ID = `${SITE_URL}/#dentist`;
@@ -13,6 +15,11 @@ const WEBSITE_ID = `${SITE_URL}/#website`;
 const DOCTOR_ID = `${SITE_URL}/#dr-swetha`;
 const BLOG_ID = `${SITE_URL}/blogs#blog`;
 const BLOG_NAME = 'Neudental Dental Health Blog';
+const PRICE_LIST_ID = `${SITE_URL}/treatments#price-list`;
+
+export function procedureId(treatment: Treatment) {
+  return `${SITE_URL}${treatmentPath(treatment)}#procedure`;
+}
 
 const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
 
@@ -43,12 +50,13 @@ export function postModifiedDate(post: BlogPost): string | undefined {
   return post.dateModified ?? postPublishedDate(post);
 }
 
-// Every piece of readable text in a post, in order, without markup, split
-// the way the page shows it (a table's label and value are separate cells).
-export function postTextBlocks(post: BlogPost): string[] {
+// Every piece of readable text in a body of content blocks, in order,
+// without markup, split the way the page shows it (a table's label and
+// value are separate cells).
+export function contentTexts(blocks: BlogBlock[], faqs?: BlogFAQ[]): string[] {
   const out: string[] = [];
   const add = (text: string) => out.push(plainText(text));
-  post.content.forEach((block: BlogBlock) => {
+  blocks.forEach((block: BlogBlock) => {
     if (typeof block === 'string') return add(block);
     switch (block.type) {
       case 'heading':
@@ -71,8 +79,12 @@ export function postTextBlocks(post: BlogPost): string[] {
         return undefined;
     }
   });
-  post.faqs?.forEach((faq) => { add(faq.question); add(faq.answer); });
+  faqs?.forEach((faq) => { add(faq.question); add(faq.answer); });
   return out;
+}
+
+export function postTextBlocks(post: BlogPost): string[] {
+  return contentTexts(post.content, post.faqs);
 }
 
 // The clinic, its lead dentist and the website: on every page.
@@ -110,7 +122,7 @@ export function siteJsonLd() {
           'https://www.youtube.com/channel/UCfyFaSu7_EJshABsfOuBbWw',
         ],
         employee: { '@id': DOCTOR_ID },
-        availableService: TREATMENTS.map((t) => ({ '@type': 'MedicalProcedure', name: t.name, description: t.description })),
+        availableService: TREATMENTS.map((t) => ({ '@type': 'MedicalProcedure', '@id': procedureId(t), name: t.name, description: t.description, url: SITE_URL + treatmentPath(t) })),
         openingHoursSpecification: CLINIC.sessions.map(({ opens, closes }) => ({
           '@type': 'OpeningHoursSpecification',
           dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
@@ -130,6 +142,10 @@ export function siteJsonLd() {
         honorificSuffix: DOCTOR.title,
         jobTitle: DOCTOR.specialty,
         alumniOf: [DOCTOR.education, DOCTOR.experience].map((name) => ({ '@type': 'CollegeOrUniversity', name })),
+        memberOf: { '@type': 'Organization', name: 'Indian Dental Association' },
+        knowsAbout: DOCTOR.skills,
+        url: SITE_URL + DOCTOR_PATH,
+        image: `${SITE_URL}/doctor/dr-swetha.webp`,
         worksFor: { '@id': DENTIST_ID },
       },
       {
@@ -145,9 +161,9 @@ export function siteJsonLd() {
   };
 }
 
-function reviewer(post: BlogPost) {
-  if (!post.reviewedBy) return undefined;
-  return post.reviewedBy.startsWith(DOCTOR.name) ? { '@id': DOCTOR_ID } : { '@type': 'Person', name: post.reviewedBy };
+function reviewer(reviewedBy: string | undefined) {
+  if (!reviewedBy) return undefined;
+  return reviewedBy.startsWith(DOCTOR.name) ? { '@id': DOCTOR_ID } : { '@type': 'Person', name: reviewedBy };
 }
 
 function breadcrumb(id: string, items: [string, string][]) {
@@ -224,7 +240,7 @@ export function blogPostJsonLd(post: BlogPost) {
   const url = postUrl(post);
   const published = postPublishedDate(post);
   const modified = postModifiedDate(post);
-  const reviewedBy = reviewer(post);
+  const reviewedBy = reviewer(post.reviewedBy);
   const image = absoluteUrl(post.image);
   const wordCount = postTextBlocks(post).join(' ').split(/\s+/).filter(Boolean).length;
   const graph: Record<string, unknown>[] = [
@@ -261,4 +277,116 @@ export function blogPostJsonLd(post: BlogPost) {
   ];
   if (post.faqs?.length) graph.push(faqPage(`${url}#faq`, url, post.faqs));
   return { '@context': 'https://schema.org', '@graph': graph };
+}
+
+function priceSpecification(treatment: Treatment) {
+  const { min, max } = priceBounds(treatment.priceRange);
+  return {
+    '@type': 'PriceSpecification',
+    priceCurrency: 'INR',
+    ...(min !== undefined ? { minPrice: min } : {}),
+    ...(max !== undefined ? { maxPrice: max } : {}),
+  };
+}
+
+function treatmentOffer(treatment: Treatment, id?: string) {
+  return {
+    '@type': 'Offer',
+    ...(id ? { '@id': id } : {}),
+    itemOffered: { '@id': procedureId(treatment) },
+    offeredBy: { '@id': DENTIST_ID },
+    priceCurrency: 'INR',
+    priceSpecification: priceSpecification(treatment),
+    url: SITE_URL + treatmentPath(treatment),
+  };
+}
+
+// A treatment page: the page (reviewed by Dr. Swetha once she has), the
+// procedure, its price at the clinic, breadcrumbs and the guide's FAQs.
+export function treatmentJsonLd(treatment: Treatment, guide: TreatmentGuide | undefined, title: string, description: string) {
+  const url = SITE_URL + treatmentPath(treatment);
+  const fill = (text: string) => plainText(fillTokens(text, treatment));
+  const reviewedBy = reviewer(guide?.reviewedBy);
+  const modified = guide?.dateModified ?? guide?.datePublished;
+  const steps = guide?.content.find((b): b is Extract<BlogBlock, { type: 'steps' }> => typeof b === 'object' && b.type === 'steps');
+  const graph: Record<string, unknown>[] = [
+    {
+      '@type': 'MedicalWebPage',
+      '@id': url,
+      url,
+      name: title,
+      description,
+      inLanguage: 'en-IN',
+      isPartOf: { '@id': WEBSITE_ID },
+      breadcrumb: { '@id': `${url}#breadcrumb` },
+      about: { '@id': procedureId(treatment) },
+      mainEntity: { '@id': procedureId(treatment) },
+      ...(guide ? { datePublished: guide.datePublished } : {}),
+      ...(modified ? { dateModified: modified } : {}),
+      ...(reviewedBy ? { reviewedBy, ...(modified ? { lastReviewed: modified } : {}) } : {}),
+    },
+    {
+      '@type': 'MedicalProcedure',
+      '@id': procedureId(treatment),
+      name: treatment.name,
+      description: guide ? fill(guide.answer) : treatment.description,
+      url,
+      ...(steps ? { howPerformed: steps.items.map((step, i) => `${i + 1}. ${fill(step.title)}: ${fill(step.text)}`).join(' ') } : {}),
+    },
+    treatmentOffer(treatment, `${url}#offer`),
+    breadcrumb(`${url}#breadcrumb`, [['Home', `${SITE_URL}/`], ['Treatments', `${SITE_URL}/treatments`], [treatment.name, url]]),
+  ];
+  if (guide?.faqs.length) graph.push(faqPage(`${url}#faq`, url, guide.faqs.map((f) => ({ question: fill(f.question), answer: fillTokens(f.answer, treatment) }))));
+  return { '@context': 'https://schema.org', '@graph': graph };
+}
+
+// /treatments: the list of treatment pages and the clinic's price list.
+export function treatmentsListJsonLd(title: string, description: string) {
+  const url = `${SITE_URL}/treatments`;
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'CollectionPage',
+        '@id': url,
+        url,
+        name: title,
+        description,
+        inLanguage: 'en-IN',
+        isPartOf: { '@id': WEBSITE_ID },
+        about: { '@id': DENTIST_ID },
+        breadcrumb: { '@id': `${url}#breadcrumb` },
+        mainEntity: { '@id': PRICE_LIST_ID },
+      },
+      {
+        '@type': 'OfferCatalog',
+        '@id': PRICE_LIST_ID,
+        name: 'Dental treatments and prices at neudental, Kodungaiyur',
+        itemListElement: TREATMENTS.map((t) => treatmentOffer(t)),
+      },
+      breadcrumb(`${url}#breadcrumb`, [['Home', `${SITE_URL}/`], ['Treatments', url]]),
+    ],
+  };
+}
+
+// /dr-swetha: a profile page whose subject is the sitewide #dr-swetha node.
+export function doctorJsonLd(title: string, description: string) {
+  const url = SITE_URL + DOCTOR_PATH;
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'ProfilePage',
+        '@id': url,
+        url,
+        name: title,
+        description,
+        inLanguage: 'en-IN',
+        isPartOf: { '@id': WEBSITE_ID },
+        breadcrumb: { '@id': `${url}#breadcrumb` },
+        mainEntity: { '@id': DOCTOR_ID },
+      },
+      breadcrumb(`${url}#breadcrumb`, [['Home', `${SITE_URL}/`], [DOCTOR.name, url]]),
+    ],
+  };
 }

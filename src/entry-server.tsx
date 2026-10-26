@@ -7,10 +7,12 @@ import { StrictMode } from 'react';
 import { prerender } from 'react-dom/static';
 import App from './App-v1';
 import { BLOGS, CLINIC, DOCTOR, FAQS, TREATMENTS } from './data';
-import { classifyRoute, normalizePath, prerenderPaths, type Route } from './lib/routes';
+import { DOCTOR_PATH, classifyRoute, normalizePath, prerenderPaths, type Route } from './lib/routes';
+import { GUIDE_TOKENS, categoryLabel, fillTokens, formatPriceRange, guideFor, treatmentById, treatmentPath } from './lib/treatments';
+import { TREATMENT_GUIDES } from './content/treatments';
 import { getRouteMeta, renderHeadTags, type ImageInfo } from './lib/seo';
-import { SITE_URL, absoluteUrl, plainText, postModifiedDate, postPublishedDate, postTextBlocks, postUrl } from './lib/schema';
-import type { BlogBlock } from './types';
+import { SITE_URL, absoluteUrl, contentTexts, plainText, postModifiedDate, postPublishedDate, postTextBlocks, postUrl } from './lib/schema';
+import type { BlogBlock, Treatment } from './types';
 
 export { classifyRoute, normalizePath, prerenderPaths };
 
@@ -58,7 +60,20 @@ function expectedContent(route: Route): { texts: string[]; hrefs: string[] } {
     case 'blogsList':
       return { texts: BLOGS.map((post) => clip(post.title)), hrefs: BLOGS.map((post) => `/blogs/${post.id}`) };
     case 'home':
-      return { texts: FAQS.flatMap((faq) => [clip(faq.question), clip(faq.answer)]), hrefs: ['/blogs'] };
+      return { texts: FAQS.flatMap((faq) => [clip(faq.question), clip(faq.answer)]), hrefs: ['/blogs', '/treatments', DOCTOR_PATH, ...TREATMENTS.map(treatmentPath)] };
+    case 'treatment': {
+      const treatment = treatmentById(route.treatmentId)!;
+      const guide = guideFor(treatment.id);
+      const fill = (text: string) => fillTokens(text, treatment);
+      const texts = guide
+        ? [guide.headline, guide.answer, ...contentTexts(guide.content, guide.faqs)].map(fill)
+        : [treatment.name, treatment.description, ...treatment.features];
+      return { texts: texts.map(clip).filter(Boolean), hrefs: ['/treatments', DOCTOR_PATH] };
+    }
+    case 'treatmentsList':
+      return { texts: TREATMENTS.map((t) => clip(t.name)), hrefs: TREATMENTS.map(treatmentPath) };
+    case 'doctor':
+      return { texts: [clip(DOCTOR.name), clip(DOCTOR.bio)], hrefs: TREATMENTS.map(treatmentPath) };
     default:
       return { texts: [], hrefs: [] };
   }
@@ -66,6 +81,11 @@ function expectedContent(route: Route): { texts: string[]; hrefs: string[] } {
 
 export function blogImages(): { id: string; image: string }[] {
   return BLOGS.map((post) => ({ id: post.id, image: post.image }));
+}
+
+// Images used as share cards besides blog images; the build reads their size.
+export function shareImages(): string[] {
+  return ['/doctor/dr-swetha.webp'];
 }
 
 export function adminHead(): string {
@@ -93,6 +113,9 @@ export function sitemapXml(paths: string[]): string {
       lastmod = post && postModifiedDate(post);
     } else if (route.type === 'blogsList') {
       lastmod = latest;
+    } else if (route.type === 'treatment') {
+      const guide = guideFor(route.treatmentId);
+      lastmod = guide && (guide.dateModified ?? guide.datePublished);
     }
     return [
       '  <url>',
@@ -188,6 +211,23 @@ function treatmentList(): string {
   return TREATMENTS.map((t) => `- ${t.name}: ${t.description}. Typical duration ${t.duration}; indicative price ${t.priceRange}.`).join('\n');
 }
 
+function treatmentMarkdown(treatment: Treatment): string {
+  const guide = guideFor(treatment.id);
+  const header = [
+    `## ${treatment.name}`,
+    '',
+    `URL: ${SITE_URL}${treatmentPath(treatment)}`,
+    `Category: ${categoryLabel(treatment.category)}`,
+    `Typical duration: ${treatment.duration}`,
+    `Indicative price at Neudental: ${formatPriceRange(treatment.priceRange)} (final cost confirmed after examination)`,
+    `Includes: ${treatment.features.join('; ')}`,
+    ...(guide?.reviewedBy ? [`Clinically reviewed by: ${guide.reviewedBy}`] : []),
+    ...(guide ? [`Updated: ${guide.dateModified ?? guide.datePublished}`] : []),
+  ].join('\n');
+  if (!guide) return `${header}\n\n${treatment.description}.`;
+  return fillTokens(`${header}\n\n> ${guide.answer}\n\n${postMarkdown(guide.content, guide.faqs)}`, treatment);
+}
+
 // llms.txt (https://llmstxt.org): H1, a blockquote summary, free text with no
 // headings, then H2 sections that are lists of links.
 export function llmsTxt(): string {
@@ -206,7 +246,13 @@ ${treatmentList()}
 ## Pages
 
 - [Home](${SITE_URL}/): clinic overview, treatments, doctor, patient reviews, location, timings, FAQs and booking
+- [Treatments and prices](${SITE_URL}/treatments): every treatment with typical duration and indicative price
+- [${DOCTOR.name}, ${DOCTOR.title}](${SITE_URL}${DOCTOR_PATH}): the clinic's lead dentist, qualifications and expertise
 - [Dental health blog](${SITE_URL}/blogs): all articles
+
+## Treatment guides
+
+${TREATMENTS.map((t) => `- [${t.name}](${SITE_URL}${treatmentPath(t)}): ${t.description}; ${t.duration}; indicative price ${formatPriceRange(t.priceRange)}`).join('\n')}
 
 ## Blog articles
 
@@ -214,7 +260,7 @@ ${BLOGS.map((post) => `- [${post.title}](${postUrl(post)}): ${post.excerpt}`).jo
 
 ## Optional
 
-- [Full text of every article, plus the clinic FAQ](${SITE_URL}/llms-full.txt)
+- [Full text of every treatment guide and article, plus the clinic FAQ](${SITE_URL}/llms-full.txt)
 `;
 }
 
@@ -235,14 +281,16 @@ export function llmsFullTxt(): string {
     return `${header}\n\n${postMarkdown(post.content, post.faqs)}`;
   });
   const faq = FAQS.map((item) => `**${item.question}**\n${item.answer}`).join('\n\n');
-  return `# Neudental — full content\n\n## Clinic facts\n\n${clinicFacts()}\n\n## Treatments and indicative prices (INR)\n\n${treatmentList()}\n\n## Frequently asked questions\n\n${faq}\n\n# Blog articles\n\n${posts.join('\n\n---\n\n')}\n`;
+  const guides = TREATMENTS.map((t) => treatmentMarkdown(t)).join('\n\n---\n\n');
+  return `# Neudental — full content\n\n## Clinic facts\n\n${clinicFacts()}\n\n## Treatments and indicative prices (INR)\n\n${treatmentList()}\n\n## Frequently asked questions\n\n${faq}\n\n# Treatment guides\n\n${guides}\n\n# Blog articles\n\n${posts.join('\n\n---\n\n')}\n`;
 }
 
 // Content checks the build runs before writing anything. Errors stop the
 // deploy (the live site keeps the last good version); warnings are printed.
 // Messages name the post and say what to change, for editors working in
 // GitHub's web editor.
-const POST_KEYS = new Set(['id', 'title', 'excerpt', 'category', 'date', 'readTime', 'image', 'content', 'seoTitle', 'imageAlt', 'datePublished', 'dateModified', 'reviewedBy', 'faqs', 'related']);
+const POST_KEYS = new Set(['id', 'title', 'excerpt', 'category', 'date', 'readTime', 'image', 'content', 'seoTitle', 'imageAlt', 'datePublished', 'dateModified', 'reviewedBy', 'faqs', 'related', 'relatedTreatments']);
+const GUIDE_KEYS = new Set(['treatmentId', 'seoTitle', 'metaDescription', 'headline', 'answer', 'content', 'faqs', 'relatedPosts', 'relatedTreatments', 'datePublished', 'dateModified', 'reviewedBy']);
 const REQUIRED_TEXT = ['id', 'title', 'excerpt', 'category', 'date', 'readTime', 'image'] as const;
 const BLOCK_TYPES = 'heading, subheading, list, steps, answer, note, quote, table, contents, faq, cta';
 
@@ -306,9 +354,81 @@ export function validateContent(): { errors: string[]; warnings: string[] } {
     for (const rel of post.related ?? []) {
       if (!BLOGS.some((b) => b.id === rel)) errors.push(`${where}: related post "${rel}" does not exist.`);
     }
+    for (const rel of post.relatedTreatments ?? []) {
+      if (!treatmentById(rel)) errors.push(`${where}: related treatment "${rel}" does not exist (use an id from TREATMENTS in src/data.ts).`);
+    }
     const title = post.seoTitle ?? `${post.title} | Neudental Blog`;
     if (title.length > 65) warnings.push(`${where}: page title is ${title.length} characters; search results cut off after about 60. Add a shorter seoTitle.`);
     if (post.excerpt.length > 170) warnings.push(`${where}: excerpt is ${post.excerpt.length} characters; search snippets show about 155.`);
   });
+  validateTreatments(errors, warnings);
   return { errors, warnings };
+}
+
+const isoDate = /^\d{4}-\d{2}-\d{2}$/;
+const words = (text: string) => plainText(text).split(/\s+/).filter(Boolean).length;
+
+function validateTreatments(errors: string[], warnings: string[]) {
+  const slugs = new Set<string>();
+  for (const t of TREATMENTS) {
+    const where = `Treatment "${t.id}"`;
+    if (typeof t.slug !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(t.slug)) errors.push(`${where}: slug must be lowercase letters, numbers and single hyphens (it is the page address /treatments/{slug}).`);
+    else if (slugs.has(t.slug)) errors.push(`${where}: slug "${t.slug}" is used by another treatment.`);
+    slugs.add(t.slug);
+    if (!guideFor(t.id)) warnings.push(`${where}: no guide in src/content/treatments/, so its page only shows the basic facts.`);
+  }
+
+  const seen = new Set<string>();
+  TREATMENT_GUIDES.forEach((guide, index) => {
+    const raw = guide as unknown as Record<string, unknown>;
+    const treatment = typeof raw.treatmentId === 'string' ? treatmentById(raw.treatmentId) : undefined;
+    const where = `Treatment guide ${treatment ? `"${treatment.slug}"` : `#${index + 1} (treatmentId "${String(raw.treatmentId)}")`}`;
+    if (!treatment) {
+      errors.push(`${where}: treatmentId must be one of the ids in TREATMENTS (src/data.ts).`);
+      return;
+    }
+    if (seen.has(treatment.id)) errors.push(`${where}: there is more than one guide for this treatment.`);
+    seen.add(treatment.id);
+    for (const key of Object.keys(raw)) {
+      if (!GUIDE_KEYS.has(key)) errors.push(`${where}: unknown field "${key}". Fields: ${[...GUIDE_KEYS].join(', ')}.`);
+    }
+    for (const key of ['seoTitle', 'metaDescription', 'headline', 'answer', 'datePublished'] as const) {
+      if (typeof raw[key] !== 'string' || !(raw[key] as string).trim()) errors.push(`${where}: "${key}" is missing or empty.`);
+    }
+    if (!Array.isArray(raw.content) || !raw.content.length) errors.push(`${where}: "content" must be a list of paragraphs/blocks.`);
+    if (!Array.isArray(raw.faqs)) errors.push(`${where}: "faqs" must be a list of { question, answer }.`);
+    if (errors.some((e) => e.startsWith(where))) return;
+
+    guide.content.forEach((block, i) => {
+      const problem = blockProblem(block);
+      if (problem) errors.push(`${where}: content block ${i + 1} ${problem}.`);
+      if (typeof block === 'object' && block.type === 'answer') warnings.push(`${where}: content block ${i + 1} is an 'answer' block; the guide's "answer" field is already shown first, so this repeats it.`);
+    });
+    if (!guide.faqs.every((f) => typeof f?.question === 'string' && f.question.trim() && typeof f?.answer === 'string' && f.answer.trim())) errors.push(`${where}: faqs must look like [{ question: '...', answer: '...' }].`);
+
+    // Placeholders, and no typed prices (they would drift from TREATMENTS).
+    const texts = [guide.seoTitle, guide.metaDescription, guide.headline, guide.answer, ...contentTexts(guide.content, guide.faqs)];
+    for (const text of texts) {
+      for (const m of text.matchAll(/\{\{(\w+)\}\}/g)) {
+        if (!(GUIDE_TOKENS as readonly string[]).includes(m[1])) errors.push(`${where}: unknown placeholder {{${m[1]}}}. Use one of: ${GUIDE_TOKENS.map((t) => `{{${t}}}`).join(', ')}.`);
+      }
+      if (/(₹|\bRs\.?|\bINR)\s?\d/.test(text)) errors.push(`${where}: a price is typed into the text ("${text.match(/(₹|\bRs\.?|\bINR)\s?[\d,]+/)?.[0]}"). Write {{price}} or {{startingPrice}} so it always matches the price list in TREATMENTS.`);
+    }
+    for (const id of guide.relatedPosts ?? []) {
+      if (!BLOGS.some((b) => b.id === id)) errors.push(`${where}: related post "${id}" does not exist.`);
+    }
+    for (const id of guide.relatedTreatments ?? []) {
+      if (!treatmentById(id) || id === treatment.id) errors.push(`${where}: related treatment "${id}" must be the id of another treatment in TREATMENTS.`);
+    }
+    if (!isoDate.test(guide.datePublished)) errors.push(`${where}: datePublished must look like 2026-10-25.`);
+    if (guide.dateModified !== undefined && !isoDate.test(guide.dateModified)) errors.push(`${where}: dateModified must look like 2026-10-25.`);
+
+    const title = fillTokens(guide.seoTitle, treatment);
+    if (title.length > 65) warnings.push(`${where}: seoTitle is ${title.length} characters; search results cut off after about 60.`);
+    const description = fillTokens(guide.metaDescription, treatment);
+    if (description.length < 70 || description.length > 170) warnings.push(`${where}: metaDescription is ${description.length} characters; aim for 120-155.`);
+    const answerWords = words(fillTokens(guide.answer, treatment));
+    if (answerWords < 30 || answerWords > 90) warnings.push(`${where}: answer is ${answerWords} words; 40-70 is the length answer engines quote.`);
+    if (guide.faqs.length < 3) warnings.push(`${where}: only ${guide.faqs.length} FAQs; 4-8 is recommended.`);
+  });
 }

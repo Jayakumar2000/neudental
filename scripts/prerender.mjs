@@ -52,6 +52,14 @@ for (const { id, image } of ssr.blogImages()) {
   const info = imageSize(await fs.readFile(file));
   if (info) imageInfoBySrc.set(image, info);
 }
+for (const image of ssr.shareImages()) {
+  const file = path.join(ROOT, 'public', image);
+  if (!(await exists(file))) fail(`Share image ${image} not found in public/.`);
+  else {
+    const info = imageSize(await fs.readFile(file));
+    if (info) imageInfoBySrc.set(image, info);
+  }
+}
 const imageInfo = (src) => imageInfoBySrc.get(src);
 
 // Width, height and MIME type from a PNG, JPEG or WebP header.

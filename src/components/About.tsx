@@ -1,10 +1,12 @@
 import React from 'react';
 import { DOCTORS } from '../data';
 import { SmileCurve } from './BrandShapes';
-import { GraduationCap, Camera, Award, Users, Activity, Sparkles, Home } from 'lucide-react';
+import { GraduationCap, Camera, Award, Users, Activity, Sparkles, Home, ArrowRight } from 'lucide-react';
+import { Link } from '../lib/navigation';
+import { DOCTOR_PATH } from '../lib/routes';
 
 // `featured` gets the filled navy ring so the eye lands on it first.
-const TRUST_STATS = [
+export const TRUST_STATS = [
   { icon: Award, value: '5+', label: 'Years of trusted dental care' },
   { icon: Users, value: '3,000+', label: 'Happy patients treated', featured: true },
   { icon: Activity, value: '5,000+', label: 'Procedures completed' },
@@ -135,6 +137,7 @@ className="w-full h-full object-cover object-top"
 </span>
 ))}
 </div>
+<Link to={DOCTOR_PATH} className="inline-flex items-center gap-1.5 mt-5 font-sans text-sm font-bold text-primary hover:text-secondary transition-colors">Read {doc.name}'s full profile <ArrowRight className="w-4 h-4" aria-hidden="true" /></Link>
 </div>
 </div>
 </div>

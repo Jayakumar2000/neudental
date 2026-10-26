@@ -5,14 +5,20 @@
 // kind of page needs a Route here, a branch in classifyRoute(), and its URLs
 // in prerenderPaths(); anything the pages link to is also found and
 // prerendered automatically by the build's link crawl.
-import { BLOGS } from '../data';
+import { BLOGS, TREATMENTS } from '../data';
 
 export type Route =
   | { type: 'home' }
   | { type: 'admin' }
   | { type: 'blogsList' }
   | { type: 'blogPost'; blogId: string }
+  | { type: 'treatmentsList' }
+  | { type: 'treatment'; treatmentId: string }
+  | { type: 'doctor' }
   | { type: 'notFound' };
+
+// Dr. Swetha's profile page.
+export const DOCTOR_PATH = '/dr-swetha';
 
 export function normalizePath(pathname: string): string {
   return pathname.replace(/\/+$/, '') || '/';
@@ -31,14 +37,46 @@ export function classifyRoute(pathname: string): Route {
     return BLOGS.some((post) => post.id === blogId) ? { type: 'blogPost', blogId } : { type: 'notFound' };
   }
   if (clean === '/blogs') return { type: 'blogsList' };
+  const treatmentMatch = clean.match(/^\/treatments\/([^/]+)$/);
+  if (treatmentMatch) {
+    const treatment = TREATMENTS.find((t) => t.slug === treatmentMatch[1]);
+    return treatment ? { type: 'treatment', treatmentId: treatment.id } : { type: 'notFound' };
+  }
+  if (clean === '/treatments') return { type: 'treatmentsList' };
+  if (clean === DOCTOR_PATH) return { type: 'doctor' };
   return { type: 'notFound' };
 }
 
-// Every public, indexable URL. Blog posts come straight from BLOGS, so a new
-// post is prerendered, added to the sitemap, RSS feed and llms.txt with no
-// other change.
+// The URL of a route (the reverse of classifyRoute).
+export function routePath(route: Route): string {
+  switch (route.type) {
+    case 'home': return '/';
+    case 'admin': return '/admin';
+    case 'blogsList': return '/blogs';
+    case 'blogPost': return `/blogs/${route.blogId}`;
+    case 'treatmentsList': return '/treatments';
+    case 'treatment': return `/treatments/${TREATMENTS.find((t) => t.id === route.treatmentId)?.slug ?? route.treatmentId}`;
+    case 'doctor': return DOCTOR_PATH;
+    case 'notFound': return '/404';
+    default: {
+      const unhandled: never = route;
+      throw new Error(`No path for route ${JSON.stringify(unhandled)}`);
+    }
+  }
+}
+
+// Every public, indexable URL. Blog posts and treatments come straight from
+// BLOGS and TREATMENTS, so a new post or treatment is prerendered and added
+// to the sitemap and llms.txt with no other change.
 export function prerenderPaths(): string[] {
-  return ['/', '/blogs', ...BLOGS.map((post) => `/blogs/${post.id}`)];
+  return [
+    '/',
+    '/blogs',
+    ...BLOGS.map((post) => `/blogs/${post.id}`),
+    '/treatments',
+    ...TREATMENTS.map((t) => `/treatments/${t.slug}`),
+    DOCTOR_PATH,
+  ];
 }
 
 // For <a href> links the app handles itself: a plain left click navigates

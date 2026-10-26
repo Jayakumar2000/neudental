@@ -9,16 +9,16 @@ const SOCIAL_LINKS = [
 import BrandLogo, { BRAND } from './BrandLogo';
 import { TREATMENTS } from '../data';
 import { trackConversion } from '../lib/analytics';
-import { inAppClick } from '../lib/routes';
+import { Link } from '../lib/navigation';
+import { DOCTOR_PATH } from '../lib/routes';
+import { treatmentPath } from '../lib/treatments';
 import { useHydrated } from '../lib/useHydrated';
 
 interface FooterProps {
 onNavigateSection: (sectionId: string) => void;
-onOpenBlogs: () => void;
-onSelectTreatment: (treatmentId: string) => void;
 }
 
-export default function Footer({ onNavigateSection, onOpenBlogs, onSelectTreatment }: FooterProps) {
+export default function Footer({ onNavigateSection }: FooterProps) {
 // The prerendered HTML carries the build's year; the visitor's own clock
 // takes over right after hydration, so the year never goes stale.
 const year = useHydrated() ? new Date().getFullYear() : __BUILD_YEAR__;
@@ -59,7 +59,7 @@ TN State Dental Council Registered
 <h4 className="text-xs font-bold uppercase tracking-widest text-[#E0F2F1] mb-6">Treatments Offered</h4>
 <ul className="grid grid-cols-2 gap-x-4 gap-y-3 text-xs text-white/70 font-medium">
 {TREATMENTS.map((treat) => (
-<li key={treat.id}><a href="#services" onClick={(e) => { e.preventDefault(); onSelectTreatment(treat.id); }} className="hover:text-[#E0F2F1] transition-colors">{treat.name}</a></li>
+<li key={treat.id}><Link to={treatmentPath(treat)} className="hover:text-[#E0F2F1] transition-colors">{treat.name}</Link></li>
 ))}
 </ul>
 </div>
@@ -67,9 +67,9 @@ TN State Dental Council Registered
 <div>
 <h4 className="text-xs font-bold uppercase tracking-widest text-[#E0F2F1] mb-6">Patient Navigation</h4>
 <ul className="space-y-3 text-xs text-white/70 font-medium">
-<li><a href="#our-doctor" onClick={(e) => handleSectionClick(e, 'our-doctor')} className="hover:text-[#E0F2F1] transition-colors">Our Doctor</a></li>
-<li><a href="#services" onClick={(e) => handleSectionClick(e, 'services')} className="hover:text-[#E0F2F1] transition-colors">Treatments Offered</a></li>
-<li><a href="/blogs" onClick={inAppClick(onOpenBlogs)} className="hover:text-[#E0F2F1] transition-colors cursor-pointer text-left">Blogs</a></li>
+<li><Link to={DOCTOR_PATH} className="hover:text-[#E0F2F1] transition-colors">Our Doctor</Link></li>
+<li><Link to="/treatments" className="hover:text-[#E0F2F1] transition-colors">Treatments &amp; Prices</Link></li>
+<li><Link to="/blogs" className="hover:text-[#E0F2F1] transition-colors cursor-pointer text-left">Blogs</Link></li>
 <li><a href="#location" onClick={(e) => handleSectionClick(e, 'location')} className="hover:text-[#E0F2F1] transition-colors">Location &amp; Timing</a></li>
 </ul>
 </div>

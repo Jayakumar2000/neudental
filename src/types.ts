@@ -1,6 +1,9 @@
 // neudental v1 - TypeScript Type Definitions
 export interface Treatment {
   id: string;
+  // The treatment page's address, /treatments/{slug}. Permanent once
+  // published: search engines and AI assistants cite it.
+  slug: string;
   name: string;
   category: 'preventive' | 'restorative' | 'cosmetic-ortho' | 'specialized' | 'pediatric';
   description: string;
@@ -15,6 +18,8 @@ export interface Treatment {
 
 export interface Doctor {
   name: string;
+  // Dental council registration, shown on the profile page when set.
+  registration?: string;
   title: string;
   specialty: string;
   experience: string;
@@ -118,4 +123,25 @@ export interface BlogPost {
   reviewedBy?: string;       // shown in the byline, e.g. "Dr. Swetha, BDS, FGDS"
   faqs?: BlogFAQ[];          // rendered as an FAQ section + FAQPage schema
   related?: string[];        // ids of other posts to link at the end
+  relatedTreatments?: string[]; // treatment ids whose pages to link at the end
+}
+
+// The long-form patient guide on a treatment's page (/treatments/{slug}),
+// one file per treatment in src/content/treatments/. Price and duration are
+// never typed into the text: write {{price}}, {{duration}} or
+// {{startingPrice}} and they are filled in from TREATMENTS, so the guide can't
+// disagree with the price list.
+export interface TreatmentGuide {
+  treatmentId: string;       // matches a Treatment.id in src/data.ts
+  seoTitle: string;          // <title>, at most ~60 characters
+  metaDescription: string;   // search snippet, ~120-155 characters
+  headline: string;          // the page's <h1>
+  answer: string;            // 40-70 word direct answer shown first
+  content: BlogBlock[];      // the guide body, same blocks as blog posts
+  faqs: BlogFAQ[];           // shown on the page and published as FAQ schema
+  relatedPosts?: string[];   // blog post ids
+  relatedTreatments?: string[]; // treatment ids
+  datePublished: string;     // 'YYYY-MM-DD'
+  dateModified?: string;     // 'YYYY-MM-DD', last real content update
+  reviewedBy?: string;       // set only once the clinician has reviewed it
 }
