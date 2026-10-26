@@ -13,6 +13,8 @@ import LocationDetails from './components/LocationDetails';
 import Footer from './components/Footer';
 import FloatingWhatsApp from './components/FloatingWhatsApp';
 import NotFound from './components/NotFound';
+import BlogsListView from './components/BlogsListView';
+import BlogDetailView from './components/BlogDetailView';
 import { FAQS, BLOGS, WHATSAPP_URL } from './data';
 import { ChevronDown, ChevronUp, ArrowLeft, Phone, RefreshCw } from 'lucide-react';
 import type { FAQItem } from './types';
@@ -21,25 +23,19 @@ import { getRouteMeta, setPageMeta } from './lib/seo';
 import { classifyRoute, normalizePath, type Route } from './lib/routes';
 import { useHydrated } from './lib/useHydrated';
 
-// Code-split: the staff-only admin CRM and the blog views are never opened by
-// most patients on a mobile data plan, so they shouldn't be in the same
-// download as the homepage. Lazy-loaded on first visit to their own route.
+// Code-split: the staff-only admin CRM is never opened by patients, so it
+// isn't in their download. The blog views are part of the main bundle (their
+// text already is, through data.ts): a prerendered post must never depend on
+// a second file arriving before it can hydrate.
 const AdminView = lazy(() => import('./components/AdminView'));
-const BlogsListView = lazy(() => import('./components/BlogsListView'));
-const BlogDetailView = lazy(() => import('./components/BlogDetailView'));
 // The booking form works off the visitor's own clock ("today", past slots)
 // and Firebase, so it can't be part of the build-time HTML: it loads in the
-// browser straight after the prerendered page hydrates. Keeping it (and the
-// Firebase SDK) out of the first download also speeds up that hydration.
-const BookingForm = lazy(() => import('./components/BookingForm'));
-
-function RouteLoading() {
-  return (
-    <div className="min-h-[50vh] flex items-center justify-center">
-      <RefreshCw className="w-6 h-6 text-secondary animate-spin" />
-    </div>
-  );
-}
+// browser straight after the prerendered page hydrates -- on every page, so
+// a reader who arrives on a blog post already has it when they tap "Book".
+// Keeping it (and the Firebase SDK) out of the first download also speeds up
+// that hydration.
+const loadBookingForm = () => import('./components/BookingForm');
+const BookingForm = lazy(loadBookingForm);
 
 // Blog subpages get a real URL (/blogs, /blogs/{blog-id}) via manual
 // history.pushState + a popstate listener below, since the app has no
@@ -78,8 +74,11 @@ class BookingFormBoundary extends React.Component<{ children: React.ReactNode },
 
 function BookingFormSlot({ preSelectedTreatmentId, preSelectNonce }: { preSelectedTreatmentId: string; preSelectNonce: number }) {
   const hydrated = useHydrated();
+  // Reserves the form's measured height (about 1370px on phones, 1030px from
+  // tablet width up), so scrolling to #location or a section below lands in
+  // the right place even if the form arrives mid-scroll.
   const placeholder = (
-    <div className="min-h-[560px] flex items-center justify-center" aria-busy="true">
+    <div className="min-h-[1370px] md:min-h-[1030px] flex items-center justify-center" aria-busy="true">
       <RefreshCw className="w-6 h-6 text-secondary animate-spin" aria-hidden="true" />
       <span className="sr-only">Loading the booking form</span>
     </div>
@@ -123,6 +122,12 @@ export default function App({ initialPath }: { initialPath?: string } = {}) {
       window.history.pushState(null, '', path);
     }
   };
+
+  // Fetch the booking form right after hydration on every page (see
+  // loadBookingForm above). A failed fetch is retried when the form mounts.
+  useEffect(() => {
+    loadBookingForm().catch(() => {});
+  }, []);
 
   // Keep state in sync with the browser's own back/forward navigation.
   useEffect(() => {
@@ -307,9 +312,7 @@ export default function App({ initialPath }: { initialPath?: string } = {}) {
     return (
       <div className="min-h-screen bg-white">
         <Navbar onSelectTreatment={handleViewTreatmentInServices} onScrollToBooking={handleScrollToBooking} onLogoClick={handleCloseBlogs} onNavigateSection={navigateToSection} onOpenBlogs={handleOpenBlogs} />
-        <Suspense fallback={<RouteLoading />}>
-          <BlogDetailView blogId={activeBlogId} onBack={handleBackToBlogsList} onSelectBlog={handleSelectBlog} onBookAppointment={handleScrollToBooking} />
-        </Suspense>
+        <BlogDetailView blogId={activeBlogId} onBack={handleBackToBlogsList} onSelectBlog={handleSelectBlog} onBookAppointment={handleScrollToBooking} />
         <Footer onNavigateSection={navigateToSection} onOpenBlogs={handleOpenBlogs} onSelectTreatment={handleViewTreatmentInServices} />
       </div>
     );
@@ -319,9 +322,7 @@ export default function App({ initialPath }: { initialPath?: string } = {}) {
     return (
       <div className="min-h-screen bg-white">
         <Navbar onSelectTreatment={handleViewTreatmentInServices} onScrollToBooking={handleScrollToBooking} onLogoClick={handleCloseBlogs} onNavigateSection={navigateToSection} onOpenBlogs={handleOpenBlogs} />
-        <Suspense fallback={<RouteLoading />}>
-          <BlogsListView onSelectBlog={handleSelectBlog} />
-        </Suspense>
+        <BlogsListView onSelectBlog={handleSelectBlog} />
         <Footer onNavigateSection={navigateToSection} onOpenBlogs={handleOpenBlogs} onSelectTreatment={handleViewTreatmentInServices} />
       </div>
     );

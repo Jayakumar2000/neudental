@@ -77,8 +77,11 @@ incremental regeneration. None of these applies today.
 
 ### Structured data, generated from the same data as the page
 
-* Sitewide (in `index.html`): `Dentist` (the clinic), `Person` (Dr. Swetha:
-  credentials, alma maters) and `WebSite`, linked to each other by stable `@id`s.
+* Every page: `Dentist` (the clinic: address, map, hours, all 17
+  treatments, rating), `Person` (Dr. Swetha: credentials, alma maters) and
+  `WebSite`, linked to each other by stable `@id`s. Built from `CLINIC`,
+  `DOCTOR`, `TREATMENTS` and `REVIEW_RATING` in `src/data.ts`, so the hours or
+  rating can't disagree between the page and the schema.
 * Homepage: `FAQPage`, built from the same `FAQS` list the page shows, so
   it can no longer drift.
 * `/blogs`: `CollectionPage` + `Blog` (listing every post) + `BreadcrumbList`.
@@ -112,12 +115,21 @@ ctrl/cmd-click opens a new tab as people expect.
 2. **Regenerates** the sitemap, RSS feed and `llms.txt` files.
 3. **Refuses to deploy a broken site.** The build fails, and Vercel keeps
    the current version live, if any page would ship:
-   - with almost no text, no `<h1>`, no title, no description, or a wrong canonical;
-   - with part of its content left out of the HTML;
-   - with invalid structured data;
-   - with a link to a page that doesn't exist;
-   - for a blog post with a bad slug, a duplicate slug, a missing image, a
-     badly formatted date, or a `related` post that doesn't exist.
+   - without its content: every paragraph, table row and step of a post,
+     every post link on `/blogs` and every FAQ on the homepage must be in the
+     HTML. A post whose body didn't render can't slip through because the
+     header and footer did;
+   - with no `<h1>`, no title, no description, or a wrong or duplicate canonical;
+   - as a silent copy of the homepage (a new page type with no view of its own);
+   - with invalid structured data, or a schema reference to something not on
+     the page;
+   - with a link to a page or file that doesn't exist, including absolute
+     links to neudental.in;
+   - for a blog post with a misspelled field, an unknown block type, a bad or
+     duplicate slug, a missing image or one with spaces in its name, a badly
+     formatted date, or a `related` post that doesn't exist.
+
+   It also type-checks the whole codebase.
 
    The error message names the post and the problem in plain English.
 4. **Warns, without blocking,** about things worth fixing: titles over about 60
@@ -132,11 +144,14 @@ the deploy fails and the live site stays as it was.
   instead of after the JavaScript runs. Better Core Web Vitals (LCP) help
   rankings too.
 * **Less JavaScript before the page works.** The main bundle fell from 304 KB to
-  125 KB compressed (1.1 MB → 424 KB uncompressed). The Firebase SDK now loads
-  after the page is visible, and only for the booking form.
-* If the booking form's code fails to load on a flaky connection, only the
-  form is replaced (with Call and WhatsApp buttons) instead of the whole page
-  breaking.
+  129 KB compressed (1.1 MB → 438 KB uncompressed). The Firebase SDK now loads
+  just after the page is visible, only for the booking form.
+* **Survives deploys.** A visitor whose tab was opened before a deploy gets one
+  automatic reload onto the new version instead of a broken booking form.
+  If the form's code truly can't load, only the form is replaced (with Call
+  and WhatsApp buttons) and the page stays intact.
+* **Problems get reported.** If a page ever renders differently in the browser
+  than at build time, a `hydration_error` event is sent to GA4.
 
 ---
 
@@ -207,9 +222,9 @@ content and reputation decide who gets cited.
 ## 7. Phase 2: site structure for citations (recommended next, about 2–6 weeks)
 
 These have the biggest effect on AI and search visibility. The new setup
-supports each one: a new page type is one entry in `src/lib/routes.ts`, and
-it's prerendered, added to the sitemap and protected by the build checks
-automatically.
+supports each one: a new page type takes the four steps in section 10, and
+it's then prerendered, added to the sitemap and protected by the build
+checks automatically.
 
 1. **One page per treatment** (`/treatments/root-canal-treatment`,
    `/treatments/dental-implants`, … for the 17 treatments in `TREATMENTS`).
@@ -224,10 +239,11 @@ automatically.
    photo. AI systems weigh named, credentialed medical authors heavily.
 3. **"Latest articles" on the homepage**, linking the 3 newest posts. The
    homepage is the strongest page, and right now it links to no individual post.
-4. **Fix the inconsistent facts that confuse answer engines.** The morning
-   closing time is 2:00 PM in the schema and FAQ but 1:30 PM in the blog
-   call-to-action and booking slots. Pick one and use it everywhere,
-   including Google Business Profile, Practo and Justdial.
+4. **Keep the clinic's facts identical everywhere.** On the site this is now
+   automatic. The blog posts' booking box said the morning session ends at
+   1:30 PM while everything else said 2:00 PM; all of it now comes from one
+   `CLINIC` entry in `src/data.ts` (2:00 PM). Make sure Google Business
+   Profile, Practo and Justdial say exactly the same.
 5. **Clear the current build warnings.** Add the exact `datePublished` for
    the three older posts, shorten three titles to ≤ 60 characters, and trim
    one excerpt. The build lists them on every run.

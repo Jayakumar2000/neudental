@@ -1,10 +1,10 @@
 // neudental v1 - BlogDetailView Component
 import React from 'react';
-import { BLOGS, WHATSAPP_URL } from '../data';
+import { BLOGS, CLINIC, WHATSAPP_URL } from '../data';
 import { Calendar, Clock, ArrowLeft, ShieldCheck, ChevronDown, MapPin, Phone } from 'lucide-react';
 import { trackConversion } from '../lib/analytics';
 import type { BlogBlock, BlogPost } from '../types';
-import { inAppClick } from '../lib/routes';
+import { classifyRoute, inAppClick } from '../lib/routes';
 import { postPublishedDate } from '../lib/schema';
 
 // "2026-10-25" -> "25 October 2026". Written out by hand rather than with
@@ -31,8 +31,9 @@ function headingId(block: { text: string; id?: string }) {
 }
 
 // Renders the small inline syntax post text may use: **bold** and
-// [link text](/path). Links to other posts stay inside the app instead of
-// reloading the page.
+// [link text](/path). Plain links to other posts stay inside the app instead
+// of reloading the page; anything else (a #section, ?query, another page or
+// site) is left to the browser.
 function InlineText({ text, onSelectBlog }: { text: string; onSelectBlog?: (blogId: string) => void }) {
   const parts: React.ReactNode[] = [];
   const pattern = /\*\*(.+?)\*\*|\[([^\]]+)\]\(([^)]+)\)/g;
@@ -44,12 +45,13 @@ function InlineText({ text, onSelectBlog }: { text: string; onSelectBlog?: (blog
       parts.push(<strong key={match.index} className="font-semibold text-primary">{match[1]}</strong>);
     } else {
       const href = match[3];
-      const blogMatch = href.match(/^\/blogs\/([^/]+)$/);
+      const route = /^\/[^?#]*$/.test(href) ? classifyRoute(href) : null;
+      const blogId = route?.type === 'blogPost' ? route.blogId : null;
       parts.push(
         <a
           key={match.index}
           href={href}
-          onClick={blogMatch && onSelectBlog ? (e) => { e.preventDefault(); onSelectBlog(blogMatch[1]); } : undefined}
+          onClick={blogId && onSelectBlog ? inAppClick(() => onSelectBlog(blogId)) : undefined}
           className="text-secondary underline underline-offset-2 hover:text-primary transition-colors"
         >
           {match[2]}
@@ -186,13 +188,11 @@ export default function BlogDetailView({ blogId, onBack, onSelectBlog, onBookApp
             <h2 className="font-serif text-2xl font-bold leading-snug">{block.title}</h2>
             <p className="font-sans text-base text-white/80 mt-2 leading-relaxed">{text(block.text)}</p>
             <div className="mt-5 space-y-2 font-sans text-sm text-white/85 leading-relaxed">
-              <p className="flex gap-2"><MapPin className="w-4 h-4 shrink-0 mt-0.5" aria-hidden="true" /><span><strong className="text-white">Neudental Dental Clinic</strong>, Door No. 13, Plot No. 26, 1st Main Road, Vasuki Nagar, Kodungaiyur, Chennai 600118 (near SIDCO Bus Stop). Open all 7 days, 10:00 AM – 1:30 PM and 5:00 PM – 9:30 PM.</span></p>
-              <p className="flex gap-2"><Phone className="w-4 h-4 shrink-0 mt-0.5" aria-hidden="true" /><a href="tel:+919342367446" onClick={() => trackConversion('call_click', 'call', { link_location: 'blog_post' })} className="font-bold text-white">+91 93423 67446</a></p>
+              <p className="flex gap-2"><MapPin className="w-4 h-4 shrink-0 mt-0.5" aria-hidden="true" /><span><strong className="text-white">{CLINIC.name}</strong>, {CLINIC.streetAddress}, {CLINIC.locality} {CLINIC.postalCode} ({CLINIC.landmark}). {CLINIC.hoursText}.</span></p>
+              <p className="flex gap-2"><Phone className="w-4 h-4 shrink-0 mt-0.5" aria-hidden="true" /><a href={CLINIC.phoneHref} onClick={() => trackConversion('call_click', 'call', { link_location: 'blog_post' })} className="font-bold text-white">{CLINIC.phone}</a></p>
             </div>
             <div className="flex flex-wrap gap-3 mt-6">
-              {onBookAppointment && (
-                <button onClick={onBookAppointment} className="bg-white text-primary font-sans font-bold text-sm px-5 py-2.5 rounded-xl hover:bg-mint transition-colors cursor-pointer">Book an appointment</button>
-              )}
+              <a href="/#booking-section" onClick={onBookAppointment ? inAppClick(onBookAppointment) : undefined} className="bg-white text-primary font-sans font-bold text-sm px-5 py-2.5 rounded-xl hover:bg-mint transition-colors cursor-pointer">Book an appointment</a>
               <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" onClick={() => trackConversion('whatsapp_click', 'whatsapp', { link_location: 'blog_post' })} className="border border-white/40 text-white font-sans font-bold text-sm px-5 py-2.5 rounded-xl hover:bg-white/10 transition-colors">Chat on WhatsApp</a>
             </div>
           </div>
@@ -240,7 +240,7 @@ export default function BlogDetailView({ blogId, onBack, onSelectBlog, onBookApp
               <ul className="space-y-1">
                 {related.map((r) => (
                   <li key={r.id}>
-                    <a href={`/blogs/${r.id}`} onClick={onSelectBlog ? (e) => { e.preventDefault(); onSelectBlog(r.id); } : undefined} className="text-secondary hover:text-primary underline underline-offset-2 transition-colors">{r.title}</a>
+                    <a href={`/blogs/${r.id}`} onClick={onSelectBlog ? inAppClick(() => onSelectBlog(r.id)) : undefined} className="text-secondary hover:text-primary underline underline-offset-2 transition-colors">{r.title}</a>
                   </li>
                 ))}
               </ul>

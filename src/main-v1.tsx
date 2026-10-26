@@ -2,7 +2,26 @@
 import {StrictMode} from 'react';
 import {createRoot, hydrateRoot} from 'react-dom/client';
 import App from './App-v1.tsx';
+import { trackEvent } from './lib/analytics';
 import './index.css';
+
+// Every deploy renames the code-split files. A tab opened before a deploy
+// then asks for a file that no longer exists (the booking form, the admin
+// console). Every URL is a complete prerendered page, so reloading it once
+// fetches the new build. The guard stops a reload loop if a file is missing
+// for some other reason; the booking form's error boundary covers that case.
+window.addEventListener('vite:preloadError', (event) => {
+  const key = 'neudental:chunkReload';
+  try {
+    const last = JSON.parse(sessionStorage.getItem(key) ?? 'null') as { path: string; at: number } | null;
+    if (last && last.path === location.pathname && Date.now() - last.at < 60_000) return;
+    sessionStorage.setItem(key, JSON.stringify({ path: location.pathname, at: Date.now() }));
+  } catch {
+    return;
+  }
+  event.preventDefault();
+  location.reload();
+});
 
 const container = document.getElementById('root')!;
 const app = (
@@ -15,7 +34,19 @@ const app = (
 // (scripts/prerender.mjs), so React attaches to that markup instead of
 // redrawing it. The dev server and the /admin shell send an empty root.
 if (container.firstElementChild) {
-  hydrateRoot(container, app);
+  hydrateRoot(container, app, {
+    // A page whose first browser render differs from its prerendered HTML
+    // still works (React redraws it), but it means something renders from
+    // the visitor's clock or browser during render. Reported to GA4 as
+    // `hydration_error` so it gets noticed and moved behind useHydrated().
+    onRecoverableError(error) {
+      console.error(error);
+      trackEvent('hydration_error', {
+        page_path: location.pathname,
+        message: String((error as Error)?.message ?? error).slice(0, 100),
+      });
+    },
+  });
 } else {
   createRoot(container).render(app);
 }

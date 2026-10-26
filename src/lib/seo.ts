@@ -7,12 +7,12 @@
 // navigation (setPageMeta).
 import { BLOGS } from '../data';
 import type { Route } from './routes';
-import { SITE_URL, absoluteUrl, blogListJsonLd, blogPostJsonLd, homeJsonLd, postModifiedDate, postPublishedDate } from './schema';
+import { SITE_URL, absoluteUrl, blogListJsonLd, blogPostJsonLd, homeJsonLd, postModifiedDate, postPublishedDate, siteJsonLd } from './schema';
 
 const DEFAULT_TITLE = 'Neudental | Family Dental Clinic in Kodungaiyur, Chennai';
 const DEFAULT_DESCRIPTION = 'Neudental — a trusted family dental clinic in Kodungaiyur, Chennai, rated among the best dentists near you in North Chennai. Painless root canal treatment (RCT), Invisalign clear aligners, teeth whitening and dental implants, by Dr. Swetha BDS, FGDS.';
 const SHARE_DESCRIPTION = 'Modern Dental Care for Confident Smiles. Painless Rotary RCT, Invisalign clear aligners and dental implants by Dr. Swetha BDS, FGDS.';
-const DEFAULT_IMAGE = { url: `${SITE_URL}/og-image.jpg`, width: 1200, height: 630, alt: 'neudental — Modern Dental Care for Confident Smiles' };
+const DEFAULT_IMAGE = { url: `${SITE_URL}/og-image.jpg`, width: 1200, height: 630, type: 'image/jpeg', alt: 'neudental — Modern Dental Care for Confident Smiles' };
 const BLOG_LIST_TITLE = 'Dental Health Blog | Neudental, Kodungaiyur, Chennai';
 const BLOG_LIST_DESCRIPTION = 'Practical, patient-friendly dental health and clinic guidance from the Neudental team in Kodungaiyur, Chennai.';
 
@@ -24,23 +24,27 @@ export interface PageMeta {
   path: string;
   noIndex?: boolean;
   ogType: 'website' | 'article';
-  image: { url: string; width?: number; height?: number; alt: string };
+  image: { url: string; width?: number; height?: number; type?: string; alt: string };
   publishedTime?: string;
   modifiedTime?: string;
   jsonLd?: object;
 }
 
-export function getRouteMeta(route: Route, pathname = '/'): PageMeta {
+// Size and type of an image under public/, when known. The build reads them
+// from the files so share cards can state them; the browser doesn't need to.
+export type ImageInfo = (src: string) => { width: number; height: number; type: string } | undefined;
+
+export function getRouteMeta(route: Route, pathname = '/', imageInfo?: ImageInfo): PageMeta {
   switch (route.type) {
     case 'blogPost': {
       const post = BLOGS.find((b) => b.id === route.blogId);
-      if (!post) break;
+      if (!post) return getRouteMeta({ type: 'notFound' }, pathname);
       return {
         title: post.seoTitle ?? `${post.title} | Neudental Blog`,
         description: post.excerpt,
         path: `/blogs/${post.id}`,
         ogType: 'article',
-        image: { url: absoluteUrl(post.image), alt: post.imageAlt ?? post.title },
+        image: { url: absoluteUrl(post.image), alt: post.imageAlt ?? post.title, ...imageInfo?.(post.image) },
         publishedTime: postPublishedDate(post),
         modifiedTime: postModifiedDate(post),
         jsonLd: blogPostJsonLd(post),
@@ -67,18 +71,23 @@ export function getRouteMeta(route: Route, pathname = '/'): PageMeta {
         ogType: 'website',
         image: DEFAULT_IMAGE,
       };
-    default:
-      break;
+    case 'home':
+      return {
+        title: DEFAULT_TITLE,
+        description: DEFAULT_DESCRIPTION,
+        shareDescription: SHARE_DESCRIPTION,
+        path: '/',
+        ogType: 'website',
+        image: DEFAULT_IMAGE,
+        jsonLd: homeJsonLd(),
+      };
+    default: {
+      // A new Route type must get its own case: the type check fails here
+      // until it does (and `npm run build` runs the type check).
+      const unhandled: never = route;
+      throw new Error(`No page meta for route ${JSON.stringify(unhandled)}`);
+    }
   }
-  return {
-    title: DEFAULT_TITLE,
-    description: DEFAULT_DESCRIPTION,
-    shareDescription: SHARE_DESCRIPTION,
-    path: '/',
-    ogType: 'website',
-    image: DEFAULT_IMAGE,
-    jsonLd: homeJsonLd(),
-  };
 }
 
 // Every managed head tag, as [kind, key, value]. A null value means the tag
@@ -101,6 +110,7 @@ function headEntries(meta: PageMeta): HeadEntry[] {
     ['property', 'og:image', meta.image.url],
     ['property', 'og:image:width', meta.image.width ? String(meta.image.width) : null],
     ['property', 'og:image:height', meta.image.height ? String(meta.image.height) : null],
+    ['property', 'og:image:type', meta.image.type ?? null],
     ['property', 'og:image:alt', meta.image.alt],
     ['property', 'article:published_time', article && meta.publishedTime ? meta.publishedTime : null],
     ['property', 'article:modified_time', article && meta.modifiedTime ? meta.modifiedTime : null],
@@ -112,6 +122,7 @@ function headEntries(meta: PageMeta): HeadEntry[] {
 }
 
 const JSON_LD_ID = 'route-jsonld';
+const SITE_JSON_LD_ID = 'site-jsonld';
 
 function escapeHtml(value: string) {
   return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -130,6 +141,7 @@ export function renderHeadTags(meta: PageMeta): string {
     if (kind === 'canonical') lines.push(`<link rel="canonical" href="${escapeHtml(value)}" />`);
     else lines.push(`<meta ${kind}="${key}" content="${escapeHtml(value)}" />`);
   }
+  lines.push(`<script type="application/ld+json" id="${SITE_JSON_LD_ID}">${serializeJsonLd(siteJsonLd())}</script>`);
   if (meta.jsonLd) lines.push(`<script type="application/ld+json" id="${JSON_LD_ID}">${serializeJsonLd(meta.jsonLd)}</script>`);
   return lines.join('\n    ');
 }

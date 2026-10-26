@@ -143,9 +143,11 @@ Brand rules:
 - On dark backgrounds use the `-light` artwork variants, never the standard ones.
 
 All raster artwork is derived from the master logo file and regenerated at 2x for
-retina displays. `index.html` carries the favicon set, PWA manifest, Open Graph /
-Twitter cards and a `Dentist` schema.org block so the brand name, logo and clinic
-details stay identical across search, social previews and the site itself.
+retina displays. `index.html` carries the favicon set and PWA manifest; each
+page's Open Graph / Twitter cards and the clinic's `Dentist` schema.org data
+are generated at build time from `src/data.ts` (see `src/lib/seo.ts` and
+`src/lib/schema.ts`), so the brand name, logo and clinic details stay identical
+across search, social previews and the site itself.
 
 ---
 

@@ -40,9 +40,29 @@ export const DOCTOR: Doctor = {
 };
 
 // Public review figures shown on the site (hero badge, testimonials, booking
-// panel); keep index.html's aggregateRating in step when they change.
+// panel) and in the clinic's structured data (src/lib/schema.ts).
 export const REVIEW_RATING = '4.9';
 export const REVIEW_COUNT_LABEL = '200+';
+
+// The clinic's contact details and opening hours, as stated to search engines
+// and AI assistants (structured data, llms.txt) and in blog posts' booking
+// box. One copy, so they can't disagree with each other.
+export const CLINIC = {
+  name: 'Neudental Dental Clinic',
+  formerName: 'Bludental',
+  streetAddress: 'Door No. 13, Plot No. 26, 1st Main Road, Vasuki Nagar, Kodungaiyur',
+  locality: 'Chennai',
+  region: 'Tamil Nadu',
+  postalCode: '600118',
+  landmark: 'near SIDCO Bus Stop',
+  phone: '+91 93423 67446',
+  phoneHref: 'tel:+919342367446',
+  email: 'neudental26@gmail.com',
+  geo: { latitude: 13.1309218, longitude: 80.2535879 },
+  // Open all 7 days, in two sessions (24-hour clock).
+  sessions: [{ opens: '10:00', closes: '14:00' }, { opens: '17:00', closes: '21:30' }],
+  hoursText: 'Open all 7 days, 10:00 AM – 2:00 PM and 5:00 PM – 9:30 PM',
+};
 
 // The clinic's WhatsApp Business chat link (its greeting is set in the WhatsApp
 // Business app). Every WhatsApp button on the site opens this.

@@ -1,9 +1,10 @@
 // neudental v1 - schema.org structured data for each kind of page.
 // Built from src/data.ts, so the JSON-LD search engines and AI answer engines
 // read always matches the text on the page -- nothing here is kept in sync by
-// hand. index.html carries the sitewide nodes these point at by @id: the
-// clinic (#dentist), the website (#website) and Dr. Swetha (#dr-swetha).
-import { BLOGS, DOCTOR, FAQS } from '../data';
+// hand. siteJsonLd() is on every page and defines the nodes the per-page
+// graphs point at by @id: the clinic (#dentist), the website (#website) and
+// Dr. Swetha (#dr-swetha).
+import { BLOGS, CLINIC, CLINIC_GOOGLE_URL, DOCTOR, FAQS, REVIEW_COUNT_LABEL, REVIEW_RATING, TREATMENTS } from '../data';
 import type { BlogBlock, BlogPost } from '../types';
 
 export const SITE_URL = 'https://www.neudental.in';
@@ -11,6 +12,7 @@ const DENTIST_ID = `${SITE_URL}/#dentist`;
 const WEBSITE_ID = `${SITE_URL}/#website`;
 const DOCTOR_ID = `${SITE_URL}/#dr-swetha`;
 const BLOG_ID = `${SITE_URL}/blogs#blog`;
+const BLOG_NAME = 'Neudental Dental Health Blog';
 
 const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
 
@@ -41,7 +43,8 @@ export function postModifiedDate(post: BlogPost): string | undefined {
   return post.dateModified ?? postPublishedDate(post);
 }
 
-// Every piece of readable text in a post, in order, without markup.
+// Every piece of readable text in a post, in order, without markup, split
+// the way the page shows it (a table's label and value are separate cells).
 export function postTextBlocks(post: BlogPost): string[] {
   const out: string[] = [];
   const add = (text: string) => out.push(plainText(text));
@@ -57,10 +60,10 @@ export function postTextBlocks(post: BlogPost): string[] {
       case 'list':
         return block.items.forEach(add);
       case 'steps':
-        return block.items.forEach((step) => add(`${step.title}: ${step.text}`));
+        return block.items.forEach((step) => { add(step.title); add(step.text); });
       case 'table':
         add(block.caption);
-        return block.rows.forEach(([label, value]) => add(`${label}: ${value}`));
+        return block.rows.forEach(([label, value]) => { add(label); add(value); });
       case 'cta':
         add(block.title);
         return add(block.text);
@@ -70,6 +73,76 @@ export function postTextBlocks(post: BlogPost): string[] {
   });
   post.faqs?.forEach((faq) => { add(faq.question); add(faq.answer); });
   return out;
+}
+
+// The clinic, its lead dentist and the website: on every page.
+export function siteJsonLd() {
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Dentist',
+        '@id': DENTIST_ID,
+        name: 'neudental',
+        alternateName: [CLINIC.formerName, CLINIC.name, 'neudental Family Dental Clinic'],
+        slogan: 'Modern Dental Care for Confident Smiles',
+        description: 'Family dental clinic in Kodungaiyur, North Chennai offering painless root canal treatment, Invisalign clear aligners, teeth whitening, dental implants and pediatric dentistry.',
+        url: `${SITE_URL}/`,
+        logo: `${SITE_URL}/brand/neudental-logo.png`,
+        image: `${SITE_URL}/og-image.jpg`,
+        telephone: CLINIC.phone.replace(/^\+91 (\d{5}) (\d{5})$/, '+91-$1-$2'),
+        email: CLINIC.email,
+        priceRange: '$$',
+        address: {
+          '@type': 'PostalAddress',
+          streetAddress: CLINIC.streetAddress,
+          addressLocality: CLINIC.locality,
+          addressRegion: CLINIC.region,
+          postalCode: CLINIC.postalCode,
+          addressCountry: 'IN',
+        },
+        geo: { '@type': 'GeoCoordinates', ...CLINIC.geo },
+        hasMap: CLINIC_GOOGLE_URL,
+        areaServed: ['Kodungaiyur, Chennai', 'North Chennai', 'Chennai'].map((name) => ({ '@type': 'Place', name })),
+        sameAs: [
+          'https://www.facebook.com/profile.php?id=61589206920105',
+          'https://www.instagram.com/neudental_clinic/',
+          'https://www.youtube.com/channel/UCfyFaSu7_EJshABsfOuBbWw',
+        ],
+        employee: { '@id': DOCTOR_ID },
+        availableService: TREATMENTS.map((t) => ({ '@type': 'MedicalProcedure', name: t.name, description: t.description })),
+        openingHoursSpecification: CLINIC.sessions.map(({ opens, closes }) => ({
+          '@type': 'OpeningHoursSpecification',
+          dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+          opens,
+          closes,
+        })),
+        aggregateRating: {
+          '@type': 'AggregateRating',
+          ratingValue: REVIEW_RATING,
+          reviewCount: String(parseInt(REVIEW_COUNT_LABEL, 10)),
+        },
+      },
+      {
+        '@type': 'Person',
+        '@id': DOCTOR_ID,
+        name: DOCTOR.name,
+        honorificSuffix: DOCTOR.title,
+        jobTitle: DOCTOR.specialty,
+        alumniOf: [DOCTOR.education, DOCTOR.experience].map((name) => ({ '@type': 'CollegeOrUniversity', name })),
+        worksFor: { '@id': DENTIST_ID },
+      },
+      {
+        '@type': 'WebSite',
+        '@id': WEBSITE_ID,
+        url: `${SITE_URL}/`,
+        name: 'neudental',
+        alternateName: ['Neudental', CLINIC.formerName],
+        inLanguage: 'en-IN',
+        publisher: { '@id': DENTIST_ID },
+      },
+    ],
+  };
 }
 
 function reviewer(post: BlogPost) {
@@ -127,7 +200,7 @@ export function blogListJsonLd(title: string, description: string) {
       {
         '@type': 'Blog',
         '@id': BLOG_ID,
-        name: 'Neudental Dental Health Blog',
+        name: BLOG_NAME,
         url,
         publisher: { '@id': DENTIST_ID },
         blogPost: BLOGS.map((post) => {
@@ -174,7 +247,7 @@ export function blogPostJsonLd(post: BlogPost) {
       description: post.excerpt,
       url,
       mainEntityOfPage: { '@id': url },
-      isPartOf: { '@id': BLOG_ID },
+      isPartOf: { '@type': 'Blog', '@id': BLOG_ID, name: BLOG_NAME, url: `${SITE_URL}/blogs` },
       image,
       ...(published ? { datePublished: published } : {}),
       ...(modified ? { dateModified: modified } : {}),
