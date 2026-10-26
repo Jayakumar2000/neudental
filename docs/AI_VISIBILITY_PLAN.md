@@ -63,7 +63,7 @@ incremental regeneration. None of these applies today.
 
 ---
 
-## 3. What was implemented (Phase 1, done)
+## 3. What was implemented (Phase 1)
 
 ### Every page is now real HTML
 
@@ -219,37 +219,40 @@ content and reputation decide who gets cited.
 
 ---
 
-## 7. Phase 2: site structure for citations (recommended next, about 2–6 weeks)
+## 7. Phase 2: site structure for citations (implemented)
 
-These have the biggest effect on AI and search visibility. The new setup
-supports each one: a new page type takes the four steps in section 10, and
-it's then prerendered, added to the sitemap and protected by the build
-checks automatically.
+| What | Where | Why it matters |
+|---|---|---|
+| **A page for every treatment** (17), with a patient guide: who needs it, signs, the steps, visits, cost and what changes it, recovery, alternatives, FAQs | `/treatments/root-canal-treatment`, `/treatments/dental-implants`, … | Gives each "root canal cost in Kodungaiyur" or "dental implants near Perambur" question one specific page to cite. Each page carries `MedicalWebPage`, `MedicalProcedure`, an `Offer` with the INR price range, `BreadcrumbList` and `FAQPage` structured data. |
+| **Treatments & prices index** with a full price table | `/treatments` | The clinic's public price list, as a page and as an `OfferCatalog` in structured data: the most-quoted kind of local fact. |
+| **Dr. Swetha's profile** | `/dr-swetha` | Qualifications, memberships, expertise, the treatments she performs and the articles she reviewed, as a `ProfilePage` about her `Person` entity. Every treatment page and reviewed article links to it. |
+| **"From the blog" on the homepage** | Homepage, above the FAQ | The strongest page now links to the newest articles. |
+| **Links everywhere** | Navbar dropdown, footer, Services cards, About section, blog posts ↔ treatment guides | Every page is reachable through a crawlable link, and related pages point at each other. |
+| **Consistent facts** | `CLINIC` in `src/data.ts` | Hours, address and phone come from one place on every page and in the structured data. |
+| **Shorter titles** | Three blog posts | Under 60 characters, so search results don't cut them off. |
 
-1. **One page per treatment** (`/treatments/root-canal-treatment`,
-   `/treatments/dental-implants`, … for the 17 treatments in `TREATMENTS`).
-   Today the treatments exist only as cards on the homepage, so there is no
-   page that answers "root canal cost in Kodungaiyur" or "dental implants
-   near Perambur". Each page should cover what it is, who needs it, the steps,
-   duration, the ₹ price range, recovery and FAQs, with `MedicalProcedure`
-   and `FAQPage` schema, and link to the related blog posts. **This is the
-   single highest-impact addition for GEO.**
-2. **A Dr. Swetha profile page** (`/dr-swetha`): qualifications, Tamil Nadu
-   Dental Council registration number, experience, procedures performed,
-   photo. AI systems weigh named, credentialed medical authors heavily.
-3. **"Latest articles" on the homepage**, linking the 3 newest posts. The
-   homepage is the strongest page, and right now it links to no individual post.
-4. **Keep the clinic's facts identical everywhere.** On the site this is now
-   automatic. The blog posts' booking box said the morning session ends at
-   1:30 PM while everything else said 2:00 PM; all of it now comes from one
-   `CLINIC` entry in `src/data.ts` (2:00 PM). Make sure Google Business
-   Profile, Practo and Justdial say exactly the same.
-5. **Clear the current build warnings.** Add the exact `datePublished` for
-   the three older posts, shorten three titles to ≤ 60 characters, and trim
-   one excerpt. The build lists them on every run.
-6. Optionally, one **"Dental clinic near Perambur / Kolathur / Madhavaram"**
-   section on a location page with real directions and travel times. Avoid
-   thin per-area doorway pages, which search engines penalise.
+Prices and durations are never typed into the guides: they come from
+`TREATMENTS`, so changing a price in one place updates the page, the price
+list, the homepage, the structured data and `llms.txt`. The build rejects a
+guide with a typed price.
+
+### What only the clinic can do
+
+1. **Have Dr. Swetha review the 17 treatment guides.** They were written
+   carefully and conservatively, and each one was checked for medical accuracy
+   and invented claims, but a clinician must read them. When she has, add
+   `reviewedBy` to the guide (see `BLOG_GUIDE.md`, "After Dr. Swetha has
+   reviewed a guide"). Each reviewed page then shows "Reviewed by Dr. Swetha",
+   the strongest trust signal for health content.
+2. **Add Dr. Swetha's Tamil Nadu State Dental Council registration number** to
+   `DOCTOR` in `src/data.ts` (`registration: '...'`). It appears on her profile.
+3. **Add the exact publish dates** of the three older blog posts
+   (`datePublished`). The build warns until they're set.
+4. **Keep Google Business Profile, Practo and Justdial** showing exactly the
+   same name, address, phone and hours as the site.
+5. Optionally, one **"Getting here from Perambur / Kolathur / Madhavaram"**
+   section with real directions and travel times. Avoid thin per-area doorway
+   pages, which search engines penalise.
 
 ## 8. Phase 3: ongoing signals that earn citations
 
@@ -290,12 +293,20 @@ checks automatically.
 | Browser entry (hydrates prerendered HTML) | `src/main-v1.tsx` |
 | Hosting (clean URLs, real 404s) | `vercel.json`, `firebase.json` |
 
-Adding a new kind of page (for example treatment pages):
+| Treatment pages, price list, doctor profile | `src/components/TreatmentPage.tsx`, `TreatmentsIndex.tsx`, `DoctorPage.tsx` |
+| Treatment guides (one file each, found automatically) | `src/content/treatments/` |
+| Shared content renderer (blog posts and guides) | `src/components/ContentBlocks.tsx` |
+| In-app links (`<Link to="...">`) | `src/lib/navigation.tsx` |
 
-1. Add a `Route` variant and its URL pattern in `classifyRoute()` (`src/lib/routes.ts`).
-2. Add its URLs to `prerenderPaths()`, or simply link to them from an existing page.
+Adding a new kind of page:
+
+1. Add a `Route` variant and its URL pattern in `classifyRoute()` and `routePath()` (`src/lib/routes.ts`).
+2. Add its URLs to `prerenderPaths()`, or simply link to them from an existing page with `<Link>`.
 3. Add its title, description and schema in `getRouteMeta()` (`src/lib/seo.ts`).
-4. Render it in `App-v1.tsx` like the blog views.
+4. Render it in the `switch` in `App-v1.tsx`.
+
+Steps 1, 3 and 4 are enforced: the type check (part of `npm run build`)
+fails until every page type has a URL, a head and a view.
 
 The build then prerenders it, lists it in the sitemap and checks it on every
 deploy. Content that depends on the visitor (today's date, their bookings)
