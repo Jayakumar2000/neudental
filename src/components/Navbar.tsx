@@ -3,6 +3,7 @@ import { Phone, Menu, X, Shield, Clock, MapPin, ChevronDown } from 'lucide-react
 import { TREATMENTS } from '../data';
 import BrandLogo, { BRAND } from './BrandLogo';
 import { trackConversion } from '../lib/analytics';
+import { inAppClick } from '../lib/routes';
 
 interface NavbarProps {
 onScrollToBooking: () => void;
@@ -41,11 +42,10 @@ setTreatmentsOpen(false);
 onSelectTreatment(treatmentId);
 };
 
-const handleLogoClick = (e: React.MouseEvent) => {
-e.preventDefault();
+const handleLogoClick = inAppClick(() => {
 if (onLogoClick) onLogoClick();
 window.scrollTo({ top: 0, behavior: "smooth" });
-};
+});
 
 const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
 e.preventDefault();
@@ -66,7 +66,7 @@ const navItems = [
 { name: 'About Us', href: '#our-doctor' },
 { name: 'Treatments', href: '#services' },
 { name: 'Location & Timing', href: '#location' },
-{ name: 'Blogs', href: '' },
+{ name: 'Blogs', href: '/blogs' },
 ];
 
 return (
@@ -83,7 +83,7 @@ neudental is now an officially Registered Trademark&reg;
 
 <header className="sticky top-0 w-full z-40 bg-white/95 backdrop-blur-md border-b border-cool-gray/10 transition-all premium-shadow">
 <div className="flex items-center justify-between px-6 md:px-10 lg:px-10 xl:px-16 py-3 max-w-[1280px] mx-auto w-full">
-<a href="#" onClick={handleLogoClick} className="flex items-center select-none group shrink-0" aria-label={`${BRAND.name} — ${BRAND.tagline}`}>
+<a href="/" onClick={handleLogoClick} className="flex items-center select-none group shrink-0" aria-label={`${BRAND.name} — ${BRAND.tagline}`}>
 <BrandLogo
 markClassName="h-10 w-auto sm:h-11 md:h-12"
 wordmarkClassName="h-[18px] w-auto sm:h-[22px] md:h-[26px]"
@@ -114,7 +114,7 @@ return (
 );
 }
 if (item.name === 'Blogs') {
-return (<button key={item.name} type="button" onClick={onOpenBlogs} className="shrink-0 whitespace-nowrap text-on-surface-variant hover:text-secondary text-sm font-sans font-medium hover:scale-105 transition-all duration-200 cursor-pointer">{item.name}</button>);
+return (<a key={item.name} href={item.href} onClick={inAppClick(onOpenBlogs)} className="shrink-0 whitespace-nowrap text-on-surface-variant hover:text-secondary text-sm font-sans font-medium hover:scale-105 transition-all duration-200 cursor-pointer">{item.name}</a>);
 }
 return (<a key={item.name} href={item.href} onClick={(e) => handleLinkClick(e, item.href)} className="shrink-0 whitespace-nowrap text-on-surface-variant hover:text-secondary text-sm font-sans font-medium hover:scale-105 transition-all duration-200">{item.name}</a>);
 })}
@@ -149,7 +149,7 @@ return (
 );
 }
 if (item.name === 'Blogs') {
-return (<button key={item.name} type="button" onClick={() => { setMobileMenuOpen(false); onOpenBlogs(); }} className="text-primary hover:text-secondary text-base font-sans font-semibold py-2 border-b border-cool-gray/5 text-left cursor-pointer">{item.name}</button>);
+return (<a key={item.name} href={item.href} onClick={inAppClick(() => { setMobileMenuOpen(false); onOpenBlogs(); })} className="text-primary hover:text-secondary text-base font-sans font-semibold py-2 border-b border-cool-gray/5 text-left cursor-pointer">{item.name}</a>);
 }
 return (<a key={item.name} href={item.href} className="text-primary hover:text-secondary text-base font-sans font-semibold py-2 border-b border-cool-gray/5" onClick={(e) => { e.preventDefault(); closeMobileMenuThen(() => onNavigateSection(item.href.slice(1))); }}>{item.name}</a>);
 })}

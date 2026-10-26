@@ -9,6 +9,8 @@ const SOCIAL_LINKS = [
 import BrandLogo, { BRAND } from './BrandLogo';
 import { TREATMENTS } from '../data';
 import { trackConversion } from '../lib/analytics';
+import { inAppClick } from '../lib/routes';
+import { useHydrated } from '../lib/useHydrated';
 
 interface FooterProps {
 onNavigateSection: (sectionId: string) => void;
@@ -17,6 +19,9 @@ onSelectTreatment: (treatmentId: string) => void;
 }
 
 export default function Footer({ onNavigateSection, onOpenBlogs, onSelectTreatment }: FooterProps) {
+// The prerendered HTML carries the build's year; the visitor's own clock
+// takes over right after hydration, so the year never goes stale.
+const year = useHydrated() ? new Date().getFullYear() : __BUILD_YEAR__;
 const handleSectionClick = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
 e.preventDefault();
 onNavigateSection(sectionId);
@@ -64,7 +69,7 @@ TN State Dental Council Registered
 <ul className="space-y-3 text-xs text-white/70 font-medium">
 <li><a href="#our-doctor" onClick={(e) => handleSectionClick(e, 'our-doctor')} className="hover:text-[#E0F2F1] transition-colors">Our Doctor</a></li>
 <li><a href="#services" onClick={(e) => handleSectionClick(e, 'services')} className="hover:text-[#E0F2F1] transition-colors">Treatments Offered</a></li>
-<li><button type="button" onClick={onOpenBlogs} className="hover:text-[#E0F2F1] transition-colors cursor-pointer text-left">Blogs</button></li>
+<li><a href="/blogs" onClick={inAppClick(onOpenBlogs)} className="hover:text-[#E0F2F1] transition-colors cursor-pointer text-left">Blogs</a></li>
 <li><a href="#location" onClick={(e) => handleSectionClick(e, 'location')} className="hover:text-[#E0F2F1] transition-colors">Location &amp; Timing</a></li>
 </ul>
 </div>
@@ -109,7 +114,7 @@ Door No. 13, Plot No. 26, 1st Main Road, Vasuki Nagar, Kodungaiyur, Chennai, Tam
 {/* lg:pr-44 clears the fixed WhatsApp button, which otherwise overlaps this row's right edge on common laptop widths */}
 <div className="max-w-[1280px] mx-auto w-full pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-white/50 lg:pr-44">
 <p className="font-sans font-medium">
-{new Date().getFullYear()} {BRAND.legalName}. All rights reserved.
+{year} {BRAND.legalName}. All rights reserved.
 </p>
 <div className="flex gap-6 font-semibold select-none">
 <a href="#booking-section" onClick={(e) => handleSectionClick(e, 'booking-section')} className="hover:text-[#E0F2F1] transition-colors">Book Appointment</a>

@@ -2,6 +2,7 @@
 import React from 'react';
 import { BLOGS } from '../data';
 import { Calendar, Clock, ArrowRight } from 'lucide-react';
+import { inAppClick } from '../lib/routes';
 
 interface BlogsListViewProps {
   onSelectBlog: (blogId: string) => void;
@@ -19,13 +20,14 @@ export default function BlogsListView({ onSelectBlog }: BlogsListViewProps) {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {BLOGS.map((post) => (
-            <button
+            <a
               key={post.id}
-              onClick={() => onSelectBlog(post.id)}
+              href={`/blogs/${post.id}`}
+              onClick={inAppClick(() => onSelectBlog(post.id))}
               className="text-left bg-surface-container-low border border-cool-gray/5 rounded-2xl overflow-hidden hover:border-secondary/20 hover:-translate-y-0.5 transition-all cursor-pointer flex flex-col"
             >
               <div className="w-full aspect-[16/9] overflow-hidden">
-                <img src={post.image} alt={post.title} loading="lazy" className="w-full h-full object-cover" />
+                <img src={post.image} alt={post.imageAlt ?? post.title} loading="lazy" className="w-full h-full object-cover" />
               </div>
               <div className="p-6 flex flex-col flex-1">
               <span className="text-[10px] font-bold uppercase tracking-wider text-secondary bg-secondary/5 px-2.5 py-1 rounded-full self-start mb-4">{post.category}</span>
@@ -37,7 +39,7 @@ export default function BlogsListView({ onSelectBlog }: BlogsListViewProps) {
               </div>
               <div className="flex items-center gap-1.5 text-xs font-bold text-secondary mt-4"><span>Read Article</span><ArrowRight className="w-3.5 h-3.5" /></div>
               </div>
-            </button>
+            </a>
           ))}
         </div>
       </div>

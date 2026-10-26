@@ -114,6 +114,7 @@ export interface BlogPost {
   seoTitle?: string;         // <title> tag; defaults to "{title} | Neudental Blog"
   imageAlt?: string;         // hero image alt text; defaults to the title
   datePublished?: string;    // ISO date (YYYY-MM-DD) for structured data
+  dateModified?: string;     // ISO date (YYYY-MM-DD) of the last real content update
   reviewedBy?: string;       // shown in the byline, e.g. "Dr. Swetha, BDS, FGDS"
   faqs?: BlogFAQ[];          // rendered as an FAQ section + FAQPage schema
   related?: string[];        // ids of other posts to link at the end

@@ -6,7 +6,6 @@ import Hero from './components/Hero';
 import About from './components/About';
 import Services from './components/Services';
 import SymptomChecker from './components/SymptomChecker';
-import BookingForm from './components/BookingForm';
 import BookingVisitPanel from './components/BookingVisitPanel';
 import { SmileCurve } from './components/BrandShapes';
 import Testimonials from './components/Testimonials';
@@ -18,7 +17,9 @@ import { FAQS, BLOGS, WHATSAPP_URL } from './data';
 import { ChevronDown, ChevronUp, ArrowLeft, Phone, RefreshCw } from 'lucide-react';
 import type { FAQItem } from './types';
 import { trackConversion, trackPageView, stopClarityRecording } from './lib/analytics';
-import { setPageMeta, resetPageMeta } from './lib/seo';
+import { getRouteMeta, setPageMeta } from './lib/seo';
+import { classifyRoute, normalizePath, type Route } from './lib/routes';
+import { useHydrated } from './lib/useHydrated';
 
 // Code-split: the staff-only admin CRM and the blog views are never opened by
 // most patients on a mobile data plan, so they shouldn't be in the same
@@ -26,6 +27,11 @@ import { setPageMeta, resetPageMeta } from './lib/seo';
 const AdminView = lazy(() => import('./components/AdminView'));
 const BlogsListView = lazy(() => import('./components/BlogsListView'));
 const BlogDetailView = lazy(() => import('./components/BlogDetailView'));
+// The booking form works off the visitor's own clock ("today", past slots)
+// and Firebase, so it can't be part of the build-time HTML: it loads in the
+// browser straight after the prerendered page hydrates. Keeping it (and the
+// Firebase SDK) out of the first download also speeds up that hydration.
+const BookingForm = lazy(() => import('./components/BookingForm'));
 
 function RouteLoading() {
   return (
@@ -37,37 +43,61 @@ function RouteLoading() {
 
 // Blog subpages get a real URL (/blogs, /blogs/{blog-id}) via manual
 // history.pushState + a popstate listener below, since the app has no
-// router. vercel.json rewrites /blogs and everything under /blogs/* to
-// index.html -- it can't tell a real slug from an invented one, since that
-// list only exists in this app's own data. This classifier is what actually
-// draws that line: it's the client-side mirror of the edge allow-list for
-// paths outside /blogs entirely, and the sole authority for whether a given
-// blog slug is real, so a bot probing /blogs/some-fake-slug lands on the same
-// Not Found view (and never fires a page_view -- see the effect below) as
-// one probing a made-up top-level path.
-type Route =
-  | { type: 'home' }
-  | { type: 'admin' }
-  | { type: 'blogsList' }
-  | { type: 'blogPost'; blogId: string }
-  | { type: 'notFound' };
+// router. Which URLs are real pages is decided by classifyRoute() in
+// src/lib/routes.ts -- the same list the build prerenders into static HTML.
+// On the live site a made-up URL has no file and gets a real 404; Not Found
+// here covers in-app navigation and the dev server.
 
-function classifyRoute(pathname: string): Route {
-  const clean = pathname.replace(/\/+$/, '') || '/';
-  if (clean === '/') return { type: 'home' };
-  if (clean === '/admin') return { type: 'admin' };
-  const detailMatch = clean.match(/^\/blogs\/([^/]+)$/);
-  if (detailMatch) {
-    const blogId = detailMatch[1];
-    return BLOGS.some((post) => post.id === blogId) ? { type: 'blogPost', blogId } : { type: 'notFound' };
+// If the booking form's code can't be fetched (a dropped mobile connection),
+// only the form is replaced -- by the clinic's phone and WhatsApp -- instead
+// of the error taking the whole page down with it.
+class BookingFormBoundary extends React.Component<{ children: React.ReactNode }, { failed: boolean }> {
+  // The project has no @types/react, so the inherited props need declaring.
+  declare readonly props: { children: React.ReactNode };
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
   }
-  if (clean === '/blogs') return { type: 'blogsList' };
-  return { type: 'notFound' };
+  componentDidCatch(error: unknown) {
+    console.error('Booking form failed to load:', error);
+  }
+  render() {
+    if (!this.state.failed) return this.props.children;
+    return (
+      <div className="min-h-[560px] flex flex-col items-center justify-center text-center gap-4 p-8">
+        <p className="font-serif text-xl text-primary font-bold">The booking form didn't load</p>
+        <p className="font-sans text-sm text-on-surface-variant max-w-sm">Check your connection and reload the page, or book straight away by phone or WhatsApp.</p>
+        <div className="flex flex-wrap justify-center gap-3">
+          <a href="tel:+919342367446" onClick={() => trackConversion('call_click', 'call', { link_location: 'booking_form_fallback' })} className="inline-flex items-center gap-2 bg-primary hover:bg-secondary text-white text-xs uppercase tracking-widest font-bold px-6 py-3.5 rounded-xl transition-colors"><Phone className="w-4 h-4" /> Call the clinic</a>
+          <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" onClick={() => trackConversion('whatsapp_click', 'whatsapp', { link_location: 'booking_form_fallback' })} className="inline-flex items-center gap-2 border border-cool-gray/20 text-primary text-xs uppercase tracking-widest font-bold px-6 py-3.5 rounded-xl hover:bg-surface-alt transition-colors">Chat on WhatsApp</a>
+        </div>
+      </div>
+    );
+  }
 }
 
-const initialRoute: Route = typeof window !== 'undefined' ? classifyRoute(window.location.pathname) : { type: 'home' };
+function BookingFormSlot({ preSelectedTreatmentId, preSelectNonce }: { preSelectedTreatmentId: string; preSelectNonce: number }) {
+  const hydrated = useHydrated();
+  const placeholder = (
+    <div className="min-h-[560px] flex items-center justify-center" aria-busy="true">
+      <RefreshCw className="w-6 h-6 text-secondary animate-spin" aria-hidden="true" />
+      <span className="sr-only">Loading the booking form</span>
+    </div>
+  );
+  if (!hydrated) return placeholder;
+  return (
+    <BookingFormBoundary>
+      <Suspense fallback={placeholder}>
+        <BookingForm preSelectedTreatmentId={preSelectedTreatmentId} preSelectNonce={preSelectNonce} bare />
+      </Suspense>
+    </BookingFormBoundary>
+  );
+}
 
-export default function App() {
+// initialPath is passed by the build-time prerenderer (src/entry-server.tsx);
+// in the browser the current URL is used.
+export default function App({ initialPath }: { initialPath?: string } = {}) {
+  const [initialRoute] = useState<Route>(() => classifyRoute(initialPath ?? (typeof window !== 'undefined' ? window.location.pathname : '/')));
   const [preSelectedTreatmentId, setPreSelectedTreatmentId] = useState<string>('checkup');
   // Counts treatment picks, so picking the same treatment again still
   // reaches the booking form after the patient changed its dropdown.
@@ -78,7 +108,7 @@ export default function App() {
   const [notFoundOpen, setNotFoundOpen] = useState(initialRoute.type === 'notFound');
   const [faqOpenId, setFaqOpenId] = useState<string | null>(null);
 
-  if (typeof window !== 'undefined' && window.location.pathname.replace(/\/+$/, '') === '/admin') {
+  if (initialRoute.type === 'admin') {
     return (
       <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-surface-alt"><RefreshCw className="w-6 h-6 text-secondary animate-spin" /></div>}>
         <AdminView />
@@ -88,7 +118,7 @@ export default function App() {
 
   const goToPath = (path: string) => {
     if (typeof window === 'undefined') return;
-    const currentPath = window.location.pathname.replace(/\/+$/, '') || '/';
+    const currentPath = normalizePath(window.location.pathname);
     if (currentPath !== path) {
       window.history.pushState(null, '', path);
     }
@@ -107,21 +137,23 @@ export default function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  // Every route shares one static index.html, so <title>/description/canonical
-  // never change on their own -- without this, a blog post would carry the
-  // homepage's canonical URL and tell Google it's a duplicate of "/" instead
-  // of its own indexable page. Also fires the one and only page_view for this
-  // route (see analytics.ts) -- skipped entirely when notFoundOpen, which is
-  // the actual fix for a bot probing a fake /blogs/:id slug still counting
-  // as a pageview.
+  // Each prerendered page already ships its own <title>, description,
+  // canonical and JSON-LD; this keeps the head in step as the visitor moves
+  // between pages in-app (same getRouteMeta() the build uses). Also fires the
+  // one and only page_view for this route (see analytics.ts) -- skipped
+  // entirely for Not Found, so a bot probing a fake /blogs/:id slug never
+  // counts as a pageview.
   useEffect(() => {
-    if (notFoundOpen) {
-      setPageMeta({
-        title: 'Page Not Found | Neudental',
-        description: 'The page you were looking for could not be found. Return to the Neudental homepage to explore our dental treatments and book an appointment.',
-        path: window.location.pathname,
-        noIndex: true,
-      });
+    const route: Route = notFoundOpen
+      ? { type: 'notFound' }
+      : activeBlogId
+        ? { type: 'blogPost', blogId: activeBlogId }
+        : blogsOpen
+          ? { type: 'blogsList' }
+          : { type: 'home' };
+    const meta = getRouteMeta(route, normalizePath(window.location.pathname));
+    setPageMeta(meta);
+    if (route.type === 'notFound') {
       // Clarity already started recording by the time index.html's own
       // exclusion check could run (that only knows about /admin and
       // ?gtm_latency=, not a fake blog slug -- only the app can tell). Cut
@@ -130,28 +162,7 @@ export default function App() {
       stopClarityRecording();
       return;
     }
-    if (activeBlogId) {
-      const post = BLOGS.find((b) => b.id === activeBlogId);
-      if (post) {
-        const path = `/blogs/${post.id}`;
-        const title = post.seoTitle ?? `${post.title} | Neudental Blog`;
-        setPageMeta({ title, description: post.excerpt, path });
-        trackPageView(path, title);
-        return;
-      }
-    }
-    if (blogsOpen) {
-      const title = 'Dental Health Blog | Neudental, Kodungaiyur, Chennai';
-      setPageMeta({
-        title,
-        description: 'Practical, patient-friendly dental health and clinic guidance from the Neudental team in Kodungaiyur, Chennai.',
-        path: '/blogs',
-      });
-      trackPageView('/blogs', title);
-      return;
-    }
-    resetPageMeta();
-    trackPageView(window.location.pathname.replace(/\/+$/, '') || '/', document.title);
+    trackPageView(meta.path, meta.title);
   }, [notFoundOpen, blogsOpen, activeBlogId]);
 
   // Scrolls to a section that lives on the home page. If we're currently on a
@@ -339,7 +350,7 @@ export default function App() {
           <div className="mt-10 md:mt-12 flex flex-col lg:flex-row bg-white rounded-[32px] border border-[#E2E8F0] overflow-hidden shadow-[0_30px_70px_-30px_rgba(11,19,65,0.35)]">
             <BookingVisitPanel className="lg:w-[38%] shrink-0" />
             <div className="flex-1 min-w-0">
-              <BookingForm preSelectedTreatmentId={preSelectedTreatmentId} preSelectNonce={treatmentPick} bare />
+              <BookingFormSlot preSelectedTreatmentId={preSelectedTreatmentId} preSelectNonce={treatmentPick} />
             </div>
           </div>
         </div>

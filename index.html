@@ -76,12 +76,21 @@
     </script>
 
     <!-- Brand: neudental — Modern Dental Care for Confident Smiles -->
-    <title>Neudental | Family Dental Clinic in Kodungaiyur, Chennai</title>
-    <meta name="description" content="Neudental — a trusted family dental clinic in Kodungaiyur, Chennai, rated among the best dentists near you in North Chennai. Painless root canal treatment (RCT), Invisalign clear aligners, teeth whitening and dental implants, by Dr. Swetha BDS, FGDS." />
     <meta name="keywords" content="best dentist near me, dentist near me, dental clinic near me, family dentist near me, best dentist in Chennai, dental clinic Kodungaiyur, dentist in Kodungaiyur, root canal treatment near me, RCT Chennai, teeth whitening near me, dental implants near me, Invisalign Kodungaiyur, braces near me, pediatric dentist near me, emergency dentist near me, Dr Swetha dentist, Bludental, Bludental Kodungaiyur" />
     <meta name="author" content="neudental" />
+
+    <!-- Per-page head. Everything between these two markers is rewritten for
+    each page at build time (scripts/prerender.mjs, from getRouteMeta() in
+    src/lib/seo.ts) and kept in step on in-app navigation by setPageMeta().
+    What is here is only the homepage default the dev server shows. Don't
+    edit a page's title/description/schema here -- change src/data.ts or
+    src/lib/seo.ts instead. -->
+    <!-- route-head:start -->
+    <title>Neudental | Family Dental Clinic in Kodungaiyur, Chennai</title>
+    <meta name="description" content="Neudental — a trusted family dental clinic in Kodungaiyur, Chennai, rated among the best dentists near you in North Chennai. Painless root canal treatment (RCT), Invisalign clear aligners, teeth whitening and dental implants, by Dr. Swetha BDS, FGDS." />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://www.neudental.in/" />
+    <!-- route-head:end -->
 
     <!-- Favicons & app icons -->
     <link rel="icon" href="/favicon.ico" sizes="any" />
@@ -93,164 +102,188 @@
     <meta name="apple-mobile-web-app-title" content="neudental" />
     <meta name="application-name" content="neudental" />
 
-    <!-- Open Graph -->
-    <meta property="og:type" content="website" />
+    <!-- Open Graph / Twitter: sitewide parts only. Each page's title,
+    description, URL and image are in the per-page block above. -->
     <meta property="og:site_name" content="neudental" />
-    <meta property="og:title" content="Neudental | Family Dental Clinic in Kodungaiyur, Chennai" />
-    <meta property="og:description" content="Modern Dental Care for Confident Smiles. Painless Rotary RCT, Invisalign clear aligners and dental implants by Dr. Swetha BDS, FGDS." />
-    <meta property="og:url" content="https://www.neudental.in/" />
-    <meta property="og:image" content="https://www.neudental.in/og-image.jpg" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="neudental — Modern Dental Care for Confident Smiles" />
     <meta property="og:locale" content="en_IN" />
-
-    <!-- Twitter / X -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Neudental | Family Dental Clinic in Kodungaiyur, Chennai" />
-    <meta name="twitter:description" content="Modern Dental Care for Confident Smiles. Painless Rotary RCT, Invisalign clear aligners and dental implants by Dr. Swetha BDS, FGDS." />
-    <meta name="twitter:image" content="https://www.neudental.in/og-image.jpg" />
-    <meta name="twitter:image:alt" content="neudental — Modern Dental Care for Confident Smiles" />
+
+    <!-- Blog feed, for feed readers and answer engines that discover new
+    posts through RSS. Generated at build time from src/data.ts. -->
+    <link rel="alternate" type="application/rss+xml" title="Neudental Dental Health Blog" href="/blogs/rss.xml" />
 
     <!-- Structured data: keeps the brand name + logo consistent in search results,
     and gives both classic search and AI answer engines (Google AI Overviews,
     ChatGPT/Perplexity browsing, etc.) an unambiguous read on who/where/what
     this business is -- geo + areaServed + sameAs disambiguate the entity,
-    availableService names the treatments people actually search "near me" for. -->
+    availableService names the treatments people actually search "near me" for.
+    These sitewide nodes (#dentist, #dr-swetha, #website) are referenced by
+    @id from each page's own JSON-LD (src/lib/schema.ts). Keep aggregateRating
+    in step with REVIEW_RATING in src/data.ts. -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "Dentist",
-      "@id": "https://www.neudental.in/#dentist",
-      "name": "neudental",
-      "alternateName": ["Bludental", "neudental Family Dental Clinic"],
-      "slogan": "Modern Dental Care for Confident Smiles",
-      "description": "Family dental clinic in Kodungaiyur, North Chennai offering painless root canal treatment, Invisalign clear aligners, teeth whitening, dental implants and pediatric dentistry.",
-      "url": "https://www.neudental.in/",
-      "logo": "https://www.neudental.in/brand/neudental-logo.png",
-      "image": "https://www.neudental.in/og-image.jpg",
-      "telephone": "+91-93423-67446",
-      "priceRange": "$$",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "Door No. 13, Plot No. 26, 1st Main Road, Vasuki Nagar, Kodungaiyur",
-        "addressLocality": "Chennai",
-        "addressRegion": "Tamil Nadu",
-        "postalCode": "600118",
-        "addressCountry": "IN"
-      },
-      "geo": {
-        "@type": "GeoCoordinates",
-        "latitude": 13.1309218,
-        "longitude": 80.2535879
-      },
-      "areaServed": [
-        { "@type": "Place", "name": "Kodungaiyur, Chennai" },
-        { "@type": "Place", "name": "North Chennai" },
-        { "@type": "Place", "name": "Chennai" }
-      ],
-      "sameAs": [
-        "https://www.facebook.com/profile.php?id=61589206920105",
-        "https://www.instagram.com/neudental_clinic/",
-        "https://www.youtube.com/channel/UCfyFaSu7_EJshABsfOuBbWw"
-      ],
-      "employee": {
-        "@type": "Person",
-        "name": "Dr. Swetha",
-        "jobTitle": "Dental Surgeon & Clinical Director",
-        "hasCredential": "BDS, FGDS"
-      },
-      "availableService": [
-        { "@type": "MedicalProcedure", "name": "Root Canal Treatment (RCT)" },
-        { "@type": "MedicalProcedure", "name": "Invisalign / Clear Aligners" },
-        { "@type": "MedicalProcedure", "name": "Teeth Whitening" },
-        { "@type": "MedicalProcedure", "name": "Dental Implants" },
-        { "@type": "MedicalProcedure", "name": "Dental Cleaning" },
-        { "@type": "MedicalProcedure", "name": "Pediatric Dentistry" },
-        { "@type": "MedicalProcedure", "name": "Wisdom Tooth Extraction" },
-        { "@type": "MedicalProcedure", "name": "Crowns & Bridges" }
-      ],
-      "openingHoursSpecification": [
+      "@graph": [
         {
-          "@type": "OpeningHoursSpecification",
-          "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
-          "opens": "10:00", "closes": "14:00"
-        },
-        {
-          "@type": "OpeningHoursSpecification",
-          "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
-          "opens": "17:00", "closes": "21:30"
-        }
-      ],
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "4.9",
-        "reviewCount": "200"
-      }
-    }
-    </script>
-
-    <!-- FAQPage structured data -- mirrors src/data.ts FAQS (kept in sync by
-    hand; update both if a question changes). This is the single highest-value
-    block for AEO/GEO: it's exactly the format Google's featured snippets, AI
-    Overviews and answer engines like Perplexity/ChatGPT browsing pull from for
-    conversational "near me" queries. -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "Is root canal treatment painful?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "No! Modern root canal treatment using rotary endodontics is virtually painless. Dr. Swetha uses advanced local anesthesia and gentle techniques to ensure you are comfortable throughout the procedure. Most patients are surprised at how easy it is."
+          "@type": "Dentist",
+          "@id": "https://www.neudental.in/#dentist",
+          "name": "neudental",
+          "alternateName": [
+            "Bludental",
+            "neudental Family Dental Clinic"
+          ],
+          "slogan": "Modern Dental Care for Confident Smiles",
+          "description": "Family dental clinic in Kodungaiyur, North Chennai offering painless root canal treatment, Invisalign clear aligners, teeth whitening, dental implants and pediatric dentistry.",
+          "url": "https://www.neudental.in/",
+          "logo": "https://www.neudental.in/brand/neudental-logo.png",
+          "image": "https://www.neudental.in/og-image.jpg",
+          "telephone": "+91-93423-67446",
+          "priceRange": "$$",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Door No. 13, Plot No. 26, 1st Main Road, Vasuki Nagar, Kodungaiyur",
+            "addressLocality": "Chennai",
+            "addressRegion": "Tamil Nadu",
+            "postalCode": "600118",
+            "addressCountry": "IN"
+          },
+          "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": 13.1309218,
+            "longitude": 80.2535879
+          },
+          "areaServed": [
+            {
+              "@type": "Place",
+              "name": "Kodungaiyur, Chennai"
+            },
+            {
+              "@type": "Place",
+              "name": "North Chennai"
+            },
+            {
+              "@type": "Place",
+              "name": "Chennai"
+            }
+          ],
+          "sameAs": [
+            "https://www.facebook.com/profile.php?id=61589206920105",
+            "https://www.instagram.com/neudental_clinic/",
+            "https://www.youtube.com/channel/UCfyFaSu7_EJshABsfOuBbWw"
+          ],
+          "availableService": [
+            {
+              "@type": "MedicalProcedure",
+              "name": "Root Canal Treatment (RCT)"
+            },
+            {
+              "@type": "MedicalProcedure",
+              "name": "Invisalign / Clear Aligners"
+            },
+            {
+              "@type": "MedicalProcedure",
+              "name": "Teeth Whitening"
+            },
+            {
+              "@type": "MedicalProcedure",
+              "name": "Dental Implants"
+            },
+            {
+              "@type": "MedicalProcedure",
+              "name": "Dental Cleaning"
+            },
+            {
+              "@type": "MedicalProcedure",
+              "name": "Pediatric Dentistry"
+            },
+            {
+              "@type": "MedicalProcedure",
+              "name": "Wisdom Tooth Extraction"
+            },
+            {
+              "@type": "MedicalProcedure",
+              "name": "Crowns & Bridges"
+            }
+          ],
+          "openingHoursSpecification": [
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday"
+              ],
+              "opens": "10:00",
+              "closes": "14:00"
+            },
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday"
+              ],
+              "opens": "17:00",
+              "closes": "21:30"
+            }
+          ],
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.9",
+            "reviewCount": "200"
+          },
+          "email": "neudental26@gmail.com",
+          "hasMap": "https://www.google.com/maps/place/Neudental+Clinic+(Formerly+Bludental)+%7C+Dentist+in+Chennai+%7C+Dental+Clinic+in+Kodungaiyur/@13.1309218,80.2535879,17z/data=!3m1!4b1!4m6!3m5!1s0x3a52659b841d30d3:0xc53ff4dcde940735!8m2!3d13.1309218!4d80.2535879!16s%2Fg%2F11z2d1y0y6",
+          "employee": {
+            "@id": "https://www.neudental.in/#dr-swetha"
           }
         },
         {
-          "@type": "Question",
-          "name": "How often should I visit the dentist?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "We recommend visiting neudental every 6 months for a regular check-up and professional cleaning. However, if you have specific dental concerns or ongoing treatments, Dr. Swetha may recommend more frequent visits."
+          "@type": "Person",
+          "@id": "https://www.neudental.in/#dr-swetha",
+          "name": "Dr. Swetha",
+          "honorificSuffix": "BDS, FGDS",
+          "jobTitle": "Dental Surgeon & Clinical Director",
+          "alumniOf": [
+            {
+              "@type": "CollegeOrUniversity",
+              "name": "Saveetha Dental University"
+            },
+            {
+              "@type": "CollegeOrUniversity",
+              "name": "KSR Dental College"
+            }
+          ],
+          "worksFor": {
+            "@id": "https://www.neudental.in/#dentist"
           }
         },
         {
-          "@type": "Question",
-          "name": "Do you offer clear aligners / Invisalign?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes! We offer modern orthodontic solutions including clear aligners for straightening teeth discreetly. Dr. Swetha will assess your case and recommend the best treatment plan during a consultation."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "What are your clinic timings?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "We are open all 7 days, Monday to Sunday: 10:00 AM - 2:00 PM and 5:00 PM - 9:30 PM. You can book appointments via WhatsApp or our online form."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "How do I book an appointment?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "You can book an appointment using any of the options we offer — the booking form on this website, chatting with us on WhatsApp, or calling us directly. Walk-ins are also welcome during clinic hours."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Is Neudental Dental Clinic the same as Bludental?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes — Neudental Dental Clinic was formerly known as Bludental. It is the same clinic, at the same location in Kodungaiyur, with the same team led by Dr. Swetha. Only the name has changed."
+          "@type": "WebSite",
+          "@id": "https://www.neudental.in/#website",
+          "url": "https://www.neudental.in/",
+          "name": "neudental",
+          "alternateName": [
+            "Neudental",
+            "Bludental"
+          ],
+          "inLanguage": "en-IN",
+          "publisher": {
+            "@id": "https://www.neudental.in/#dentist"
           }
         }
       ]
     }
     </script>
+
   </head>
   <body>
     <div id="root"></div>

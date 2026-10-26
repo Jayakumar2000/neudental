@@ -1,9 +1,19 @@
 // neudental v1 - BlogDetailView Component
-import React, { useEffect } from 'react';
+import React from 'react';
 import { BLOGS, WHATSAPP_URL } from '../data';
 import { Calendar, Clock, ArrowLeft, ShieldCheck, ChevronDown, MapPin, Phone } from 'lucide-react';
 import { trackConversion } from '../lib/analytics';
 import type { BlogBlock, BlogPost } from '../types';
+import { inAppClick } from '../lib/routes';
+import { postPublishedDate } from '../lib/schema';
+
+// "2026-10-25" -> "25 October 2026". Written out by hand rather than with
+// Intl so the build server and every browser produce identical text.
+const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+function formatIsoDate(iso: string) {
+  const [y, m, d] = iso.split('-').map(Number);
+  return d ? `${d} ${MONTH_NAMES[m - 1]} ${y}` : iso;
+}
 
 interface BlogDetailViewProps {
   blogId: string;
@@ -12,20 +22,12 @@ interface BlogDetailViewProps {
   onBookAppointment?: () => void;
 }
 
-const SITE_URL = 'https://www.neudental.in';
-const JSON_LD_ID = 'blog-post-jsonld';
-
 function slugify(text: string) {
   return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 }
 
 function headingId(block: { text: string; id?: string }) {
   return block.id ?? slugify(block.text);
-}
-
-// Strips the **bold** / [link](/path) markers, for schema text.
-function plainText(text: string) {
-  return text.replace(/\*\*(.+?)\*\*/g, '$1').replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1');
 }
 
 // Renders the small inline syntax post text may use: **bold** and
@@ -60,59 +62,8 @@ function InlineText({ text, onSelectBlog }: { text: string; onSelectBlog?: (blog
   return <>{parts}</>;
 }
 
-function buildJsonLd(post: BlogPost) {
-  const url = `${SITE_URL}/blogs/${post.id}`;
-  const graph: Record<string, unknown>[] = [
-    {
-      '@type': 'BlogPosting',
-      headline: post.title,
-      description: post.excerpt,
-      url,
-      mainEntityOfPage: url,
-      image: SITE_URL + post.image,
-      ...(post.datePublished ? { datePublished: post.datePublished } : {}),
-      inLanguage: 'en-IN',
-      author: { '@type': 'Organization', name: 'Neudental', url: `${SITE_URL}/` },
-      publisher: { '@id': `${SITE_URL}/#dentist` },
-      ...(post.reviewedBy ? { reviewedBy: { '@type': 'Person', name: post.reviewedBy } } : {}),
-    },
-    {
-      '@type': 'BreadcrumbList',
-      itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE_URL}/` },
-        { '@type': 'ListItem', position: 2, name: 'Blog', item: `${SITE_URL}/blogs` },
-        { '@type': 'ListItem', position: 3, name: post.title, item: url },
-      ],
-    },
-  ];
-  if (post.faqs?.length) {
-    graph.push({
-      '@type': 'FAQPage',
-      mainEntity: post.faqs.map((faq) => ({
-        '@type': 'Question',
-        name: faq.question,
-        acceptedAnswer: { '@type': 'Answer', text: plainText(faq.answer) },
-      })),
-    });
-  }
-  return { '@context': 'https://schema.org', '@graph': graph };
-}
-
 export default function BlogDetailView({ blogId, onBack, onSelectBlog, onBookAppointment }: BlogDetailViewProps) {
   const post = BLOGS.find((b) => b.id === blogId);
-
-  // Per-post structured data (article, breadcrumbs, FAQs), removed again when
-  // the reader leaves the post so it never leaks onto another route.
-  useEffect(() => {
-    if (!post) return;
-    const script = document.createElement('script');
-    script.type = 'application/ld+json';
-    script.id = JSON_LD_ID;
-    script.textContent = JSON.stringify(buildJsonLd(post));
-    document.getElementById(JSON_LD_ID)?.remove();
-    document.head.appendChild(script);
-    return () => script.remove();
-  }, [post]);
 
   if (!post) {
     return (
@@ -261,14 +212,17 @@ export default function BlogDetailView({ blogId, onBack, onSelectBlog, onBookApp
   return (
     <article className="py-16 px-6 md:px-10 lg:px-16 bg-white">
       <div className="max-w-3xl mx-auto w-full">
-        <button onClick={onBack} className="flex items-center gap-2 text-on-surface-variant hover:text-secondary font-sans text-sm font-medium mb-6 transition-colors cursor-pointer">
+        <a href="/blogs" onClick={inAppClick(onBack)} className="flex w-fit items-center gap-2 text-on-surface-variant hover:text-secondary font-sans text-sm font-medium mb-6 transition-colors cursor-pointer">
           <ArrowLeft size={20} />
           Back to Blog
-        </button>
+        </a>
         <span className="text-[10px] font-bold uppercase tracking-wider text-secondary bg-secondary/5 px-2.5 py-1 rounded-full">{post.category}</span>
         <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl text-primary font-bold mt-4 leading-tight">{post.title}</h1>
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-cool-gray font-sans font-medium mt-4 pb-6 border-b border-cool-gray/10">
-          <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> {post.date}</span>
+          <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> <time dateTime={postPublishedDate(post)}>{post.date}</time></span>
+          {post.dateModified && (
+            <span className="flex items-center gap-1.5">Updated <time dateTime={post.dateModified}>{formatIsoDate(post.dateModified)}</time></span>
+          )}
           <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {post.readTime}</span>
           {post.reviewedBy && (
             <span className="flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5" /> Reviewed by <strong className="text-primary font-semibold">{post.reviewedBy}</strong></span>
