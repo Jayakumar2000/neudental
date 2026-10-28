@@ -151,7 +151,7 @@ return (
         <div className="relative flex flex-col gap-4 lg:gap-[18px]">
           {[
             { label: 'Morning', time: ['10 AM', '2 PM'], Icon: Sun },
-            { label: 'Evening', time: ['5 PM', '9.30 PM'], Icon: Moon },
+            { label: 'Evening', time: ['5 PM', '10 PM'], Icon: Moon },
           ].map(({ label, time, Icon }) => (
             <div key={label} className="flex items-center gap-4">
               <span aria-hidden="true" className="w-11 h-11 shrink-0 rounded-full border-[1.5px] border-[#00fff2] flex items-center justify-center"><Icon className="w-5 h-5 text-[#00fff2]" strokeWidth={1.8} /></span>
@@ -163,21 +163,21 @@ return (
           ))}
         </div>
 
-        {/* The day from 10 AM to 9.30 PM, to scale: 4 h open, 3 h closed, 4.5 h open. */}
-        <div className="relative font-sans" role="img" aria-label="Open 10 AM to 2 PM, closed 2 PM to 5 PM, open 5 PM to 9.30 PM">
+        {/* The day from 10 AM to 10 PM, to scale: 4 h open, 3 h closed, 5 h open. */}
+        <div className="relative font-sans" role="img" aria-label="Open 10 AM to 2 PM, closed 2 PM to 5 PM, open 5 PM to 10 PM">
           <div aria-hidden="true" className="flex gap-1 text-[11px] font-semibold text-[#C7CDE6] mb-2">
-            <span className="w-[34.8%] text-center">Morning</span><span className="w-[26.1%] text-center">Closed</span><span className="flex-1 text-center">Evening</span>
+            <span className="w-[33.3%] text-center">Morning</span><span className="w-[25%] text-center">Closed</span><span className="flex-1 text-center">Evening</span>
           </div>
           <div aria-hidden="true" className="flex gap-1 h-2.5">
-            <span className="w-[34.8%] rounded-full bg-[#00fff2] shadow-[0_0_14px_rgba(0,255,242,0.45)]" />
-            <span className="w-[26.1%] rounded-full border border-dashed border-white/35" />
+            <span className="w-[33.3%] rounded-full bg-[#00fff2] shadow-[0_0_14px_rgba(0,255,242,0.45)]" />
+            <span className="w-[25%] rounded-full border border-dashed border-white/35" />
             <span className="flex-1 rounded-full bg-[#00fff2] shadow-[0_0_14px_rgba(0,255,242,0.45)]" />
           </div>
           <div aria-hidden="true" className="relative h-4 mt-2 font-display text-xs font-medium text-[#E2E8F8]">
             <span className="absolute left-0">10 AM</span>
-            <span className="absolute left-[calc(34.8%+2px)] -translate-x-1/2">2 PM</span>
-            <span className="absolute left-[calc(60.9%+6px)] -translate-x-1/2">5 PM</span>
-            <span className="absolute right-0">9.30 PM</span>
+            <span className="absolute left-[calc(33.3%+2px)] -translate-x-1/2">2 PM</span>
+            <span className="absolute left-[calc(58.3%+6px)] -translate-x-1/2">5 PM</span>
+            <span className="absolute right-0">10 PM</span>
           </div>
         </div>
 

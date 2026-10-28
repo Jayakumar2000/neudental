@@ -51,7 +51,7 @@ export default function BookingVisitPanel({ className = '' }: { className?: stri
       <div className="relative mt-auto pt-5 border-t border-white/[0.14] flex flex-col gap-2.5 font-sans text-sm">
         <p className="flex flex-wrap justify-between gap-x-3 gap-y-1">
           <span className="text-[#C7CDE6]">Open all 7 days</span>
-          <span className="font-semibold">10 AM – 2 PM &amp; 5 PM – 9.30 PM</span>
+          <span className="font-semibold">10 AM – 2 PM &amp; 5 PM – 10 PM</span>
         </p>
         <p className="text-[#C7CDE6]">
           Prefer to talk?{' '}

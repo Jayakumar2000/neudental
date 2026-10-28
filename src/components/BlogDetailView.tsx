@@ -235,7 +235,7 @@ export default function BlogDetailView({ blogId, onBack, onSelectBlog, onBookApp
             <h2 className="font-serif text-2xl font-bold leading-snug">{block.title}</h2>
             <p className="font-sans text-base text-white/80 mt-2 leading-relaxed">{text(block.text)}</p>
             <div className="mt-5 space-y-2 font-sans text-sm text-white/85 leading-relaxed">
-              <p className="flex gap-2"><MapPin className="w-4 h-4 shrink-0 mt-0.5" aria-hidden="true" /><span><strong className="text-white">Neudental Dental Clinic</strong>, Door No. 13, Plot No. 26, 1st Main Road, Vasuki Nagar, Kodungaiyur, Chennai 600118 (near SIDCO Bus Stop). Open all 7 days, 10:00 AM – 1:30 PM and 5:00 PM – 9:30 PM.</span></p>
+              <p className="flex gap-2"><MapPin className="w-4 h-4 shrink-0 mt-0.5" aria-hidden="true" /><span><strong className="text-white">Neudental Dental Clinic</strong>, Door No. 13, Plot No. 26, 1st Main Road, Vasuki Nagar, Kodungaiyur, Chennai 600118 (near SIDCO Bus Stop). Open all 7 days, 10:00 AM – 1:30 PM and 5:00 PM – 10:00 PM.</span></p>
               <p className="flex gap-2"><Phone className="w-4 h-4 shrink-0 mt-0.5" aria-hidden="true" /><a href="tel:+919342367446" onClick={() => trackConversion('call_click', 'call', { link_location: 'blog_post' })} className="font-bold text-white">+91 93423 67446</a></p>
             </div>
             <div className="flex flex-wrap gap-3 mt-6">
