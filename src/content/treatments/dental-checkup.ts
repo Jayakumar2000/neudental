@@ -63,7 +63,7 @@ const guide: TreatmentGuide = {
       type: 'list',
       items: [
         '**A small cavity** can usually be repaired with a [tooth-coloured filling](/treatments/tooth-filling) in a single sitting. Left alone, it can reach the nerve and need a root canal, or the tooth may have to be removed.',
-        '**Bleeding gums** from early gum disease (gingivitis) can usually be reversed with a professional cleaning and better brushing. If it progresses, the bone around the teeth is slowly lost and teeth can become loose.',
+        '**Bleeding gums** from early gum disease (gingivitis) can usually be reversed with a professional cleaning and better brushing. If it progresses to periodontitis, the bone around the teeth is slowly lost and teeth can become loose.',
         '**A worn or cracked filling** can be replaced before decay gets underneath it.',
       ],
     },
@@ -112,7 +112,7 @@ const guide: TreatmentGuide = {
     { question: 'Is teeth cleaning part of the check-up?', answer: 'The check-up is an examination with advice. Professional cleaning (scaling and polishing) is a separate treatment with its own cost. Neudental recommends both every six months, and your dentist will tell you at the check-up whether you need a cleaning now.' },
     { question: 'Will I need an X-ray at my check-up?', answer: 'Only if your dentist needs to see something that cannot be checked by eye, such as decay between teeth, under a filling or around a root. A complimentary X-ray is included with your check-up when it is needed. Tell your dentist if you are or might be pregnant.' },
     { question: 'Is a dental check-up uncomfortable?', answer: 'A check-up is usually quick and comfortable. Your dentist looks at each tooth and your gums with a small mirror and a fine probe, and you may feel gentle pressure. If you have sensitive teeth or feel anxious, say so, and your dentist can take it slowly.' },
-    { question: 'Can I have a dental check-up during pregnancy?', answer: 'Yes. A routine check-up is generally safe during pregnancy, and hormonal changes can make gums swell and bleed more easily, so it is a useful time to have one. Tell your dentist you are pregnant, so any X-rays and treatment can be planned with that in mind.' },
+    { question: 'Does the dentist check for signs of mouth cancer?', answer: 'Yes. As part of the examination, your dentist looks at your tongue, cheeks, lips, gums and palate for ulcers, white or red patches and lumps. Most turn out to be harmless, but one that has not healed within two to three weeks needs a closer look. This matters more if you smoke, chew tobacco or paan.' },
   ],
   relatedPosts: ['why-regular-checkups-matter'],
   relatedTreatments: ['cleaning', 'imaging', 'filling', 'gum-disease'],

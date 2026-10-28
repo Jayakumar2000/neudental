@@ -52,7 +52,7 @@ const guide: TreatmentGuide = {
         'Small gaps between the teeth that you can now feel, where tartar or swollen gum used to fill the space',
       ],
     },
-    'Sensitivity and tenderness usually settle within a few days to a week as the gums heal. The gaps were already there under the tartar; they are not new damage. If sensitivity or bleeding gets worse, or lasts beyond two weeks, call the clinic.',
+    'Sensitivity and tenderness usually settle within a few days to a week as the gums heal. The gaps were already there, hidden by tartar or swollen gum; they are not new damage. If sensitivity or bleeding gets worse, or lasts beyond two weeks, call the clinic.',
     { type: 'heading', id: 'how-often', text: 'How often should you get your teeth cleaned?' },
     'At Neudental, a check-up and professional cleaning every six months is recommended for most people. The cleaning is separate from the [routine dental check-up](/treatments/dental-checkup), which examines your teeth for cavities and other problems, but both follow the same six-monthly schedule. Dr. Swetha may suggest more frequent cleanings if you:',
     {
