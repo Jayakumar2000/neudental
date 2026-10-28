@@ -11,6 +11,10 @@ import './index.css';
 // fetches the new build. The guard stops a reload loop if a file is missing
 // for some other reason; the booking form's error boundary covers that case.
 window.addEventListener('vite:preloadError', (event) => {
+  // Only a file that couldn't be downloaded (Chrome / Firefox / Safari
+  // wording) is fixed by a reload; an error thrown while a module runs is not.
+  const message = String((event as Event & { payload?: unknown }).payload ?? '');
+  if (!/dynamically imported module|Importing a module script failed|Unable to preload/i.test(message)) return;
   const key = 'neudental:chunkReload';
   try {
     const last = JSON.parse(sessionStorage.getItem(key) ?? 'null') as { path: string; at: number } | null;
