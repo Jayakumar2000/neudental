@@ -220,9 +220,16 @@ Every treatment in `TREATMENTS` (`src/data.ts`) has its own page at
 its price. The page is built from two things:
 
 1. **The treatment's entry in `TREATMENTS`** — name, description, `duration`,
-   `priceRange` and `features`. Change a price or duration here and it changes
-   everywhere at once: the treatment page, the price list, the homepage cards,
-   the structured data and `llms.txt`.
+   `priceRange`, `startingPrice` and `features`. Change a price or duration
+   here and it changes everywhere at once: the treatment page, the price list,
+   the homepage cards, the structured data and `llms.txt`.
+
+   Prices have one format, so every page reads them the same way:
+   `'₹3500-₹8000'` (a range), `'₹30000-₹1,50,000'` (commas are fine) or
+   `'₹5000+'` (from ₹5,000). Whole rupees only — no "lakh", "k" or words.
+   `startingPrice` must be the first number of `priceRange`
+   (`₹3500-₹8000` → `startingPrice: 3500`). The deploy stops and says so if
+   either is off.
 2. **Its patient guide**, one file per treatment in `src/content/treatments/`
    (`root-canal-treatment.ts` and so on), with the long-form explanation and
    FAQs. The fields are described on `TreatmentGuide` in `src/types.ts`.
@@ -259,9 +266,24 @@ once the review has really happened.
 
 1. Add it to `TREATMENTS` in `src/data.ts` (copy an existing entry), with a
    `slug` (lowercase words joined by hyphens, e.g. `'smile-designing'`). The
-   slug is the page's permanent address; don't change it later.
+   slug is the page's permanent address; avoid changing it later (see below).
 2. Commit. The page, its place on `/treatments`, the price list, the sitemap
    and `llms.txt` appear automatically, with the basic facts.
 3. Optionally add a guide: copy `src/content/treatments/root-canal-treatment.ts`
-   to `src/content/treatments/{slug}.ts`, set `treatmentId` to the new id and
-   rewrite the text. It is picked up automatically.
+   to `src/content/treatments/{slug}.ts` (the file name must be the slug), set
+   `treatmentId` to the new id and rewrite the text. It is picked up
+   automatically. Keep only guide files in that folder.
+
+## If a treatment's address must change
+
+Search engines and AI assistants may already cite the old address, so keep
+it working: change `slug` to the new one, rename the guide file to match, and
+add the old slug to `formerSlugs`:
+
+```ts
+  { id: 'dentures', slug: 'complete-dentures', formerSlugs: ['dentures'], ... },
+```
+
+The deploy then writes a redirect from `/treatments/dentures` to the new
+page, and lists every page that still links to the old address so you can
+update those links.

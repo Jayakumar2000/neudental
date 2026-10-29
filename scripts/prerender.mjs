@@ -155,6 +155,8 @@ async function checkLinks(page) {
     }
     if (!/^https?:$/.test(url.protocol) || !OWN_HOST.test(url.hostname)) continue;
     const linkPath = ssr.normalizePath(decodeURIComponent(url.pathname));
+    if (!linkedFrom.has(linkPath)) linkedFrom.set(linkPath, new Set());
+    linkedFrom.get(linkPath).add(page.path);
     if (STATIC_FILE.test(linkPath)) {
       if (!(await exists(path.join(DIST, linkPath)))) fail(`Page ${page.path}: links to ${linkPath}, which is not a file in public/.`);
       continue;
@@ -167,9 +169,12 @@ async function checkLinks(page) {
   }
 }
 
+// Every page that links to each URL, so a broken link is reported with all
+// the places it appears (e.g. after a treatment's slug changes).
+const linkedFrom = new Map();
 function checkPage(page, html, homeAppHtml) {
   const where = `Page ${page.path}`;
-  if (page.routeType === 'notFound') return fail(`${where} (linked from ${page.from}) is not a real page. Fix the link, or add the page to src/lib/routes.ts.`);
+  if (page.routeType === 'notFound') return fail(`${where} (linked from ${[...(linkedFrom.get(page.path) ?? [page.from])].join(', ')}) is not a real page. Fix the link, or add the page to src/lib/routes.ts.`);
   const text = textOf(page.appHtml);
   if (!/<h1[\s>]/.test(page.appHtml)) fail(`${where}: has no <h1> heading.`);
   // <!--$?--> is a boundary still waiting on data; <!--$!--> one that errored
@@ -247,8 +252,19 @@ for (const page of rendered) {
   if (page.path === '/') await write('index.html', page.html);
   else {
     await write(`${page.path.slice(1)}.html`, page.html);
+    // /blogs and /treatments are both a page and a folder: write the folder's
+    // index too, so the page is found whichever the host looks for first.
     if (page.path === '/blogs') await write('blogs/index.html', page.html);
+    if (page.path === '/treatments') await write('treatments/index.html', page.html);
   }
+}
+
+// Old treatment addresses (formerSlugs): a small page that sends visitors and
+// search engines on to the current one.
+for (const { from, to } of ssr.treatmentRedirects()) {
+  if (rendered.some((p) => p.path === from)) throw new Error(`Former slug ${from} is still a live page.`);
+  const target = SITE + to;
+  await write(`${from.slice(1)}.html`, `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Moved</title><meta name="robots" content="noindex, follow"><link rel="canonical" href="${target}"><meta http-equiv="refresh" content="0; url=${to}"></head><body><p>This page has moved to <a href="${to}">${target}</a>.</p><script>location.replace(${JSON.stringify(to)} + location.hash)</script></body></html>`);
 }
 
 // 6. Machine-readable companions.

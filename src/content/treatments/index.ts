@@ -19,11 +19,22 @@ const byCodePoint = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
 // Every guide with its file name, without folder or extension (build only).
 export const TREATMENT_GUIDE_FILES: { file: string; guide: TreatmentGuide }[] = Object.entries(eager)
   .sort(([a], [b]) => byCodePoint(a, b))
-  .map(([file, mod]) => ({ file: file.slice(2, -3), guide: mod.default }));
+  .map(([file, mod]) => {
+    if (!mod.default || typeof mod.default !== 'object') {
+      throw new Error(`src/content/treatments/${file.slice(2)} is not a treatment guide: it must end with "export default guide;" (copy root-canal-treatment.ts), or move it out of this folder.`);
+    }
+    return { file: file.slice(2, -3), guide: mod.default };
+  });
 
 export const TREATMENT_GUIDES: TreatmentGuide[] = TREATMENT_GUIDE_FILES.map((g) => g.guide);
 
 const loaded = new Map<string, TreatmentGuide>(TREATMENT_GUIDES.map((g) => [g.treatmentId, g]));
+
+// Whether src/content/treatments/{slug}.ts exists, without loading it. The
+// same answer at build time and in the browser (safe to render from).
+export function hasGuideFile(slug: string): boolean {
+  return `./${slug}.ts` in (import.meta.env.SSR ? eager : lazy);
+}
 
 // The guide for a treatment, if it is loaded (always, at build time).
 export function loadedGuide(treatmentId: string): TreatmentGuide | undefined {

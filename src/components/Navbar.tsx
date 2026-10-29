@@ -4,6 +4,7 @@ import { TREATMENTS } from '../data';
 import BrandLogo, { BRAND } from './BrandLogo';
 import { trackConversion } from '../lib/analytics';
 import { Link } from '../lib/navigation';
+import { inAppClick } from '../lib/routes';
 import { treatmentPath } from '../lib/treatments';
 
 interface NavbarProps {
@@ -36,10 +37,9 @@ document.removeEventListener('touchmove', blockTouch);
 }, [mobileMenuOpen]);
 
 
-const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-e.preventDefault();
-onNavigateSection(href.slice(1));
-};
+// Section links are real "/#section" URLs (crawlable, and they work from
+// any page or in a new tab); a plain click scrolls in-app.
+const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => inAppClick(() => onNavigateSection(href.slice(2)))(e);
 
 // Closing the mobile menu and scrolling to a section in the same click
 // handler scrolls while the (still in-flow, taller) open menu is on
@@ -52,9 +52,9 @@ requestAnimationFrame(() => requestAnimationFrame(action));
 };
 
 const navItems = [
-{ name: 'About Us', href: '#our-doctor' },
-{ name: 'Treatments', href: '#services' },
-{ name: 'Location & Timing', href: '#location' },
+{ name: 'About Us', href: '/#our-doctor' },
+{ name: 'Treatments', href: '/treatments' },
+{ name: 'Location & Timing', href: '/#location' },
 { name: 'Blogs', href: '/blogs' },
 ];
 
@@ -140,7 +140,7 @@ return (
 if (item.name === 'Blogs') {
 return (<Link key={item.name} to={item.href} onClick={() => setMobileMenuOpen(false)} className="text-primary hover:text-secondary text-base font-sans font-semibold py-2 border-b border-cool-gray/5 text-left cursor-pointer">{item.name}</Link>);
 }
-return (<a key={item.name} href={item.href} className="text-primary hover:text-secondary text-base font-sans font-semibold py-2 border-b border-cool-gray/5" onClick={(e) => { e.preventDefault(); closeMobileMenuThen(() => onNavigateSection(item.href.slice(1))); }}>{item.name}</a>);
+return (<a key={item.name} href={item.href} className="text-primary hover:text-secondary text-base font-sans font-semibold py-2 border-b border-cool-gray/5" onClick={inAppClick(() => closeMobileMenuThen(() => onNavigateSection(item.href.slice(2))))}>{item.name}</a>);
 })}
 </nav>
 <div className="flex flex-col gap-4 pt-4 border-t border-cool-gray/10">

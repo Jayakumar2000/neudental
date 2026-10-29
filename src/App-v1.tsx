@@ -135,6 +135,11 @@ export default function App({ initialPath }: { initialPath?: string } = {}) {
   useEffect(() => {
     const handlePopState = () => {
       const next = classifyRoute(window.location.pathname);
+      // The staff console is a separate app shell: load it for real.
+      if (next.type === 'admin') {
+        window.location.reload();
+        return;
+      }
       const seq = ++navSeq.current;
       const show = () => {
         if (seq !== navSeq.current) return;
@@ -154,6 +159,9 @@ export default function App({ initialPath }: { initialPath?: string } = {}) {
   // one and only page_view for this route (see analytics.ts) -- skipped
   // entirely for Not Found, so a bot probing a fake URL never counts as a
   // pageview.
+  // Keyed on the page's URL, not the route object, so moving between two
+  // history entries of the same page (e.g. a #section) isn't a new page view.
+  const routeKey = route.type === 'notFound' ? `404:${typeof window === 'undefined' ? '' : window.location.pathname}` : routePath(route);
   useEffect(() => {
     const meta = getRouteMeta(route, normalizePath(window.location.pathname));
     setPageMeta(meta);
@@ -166,7 +174,7 @@ export default function App({ initialPath }: { initialPath?: string } = {}) {
       return;
     }
     trackPageView(meta.path, meta.title);
-  }, [route]);
+  }, [routeKey]);
 
   // Scrolls to a section that lives on the home page. If we're currently on a
   // subpage (so the section isn't mounted yet), switch to the home page first
@@ -176,7 +184,9 @@ export default function App({ initialPath }: { initialPath?: string } = {}) {
   // element inside it instead of the section's own top.
   const navigateToSection = (sectionId: string, resolveTarget?: () => HTMLElement | null) => {
     const scrollToTarget = () => (resolveTarget?.() ?? document.getElementById(sectionId))?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    const existing = document.getElementById(sectionId);
+    // Only the home page's own sections count: a guide heading on another
+    // page could share the id.
+    const existing = route.type === 'home' && !symptomCheckerOpen ? document.getElementById(sectionId) : null;
     if (existing) {
       scrollToTarget();
       return;
@@ -210,7 +220,8 @@ export default function App({ initialPath }: { initialPath?: string } = {}) {
       setSymptomCheckerOpen(false);
       if (routePath(next) !== routePath(route) || next.type === 'notFound') setRoute(next);
       const path = normalizePath(url.pathname);
-      if (normalizePath(window.location.pathname) !== path || window.location.hash) window.history.pushState(null, '', path);
+      if (normalizePath(window.location.pathname) !== path) window.history.pushState(null, '', path);
+      else if (window.location.hash) window.history.replaceState(null, '', path);
       window.scrollTo({ top: 0, behavior: 'instant' });
     };
     // A treatment's guide is its own small file: fetch it first, so the page
@@ -264,14 +275,16 @@ export default function App({ initialPath }: { initialPath?: string } = {}) {
       return page(<NotFound onGoHome={() => navigate('/')} />);
     case 'blogsList':
       return page(<BlogsListView />);
+    // Keyed per page, so one post's or guide's open FAQs don't carry over to
+    // the next. (On a Fragment: the project has no @types/react.)
     case 'blogPost':
-      return page(<BlogDetailView blogId={route.blogId} onBookAppointment={handleScrollToBooking} />);
+      return page(<React.Fragment key={route.blogId}><BlogDetailView blogId={route.blogId} onBookAppointment={handleScrollToBooking} /></React.Fragment>);
     case 'treatmentsList':
-      return page(<TreatmentsIndex />);
+      return page(<TreatmentsIndex />, <FloatingWhatsApp />);
     case 'treatment':
-      return page(<TreatmentPage treatmentId={route.treatmentId} onBookTreatment={handleSelectTreatment} />);
+      return page(<React.Fragment key={route.treatmentId}><TreatmentPage treatmentId={route.treatmentId} onBookTreatment={handleSelectTreatment} /></React.Fragment>, <FloatingWhatsApp />);
     case 'doctor':
-      return page(<DoctorPage />);
+      return page(<DoctorPage />, <FloatingWhatsApp />);
     case 'home':
       break;
     default: {

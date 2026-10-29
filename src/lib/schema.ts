@@ -122,7 +122,8 @@ export function siteJsonLd() {
           'https://www.youtube.com/channel/UCfyFaSu7_EJshABsfOuBbWw',
         ],
         employee: { '@id': DOCTOR_ID },
-        availableService: TREATMENTS.map((t) => ({ '@type': 'MedicalProcedure', '@id': procedureId(t), name: t.name, description: t.description, url: SITE_URL + treatmentPath(t) })),
+        // Each procedure is described in full on its own page (same @id).
+        availableService: TREATMENTS.map((t) => ({ '@type': 'MedicalProcedure', '@id': procedureId(t), name: t.name, url: SITE_URL + treatmentPath(t) })),
         openingHoursSpecification: CLINIC.sessions.map(({ opens, closes }) => ({
           '@type': 'OpeningHoursSpecification',
           dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
@@ -281,6 +282,7 @@ export function blogPostJsonLd(post: BlogPost) {
 
 function priceSpecification(treatment: Treatment) {
   const { min, max } = priceBounds(treatment.priceRange);
+  if (min !== undefined && max === min) return { '@type': 'PriceSpecification', priceCurrency: 'INR', price: min };
   return {
     '@type': 'PriceSpecification',
     priceCurrency: 'INR',
@@ -362,7 +364,7 @@ export function treatmentsListJsonLd(title: string, description: string) {
         '@type': 'OfferCatalog',
         '@id': PRICE_LIST_ID,
         name: 'Dental treatments and prices at neudental, Kodungaiyur',
-        itemListElement: TREATMENTS.map((t) => treatmentOffer(t)),
+        itemListElement: TREATMENTS.map((t) => treatmentOffer(t, `${SITE_URL}${treatmentPath(t)}#offer`)),
       },
       breadcrumb(`${url}#breadcrumb`, [['Home', `${SITE_URL}/`], ['Treatments', url]]),
     ],

@@ -8,7 +8,7 @@ import { prerender } from 'react-dom/static';
 import App from './App-v1';
 import { BLOGS, CLINIC, DOCTOR, FAQS, TREATMENTS } from './data';
 import { DOCTOR_PATH, classifyRoute, normalizePath, prerenderPaths, type Route } from './lib/routes';
-import { GUIDE_TOKENS, categoryLabel, fillTokens, formatPriceRange, guideFor, guideModulePath, treatmentById, treatmentPath } from './lib/treatments';
+import { GUIDE_TOKENS, categoryLabel, fillTokens, formatPriceRange, guideFor, guideModulePath, priceBounds, treatmentById, treatmentPath } from './lib/treatments';
 import { TREATMENT_GUIDE_FILES } from './content/treatments';
 import { getRouteMeta, renderHeadTags, type ImageInfo } from './lib/seo';
 import { SITE_URL, absoluteUrl, contentTexts, plainText, postModifiedDate, postPublishedDate, postTextBlocks, postUrl } from './lib/schema';
@@ -99,6 +99,11 @@ export function blogImages(): { id: string; image: string }[] {
 // Images used as share cards besides blog images; the build reads their size.
 export function shareImages(): string[] {
   return ['/doctor/dr-swetha.webp'];
+}
+
+// Old treatment addresses (formerSlugs) and where they now live.
+export function treatmentRedirects(): { from: string; to: string }[] {
+  return TREATMENTS.flatMap((t) => (t.formerSlugs ?? []).map((old) => ({ from: `/treatments/${old}`, to: treatmentPath(t) })));
 }
 
 export function adminHead(): string {
@@ -337,7 +342,6 @@ export function validateContent(): { errors: string[]; warnings: string[] } {
   const errors: string[] = [];
   const warnings: string[] = [];
   const ids = new Set<string>();
-  const isoDate = /^\d{4}-\d{2}-\d{2}$/;
   BLOGS.forEach((post, index) => {
     const raw = post as unknown as Record<string, unknown>;
     const where = `Blog post "${typeof raw.id === 'string' ? raw.id : `#${index + 1} in BLOGS`}"`;
@@ -360,8 +364,8 @@ export function validateContent(): { errors: string[]; warnings: string[] } {
     if (post.faqs !== undefined && !(Array.isArray(post.faqs) && post.faqs.every((f) => typeof f?.question === 'string' && f.question.trim() && typeof f?.answer === 'string' && f.answer.trim()))) {
       errors.push(`${where}: faqs must look like [{ question: '...', answer: '...' }].`);
     }
-    if (post.datePublished !== undefined && !isoDate.test(post.datePublished)) errors.push(`${where}: datePublished must look like 2026-10-25.`);
-    if (post.dateModified !== undefined && !isoDate.test(post.dateModified)) errors.push(`${where}: dateModified must look like 2026-10-25.`);
+    if (post.datePublished !== undefined && !isRealDate(post.datePublished)) errors.push(`${where}: datePublished must be a real date written like 2026-10-25.`);
+    if (post.dateModified !== undefined && !isRealDate(post.dateModified)) errors.push(`${where}: dateModified must be a real date written like 2026-10-25.`);
     if (!postPublishedDate(post)) errors.push(`${where}: add datePublished ('YYYY-MM-DD'), or write date as "Month YYYY".`);
     else if (!post.datePublished) warnings.push(`${where}: no datePublished, so only the month ("${post.date}") is known. Add the exact day ('YYYY-MM-DD') for better freshness signals.`);
     for (const rel of post.related ?? []) {
@@ -378,17 +382,48 @@ export function validateContent(): { errors: string[]; warnings: string[] } {
   return { errors, warnings };
 }
 
-const isoDate = /^\d{4}-\d{2}-\d{2}$/;
+// 'YYYY-MM-DD' that is a real calendar day (not 2026-13-05 or 2026-02-30).
+function isRealDate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().startsWith(value);
+}
+
+// The one price format: '₹3500-₹8000', '₹30000-₹1,50,000' or '₹5000+'.
+const PRICE_RANGE = /^₹[1-9][\d,]*(?:-₹[1-9][\d,]*|\+)?$/;
+
 const words = (text: string) => plainText(text).split(/\s+/).filter(Boolean).length;
 
 function validateTreatments(errors: string[], warnings: string[]) {
   const slugs = new Set<string>();
+  const ids = new Set<string>();
+  const former = new Set<string>();
   for (const t of TREATMENTS) {
     const where = `Treatment "${t.id}"`;
+    if (ids.has(t.id)) errors.push(`${where}: id is used by more than one treatment.`);
+    ids.add(t.id);
     if (typeof t.slug !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(t.slug)) errors.push(`${where}: slug must be lowercase letters, numbers and single hyphens (it is the page address /treatments/{slug}).`);
     else if (slugs.has(t.slug)) errors.push(`${where}: slug "${t.slug}" is used by another treatment.`);
     slugs.add(t.slug);
+    for (const old of t.formerSlugs ?? []) {
+      if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(old) || former.has(old)) errors.push(`${where}: former slug "${old}" is not a valid slug, or is listed twice.`);
+      former.add(old);
+    }
+    // Prices: one format, so the page, the price list, the structured data
+    // and llms.txt all read them the same way.
+    if (typeof t.priceRange !== 'string' || !PRICE_RANGE.test(t.priceRange.trim())) {
+      errors.push(`${where}: priceRange "${t.priceRange}" must look like ₹3500-₹8000, ₹30000-₹1,50,000 or ₹5000+ (whole rupees, no "lakh", "k" or words).`);
+    } else {
+      const { min, max } = priceBounds(t.priceRange);
+      if (min !== undefined && max !== undefined && max < min) errors.push(`${where}: priceRange "${t.priceRange}" ends lower than it starts.`);
+      if (t.startingPrice !== min) errors.push(`${where}: startingPrice is ${t.startingPrice} but priceRange starts at ${min}. Make them match.`);
+    }
     if (!guideFor(t.id)) warnings.push(`${where}: no guide in src/content/treatments/, so its page only shows the basic facts.`);
+    const fallbackTitle = `${t.name} in Kodungaiyur: Cost & Procedure | Neudental`;
+    if (!guideFor(t.id) && fallbackTitle.length > 65) warnings.push(`${where}: its page title "${fallbackTitle}" is ${fallbackTitle.length} characters; add a guide with a shorter seoTitle.`);
+  }
+  for (const old of former) {
+    if (slugs.has(old)) errors.push(`Former slug "${old}" is now the slug of another treatment; an address can only point one way.`);
   }
 
   const seen = new Set<string>();
@@ -427,7 +462,10 @@ function validateTreatments(errors: string[], warnings: string[]) {
       for (const m of text.matchAll(/\{\{(\w+)\}\}/g)) {
         if (!(GUIDE_TOKENS as readonly string[]).includes(m[1])) errors.push(`${where}: unknown placeholder {{${m[1]}}}. Use one of: ${GUIDE_TOKENS.map((t) => `{{${t}}}`).join(', ')}.`);
       }
-      if (/(₹|\bRs\.?|\bINR)\s?\d/.test(text)) errors.push(`${where}: a price is typed into the text ("${text.match(/(₹|\bRs\.?|\bINR)\s?[\d,]+/)?.[0]}"). Write {{price}} or {{startingPrice}} so it always matches the price list in TREATMENTS.`);
+      const typedPrice = text.match(/(₹|\bRs\.?|\bINR)\s*\d[\d,]*|\d[\d,]*\s*(\/-|rupees\b|INR\b)/i);
+      if (typedPrice) errors.push(`${where}: a price is typed into the text ("${typedPrice[0]}"). Write {{price}} or {{startingPrice}} for this treatment's price; for another treatment's price, link to its page instead.`);
+      if (/(₹|\bRs\.?|\bINR)\s*\{\{/i.test(text)) errors.push(`${where}: remove the currency sign before the placeholder; {{price}} and {{startingPrice}} already include ₹.`);
+      if (/[{}]/.test(fillTokens(text, treatment))) errors.push(`${where}: stray { or } in "${text.slice(0, 60)}". Placeholders are written exactly {{price}}, {{duration}}, {{startingPrice}} or {{name}}.`);
     }
     for (const id of guide.relatedPosts ?? []) {
       if (!BLOGS.some((b) => b.id === id)) errors.push(`${where}: related post "${id}" does not exist.`);
@@ -435,8 +473,8 @@ function validateTreatments(errors: string[], warnings: string[]) {
     for (const id of guide.relatedTreatments ?? []) {
       if (!treatmentById(id) || id === treatment.id) errors.push(`${where}: related treatment "${id}" must be the id of another treatment in TREATMENTS.`);
     }
-    if (!isoDate.test(guide.datePublished)) errors.push(`${where}: datePublished must look like 2026-10-25.`);
-    if (guide.dateModified !== undefined && !isoDate.test(guide.dateModified)) errors.push(`${where}: dateModified must look like 2026-10-25.`);
+    if (!isRealDate(guide.datePublished)) errors.push(`${where}: datePublished must be a real date written like 2026-10-25.`);
+    if (guide.dateModified !== undefined && !isRealDate(guide.dateModified)) errors.push(`${where}: dateModified must be a real date written like 2026-10-25.`);
 
     const title = fillTokens(guide.seoTitle, treatment);
     if (title.length > 65) warnings.push(`${where}: seoTitle is ${title.length} characters; search results cut off after about 60.`);

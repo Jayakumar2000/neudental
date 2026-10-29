@@ -1,16 +1,21 @@
 // neudental v1 - treatment pages: lookups and the {{price}}-style
 // placeholders guides use so their text always matches TREATMENTS.
 import { TREATMENTS } from '../data';
-import { loadGuide, loadedGuide } from '../content/treatments';
+import { hasGuideFile, loadGuide, loadedGuide } from '../content/treatments';
 import type { Treatment, TreatmentGuide } from '../types';
 
-export const TREATMENT_CATEGORIES: { key: Treatment['category']; label: string }[] = [
-  { key: 'preventive', label: 'Preventive care' },
-  { key: 'restorative', label: 'Restorative dentistry' },
-  { key: 'cosmetic-ortho', label: 'Cosmetic & orthodontics' },
-  { key: 'specialized', label: 'Specialised & surgical care' },
-  { key: 'pediatric', label: 'Kids dentistry' },
-];
+// Every category needs a label: the type check fails if one is added to
+// Treatment['category'] without one here.
+const CATEGORY_LABELS: Record<Treatment['category'], string> = {
+  preventive: 'Preventive care',
+  restorative: 'Restorative dentistry',
+  'cosmetic-ortho': 'Cosmetic & orthodontics',
+  specialized: 'Specialised & surgical care',
+  pediatric: 'Kids dentistry',
+};
+
+export const TREATMENT_CATEGORIES: { key: Treatment['category']; label: string }[] = (Object.keys(CATEGORY_LABELS) as Treatment['category'][])
+  .map((key) => ({ key, label: CATEGORY_LABELS[key] }));
 
 export function categoryLabel(key: Treatment['category']): string {
   return TREATMENT_CATEGORIES.find((c) => c.key === key)?.label ?? key;
@@ -35,6 +40,11 @@ export function guideFor(treatmentId: string): TreatmentGuide | undefined {
   return loadedGuide(treatmentId);
 }
 
+// Whether a treatment has a guide, known without loading it.
+export function hasGuide(treatment: Pick<Treatment, 'slug'>): boolean {
+  return hasGuideFile(treatment.slug);
+}
+
 export function loadTreatmentGuide(treatmentId: string): Promise<TreatmentGuide | undefined> {
   const treatment = treatmentById(treatmentId);
   return treatment ? loadGuide(treatment.id, treatment.slug) : Promise.resolve(undefined);
@@ -45,11 +55,13 @@ export function guideModulePath(treatment: Pick<Treatment, 'slug'>): string {
   return `src/content/treatments/${treatment.slug}.ts`;
 }
 
-// "₹30000-₹1,50,000" -> { min: 30000, max: 150000 }; "₹5000+" -> { min: 5000 }.
+// "₹30000-₹1,50,000" -> { min: 30000, max: 150000 }; "₹5000+" -> { min: 5000 }
+// (open-ended); "₹1500" -> { min: 1500, max: 1500 } (an exact price).
 export function priceBounds(priceRange: string): { min?: number; max?: number } {
   const numbers = (priceRange.match(/[\d,]+/g) ?? []).map((n) => Number(n.replace(/,/g, ''))).filter((n) => n > 0);
   if (!numbers.length) return {};
-  return priceRange.trim().endsWith('+') || numbers.length === 1 ? { min: numbers[0] } : { min: numbers[0], max: numbers[numbers.length - 1] };
+  if (priceRange.trim().endsWith('+')) return { min: numbers[0] };
+  return { min: numbers[0], max: numbers[numbers.length - 1] };
 }
 
 // 150000 -> "1,50,000" (Indian digit grouping). Written out by hand rather
@@ -72,6 +84,7 @@ export function formatPriceRange(priceRange: string): string {
   const inr = formatInr;
   if (min === undefined) return priceRange;
   if (max === undefined) return `From ${inr(min)}`;
+  if (max === min) return inr(min);
   return `${inr(min)} – ${inr(max)}`;
 }
 
@@ -80,9 +93,15 @@ export const GUIDE_TOKENS = ['price', 'duration', 'startingPrice', 'name'] as co
 // Replaces {{price}}, {{duration}}, {{startingPrice}} and {{name}} in guide
 // text with the treatment's current values from TREATMENTS.
 export function fillTokens(text: string, treatment: Treatment): string {
-  return text.replace(/\{\{(\w+)\}\}/g, (whole, key: string) => {
+  return text.replace(/\{\{(\w+)\}\}/g, (whole, key: string, offset: number) => {
     switch (key) {
-      case 'price': return formatPriceRange(treatment.priceRange);
+      case 'price': {
+        // An open-ended price reads "From ₹5,000" at the start of a sentence
+        // or table cell, and "costs from ₹5,000" mid-sentence.
+        const price = formatPriceRange(treatment.priceRange);
+        const startsSentence = offset === 0 || /[.:!?]\s*$/.test(text.slice(0, offset));
+        return startsSentence ? price : price.replace(/^From /, 'from ');
+      }
       case 'startingPrice': return formatInr(treatment.startingPrice);
       case 'duration': return treatment.duration;
       case 'name': return treatment.name;

@@ -72,7 +72,7 @@ export function getRouteMeta(route: Route, pathname = '/', imageInfo?: ImageInfo
       const title = guide ? fillTokens(guide.seoTitle, treatment) : `${treatment.name} in Kodungaiyur: Cost & Procedure | Neudental`;
       const description = guide
         ? fillTokens(guide.metaDescription, treatment)
-        : `${treatment.name} at Neudental, Kodungaiyur, Chennai: ${treatment.description.toLowerCase()}. Typical duration ${treatment.duration}, indicative cost ${formatPriceRange(treatment.priceRange)}.`;
+        : `${treatment.name} at Neudental, Kodungaiyur, Chennai: ${treatment.description}. Typical duration ${treatment.duration}, indicative cost ${formatPriceRange(treatment.priceRange)}.`;
       return {
         title,
         description,

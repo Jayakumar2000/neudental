@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { TREATMENTS } from '../data';
 import { Treatment } from '../types';
 import { formatIndianNumber, treatmentPath } from '../lib/treatments';
@@ -20,14 +20,28 @@ const CATEGORIES = [
 { key: 'pediatric', label: 'Kids Dentistry' },
 ] as const;
 
+// The section's view (category, selected card, deck position), kept while the
+// patient looks at another page, so Back brings them to the card they were
+// on. Written only in the browser, after mount, so prerendering never sees it.
+type ServicesView = { category: (typeof CATEGORIES)[number]['key']; selectedId: string; stackIndex: number; forPick: string };
+let rememberedView: ServicesView | null = null;
+
 export default function Services({ onSelectTreatment, selectedTreatmentId }: ServicesProps) {
-const [activeCategory, setActiveCategory] = useState<(typeof CATEGORIES)[number]['key']>('all');
-const [selectedTreatment, setSelectedTreatment] = useState<Treatment | null>(TREATMENTS.find(t => t.id === selectedTreatmentId) || TREATMENTS[0]);
+// A new treatment pick (e.g. "Book this treatment" on a guide) starts fresh.
+const remembered = rememberedView?.forPick === selectedTreatmentId ? rememberedView : null;
+const [activeCategory, setActiveCategory] = useState<(typeof CATEGORIES)[number]['key']>(remembered?.category ?? 'all');
+const [selectedTreatment, setSelectedTreatment] = useState<Treatment | null>(TREATMENTS.find(t => t.id === (remembered?.selectedId ?? selectedTreatmentId)) || TREATMENTS[0]);
 // Mobile-only card-stack position -- separate from desktop's selectedTreatment
 // so switching category always restarts the deck from its first card.
-const [stackIndex, setStackIndex] = useState(0);
+const [stackIndex, setStackIndex] = useState(remembered?.stackIndex ?? 0);
+const restoredView = useRef(remembered !== null);
 
 useEffect(() => {
+rememberedView = { category: activeCategory, selectedId: selectedTreatment?.id ?? selectedTreatmentId, stackIndex, forPick: selectedTreatmentId };
+}, [activeCategory, selectedTreatment, stackIndex, selectedTreatmentId]);
+
+useEffect(() => {
+if (restoredView.current) { restoredView.current = false; return; }
 const idx = TREATMENTS.findIndex(t => t.id === selectedTreatmentId);
 if (idx >= 0) { setSelectedTreatment(TREATMENTS[idx]); setActiveCategory('all'); setStackIndex(idx); }
 }, [selectedTreatmentId]);

@@ -4,6 +4,9 @@ export interface Treatment {
   // The treatment page's address, /treatments/{slug}. Permanent once
   // published: search engines and AI assistants cite it.
   slug: string;
+  // Earlier slugs of this treatment, if it was ever renamed: their old
+  // addresses keep working (the build writes a redirect for each).
+  formerSlugs?: string[];
   name: string;
   category: 'preventive' | 'restorative' | 'cosmetic-ortho' | 'specialized' | 'pediatric';
   description: string;

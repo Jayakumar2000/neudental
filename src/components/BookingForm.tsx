@@ -155,17 +155,27 @@ const fieldClass = (invalid: boolean, padding = 'px-4') => `w-full ${padding} py
 const labelClass = 'block text-xs font-sans font-bold tracking-[0.08em] uppercase text-primary mb-2';
 const optionalClass = 'normal-case tracking-normal font-medium text-cool-gray';
 
+// What the patient has typed but not yet sent, kept while they look at
+// another page of the site (the form unmounts with the home page) and put
+// back when they return. Only in this tab's memory; gone once they book.
+// `pick` is the treatment pick the form had, so a new pick still wins.
+type UnsentDetails = Omit<BookingDraft, 'savedAt'> & { pick: { id: string; nonce?: number } };
+let unsentDetails: UnsentDetails | null = null;
+
 export default function BookingForm({ preSelectedTreatmentId, preSelectNonce, onClose, bare = false }: BookingFormProps) {
   // Read once on mount; cleared in an effect so StrictMode's double render
-  // can't drop it.
+  // can't drop it. A stale-build draft (see readDraft) wins over details
+  // kept from earlier in this visit.
   const [restoredDraft] = useState(readDraft);
-  const [patientName, setPatientName] = useState(restoredDraft?.patientName ?? '');
-  const [phone, setPhone] = useState(restoredDraft?.phone ?? '');
-  const [email, setEmail] = useState(restoredDraft?.email ?? '');
-  const [treatmentId, setTreatmentId] = useState(restoredDraft?.treatmentId || preSelectedTreatmentId || TREATMENTS[0].id);
-  const [date, setDate] = useState(restoredDraft?.date ?? '');
-  const [timeSlot, setTimeSlot] = useState(restoredDraft ? restoredDraft.timeSlot : '10:00 AM');
-  const [notes, setNotes] = useState(restoredDraft?.notes ?? '');
+  const [kept] = useState(() => (restoredDraft ? null : unsentDetails));
+  const keptTreatment = kept && kept.pick.id === preSelectedTreatmentId && kept.pick.nonce === preSelectNonce ? kept.treatmentId : null;
+  const [patientName, setPatientName] = useState(restoredDraft?.patientName ?? kept?.patientName ?? '');
+  const [phone, setPhone] = useState(restoredDraft?.phone ?? kept?.phone ?? '');
+  const [email, setEmail] = useState(restoredDraft?.email ?? kept?.email ?? '');
+  const [treatmentId, setTreatmentId] = useState(restoredDraft?.treatmentId || keptTreatment || preSelectedTreatmentId || TREATMENTS[0].id);
+  const [date, setDate] = useState(restoredDraft?.date ?? kept?.date ?? '');
+  const [timeSlot, setTimeSlot] = useState(restoredDraft ? restoredDraft.timeSlot : kept ? kept.timeSlot : '10:00 AM');
+  const [notes, setNotes] = useState(restoredDraft?.notes ?? kept?.notes ?? '');
   const [userId, setUserId] = useState<string | null>(null);
   const [dbLoading, setDbLoading] = useState(true);
   const [myBookings, setMyBookings] = useState<Appointment[]>([]);
@@ -239,6 +249,15 @@ export default function BookingForm({ preSelectedTreatmentId, preSelectNonce, on
     else if (target === 'bookingsNotice') reveal(bookingsNoticeRef.current, true);
     else reveal(fields[target], true);
   }, [revealRequest]);
+
+  // Keep what has been typed for the rest of the visit (see unsentDetails).
+  // Nothing typed (or a booking just made, which empties the fields) clears it.
+  useEffect(() => {
+    const typed = patientName || phone || email || notes;
+    unsentDetails = typed
+      ? { patientName, phone, email, treatmentId, date, timeSlot, notes, pick: { id: preSelectedTreatmentId, nonce: preSelectNonce } }
+      : null;
+  }, [patientName, phone, email, treatmentId, date, timeSlot, notes, preSelectedTreatmentId, preSelectNonce]);
 
   // The parent's treatment pick is applied each time one is made. Its value
   // at mount is already in the initial state, where a restored draft wins.

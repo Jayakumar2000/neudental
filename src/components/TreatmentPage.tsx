@@ -68,13 +68,13 @@ export default function TreatmentPage({ treatmentId, onBookTreatment }: Treatmen
             <table className="w-full text-left font-sans text-[15px]">
               <caption className="text-left px-5 pt-4 pb-1 font-bold text-primary text-sm">{treatment.name} at neudental: at a glance</caption>
               <tbody>
-                <tr><th scope="row" className="px-5 py-3 font-semibold text-primary align-top w-2/5">Indicative cost</th><td className="px-5 py-3 text-on-surface-variant align-top">{price}<span className="block text-xs text-cool-gray mt-1">The final cost is confirmed after an examination, and depends on your case.</span></td></tr>
-                <tr className="border-t border-cool-gray/10"><th scope="row" className="px-5 py-3 font-semibold text-primary align-top">Typical duration</th><td className="px-5 py-3 text-on-surface-variant align-top">{treatment.duration}</td></tr>
-                <tr className="border-t border-cool-gray/10"><th scope="row" className="px-5 py-3 font-semibold text-primary align-top">What's included</th><td className="px-5 py-3 text-on-surface-variant align-top">
+                <tr><th scope="row" className="px-3 sm:px-5 py-3 font-semibold text-primary align-top w-2/5">Indicative cost</th><td className="px-3 sm:px-5 py-3 text-on-surface-variant align-top">{price}<span className="block text-xs text-cool-gray mt-1">The final cost is confirmed after an examination, and depends on your case.</span></td></tr>
+                <tr className="border-t border-cool-gray/10"><th scope="row" className="px-3 sm:px-5 py-3 font-semibold text-primary align-top">Typical duration</th><td className="px-3 sm:px-5 py-3 text-on-surface-variant align-top">{treatment.duration}</td></tr>
+                <tr className="border-t border-cool-gray/10"><th scope="row" className="px-3 sm:px-5 py-3 font-semibold text-primary align-top">What's included</th><td className="px-3 sm:px-5 py-3 text-on-surface-variant align-top">
                   <ul className="space-y-1">{treatment.features.map((f) => <li key={f} className="flex gap-2"><Check className="w-4 h-4 text-secondary shrink-0 mt-0.5" aria-hidden="true" />{f}</li>)}</ul>
                 </td></tr>
-                <tr className="border-t border-cool-gray/10"><th scope="row" className="px-5 py-3 font-semibold text-primary align-top">Where</th><td className="px-5 py-3 text-on-surface-variant align-top">{CLINIC.name}, {CLINIC.streetAddress}, {CLINIC.locality}. {CLINIC.hoursText}.</td></tr>
-                <tr className="border-t border-cool-gray/10"><th scope="row" className="px-5 py-3 font-semibold text-primary align-top">Dentist</th><td className="px-5 py-3 text-on-surface-variant align-top"><Link to={DOCTOR_PATH} className="text-secondary hover:text-primary underline underline-offset-2">{DOCTOR.name}, {DOCTOR.title}</Link></td></tr>
+                <tr className="border-t border-cool-gray/10"><th scope="row" className="px-3 sm:px-5 py-3 font-semibold text-primary align-top">Where</th><td className="px-3 sm:px-5 py-3 text-on-surface-variant align-top">{CLINIC.name}, {CLINIC.streetAddress}, {CLINIC.locality}. {CLINIC.hoursText}.</td></tr>
+                <tr className="border-t border-cool-gray/10"><th scope="row" className="px-3 sm:px-5 py-3 font-semibold text-primary align-top">Dentist</th><td className="px-3 sm:px-5 py-3 text-on-surface-variant align-top"><Link to={DOCTOR_PATH} className="text-secondary hover:text-primary underline underline-offset-2">{DOCTOR.name}, {DOCTOR.title}</Link></td></tr>
               </tbody>
             </table>
           </div>

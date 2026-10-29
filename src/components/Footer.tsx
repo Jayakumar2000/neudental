@@ -10,7 +10,7 @@ import BrandLogo, { BRAND } from './BrandLogo';
 import { TREATMENTS } from '../data';
 import { trackConversion } from '../lib/analytics';
 import { Link } from '../lib/navigation';
-import { DOCTOR_PATH } from '../lib/routes';
+import { DOCTOR_PATH, inAppClick } from '../lib/routes';
 import { treatmentPath } from '../lib/treatments';
 import { useHydrated } from '../lib/useHydrated';
 
@@ -22,10 +22,8 @@ export default function Footer({ onNavigateSection }: FooterProps) {
 // The prerendered HTML carries the build's year; the visitor's own clock
 // takes over right after hydration, so the year never goes stale.
 const year = useHydrated() ? new Date().getFullYear() : __BUILD_YEAR__;
-const handleSectionClick = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
-e.preventDefault();
-onNavigateSection(sectionId);
-};
+// Section links are real "/#section" URLs; a plain click scrolls in-app.
+const handleSectionClick = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => inAppClick(() => onNavigateSection(sectionId))(e);
 
 return (
 <footer className="bg-primary text-white border-t border-white/5 pt-16 pb-8 px-6 md:px-10 lg:px-16">
@@ -70,7 +68,7 @@ TN State Dental Council Registered
 <li><Link to={DOCTOR_PATH} className="hover:text-[#E0F2F1] transition-colors">Our Doctor</Link></li>
 <li><Link to="/treatments" className="hover:text-[#E0F2F1] transition-colors">Treatments &amp; Prices</Link></li>
 <li><Link to="/blogs" className="hover:text-[#E0F2F1] transition-colors cursor-pointer text-left">Blogs</Link></li>
-<li><a href="#location" onClick={(e) => handleSectionClick(e, 'location')} className="hover:text-[#E0F2F1] transition-colors">Location &amp; Timing</a></li>
+<li><a href="/#location" onClick={(e) => handleSectionClick(e, 'location')} className="hover:text-[#E0F2F1] transition-colors">Location &amp; Timing</a></li>
 </ul>
 </div>
 {/* Column 4 Direct support contact */}
@@ -117,9 +115,9 @@ Door No. 13, Plot No. 26, 1st Main Road, Vasuki Nagar, Kodungaiyur, Chennai, Tam
 {year} {BRAND.legalName}. All rights reserved.
 </p>
 <div className="flex gap-6 font-semibold select-none">
-<a href="#booking-section" onClick={(e) => handleSectionClick(e, 'booking-section')} className="hover:text-[#E0F2F1] transition-colors">Book Appointment</a>
+<a href="/#booking-section" onClick={(e) => handleSectionClick(e, 'booking-section')} className="hover:text-[#E0F2F1] transition-colors">Book Appointment</a>
 <span className="text-white/10">|</span>
-<a href="#location" onClick={(e) => handleSectionClick(e, 'location')} className="hover:text-[#E0F2F1] transition-colors">Clinical Timings</a>
+<a href="/#location" onClick={(e) => handleSectionClick(e, 'location')} className="hover:text-[#E0F2F1] transition-colors">Clinical Timings</a>
 <span className="text-white/10">|</span>
 <span className="text-emerald-400 font-bold">100% Safe &amp; Sterilized Practice</span>
 </div>

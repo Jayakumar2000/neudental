@@ -7,7 +7,7 @@ import { ArrowRight, Clock, IndianRupee } from 'lucide-react';
 import { CLINIC, DOCTOR, TREATMENTS } from '../data';
 import { Link } from '../lib/navigation';
 import { DOCTOR_PATH } from '../lib/routes';
-import { TREATMENT_CATEGORIES, formatPriceRange, treatmentPath } from '../lib/treatments';
+import { TREATMENT_CATEGORIES, formatPriceRange, hasGuide, treatmentPath } from '../lib/treatments';
 import Breadcrumbs from './Breadcrumbs';
 import { VisitCta } from './ContentBlocks';
 
@@ -20,7 +20,7 @@ export default function TreatmentsIndex() {
           <span className="text-secondary font-sans text-xs font-bold tracking-[0.2em] uppercase">Treatments &amp; prices</span>
           <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl text-primary font-bold leading-tight mt-3">Dental treatments at neudental, Kodungaiyur</h1>
           <p className="font-sans text-base md:text-lg text-on-surface-variant mt-4 leading-relaxed max-w-3xl">
-            Every treatment offered at {CLINIC.name} in Kodungaiyur, North Chennai, with its typical duration and indicative price. Each one has a patient guide explaining who needs it, what happens, recovery and costs. All treatment is carried out by <Link to={DOCTOR_PATH} className="text-secondary hover:text-primary underline underline-offset-2">{DOCTOR.name}, {DOCTOR.title}</Link>.
+            Every treatment offered at {CLINIC.name} in Kodungaiyur, North Chennai, with its typical duration and indicative price, and a page explaining who needs it, what happens, recovery and costs. All treatment is carried out by <Link to={DOCTOR_PATH} className="text-secondary hover:text-primary underline underline-offset-2">{DOCTOR.name}, {DOCTOR.title}</Link>.
           </p>
         </div>
       </header>
@@ -43,7 +43,7 @@ export default function TreatmentsIndex() {
                           <span className="inline-flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-secondary" aria-hidden="true" />{t.duration}</span>
                           <span className="inline-flex items-center gap-1"><IndianRupee className="w-3.5 h-3.5 text-secondary" aria-hidden="true" />{formatPriceRange(t.priceRange)}</span>
                         </div>
-                        <span className="inline-flex items-center gap-1 mt-4 font-sans text-xs font-bold text-secondary">Patient guide <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" /></span>
+                        <span className="inline-flex items-center gap-1 mt-4 font-sans text-xs font-bold text-secondary">{hasGuide(t) ? 'Patient guide' : 'Cost & details'} <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" /></span>
                       </Link>
                     </li>
                   ))}
@@ -59,14 +59,14 @@ export default function TreatmentsIndex() {
               <table className="w-full text-left font-sans text-[15px]">
                 <caption className="sr-only">Dental treatment prices and durations at neudental, Kodungaiyur, Chennai</caption>
                 <thead className="bg-surface-alt text-xs uppercase tracking-wider text-primary">
-                  <tr><th scope="col" className="px-5 py-3">Treatment</th><th scope="col" className="px-5 py-3">Typical duration</th><th scope="col" className="px-5 py-3">Indicative price</th></tr>
+                  <tr><th scope="col" className="px-3 sm:px-5 py-3">Treatment</th><th scope="col" className="px-3 sm:px-5 py-3">Typical duration</th><th scope="col" className="px-3 sm:px-5 py-3">Indicative price</th></tr>
                 </thead>
                 <tbody>
                   {TREATMENTS.map((t) => (
                     <tr key={t.id} className="border-t border-cool-gray/10">
-                      <th scope="row" className="px-5 py-3 font-semibold text-primary"><Link to={treatmentPath(t)} className="hover:text-secondary">{t.name}</Link></th>
-                      <td className="px-5 py-3 text-on-surface-variant">{t.duration}</td>
-                      <td className="px-5 py-3 text-on-surface-variant whitespace-nowrap">{formatPriceRange(t.priceRange)}</td>
+                      <th scope="row" className="px-3 sm:px-5 py-3 font-semibold text-primary"><Link to={treatmentPath(t)} className="hover:text-secondary">{t.name}</Link></th>
+                      <td className="px-3 sm:px-5 py-3 text-on-surface-variant">{t.duration}</td>
+                      <td className="px-3 sm:px-5 py-3 text-on-surface-variant">{formatPriceRange(t.priceRange)}</td>
                     </tr>
                   ))}
                 </tbody>
