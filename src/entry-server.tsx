@@ -8,8 +8,8 @@ import { prerender } from 'react-dom/static';
 import App from './App-v1';
 import { BLOGS, CLINIC, DOCTOR, FAQS, TREATMENTS } from './data';
 import { DOCTOR_PATH, classifyRoute, normalizePath, prerenderPaths, type Route } from './lib/routes';
-import { GUIDE_TOKENS, categoryLabel, fillTokens, formatPriceRange, guideFor, treatmentById, treatmentPath } from './lib/treatments';
-import { TREATMENT_GUIDES } from './content/treatments';
+import { GUIDE_TOKENS, categoryLabel, fillTokens, formatPriceRange, guideFor, guideModulePath, treatmentById, treatmentPath } from './lib/treatments';
+import { TREATMENT_GUIDE_FILES } from './content/treatments';
 import { getRouteMeta, renderHeadTags, type ImageInfo } from './lib/seo';
 import { SITE_URL, absoluteUrl, contentTexts, plainText, postModifiedDate, postPublishedDate, postTextBlocks, postUrl } from './lib/schema';
 import type { BlogBlock, Treatment } from './types';
@@ -25,6 +25,9 @@ export interface RenderedPage {
   headHtml: string;
   // Text and links the page's data says must be in its HTML (see expectedContent).
   expected: { texts: string[]; hrefs: string[] };
+  // Source files of code-split modules this page needs before it can hydrate
+  // (a treatment's guide), so the HTML can preload them.
+  preloadModules: string[];
 }
 
 export async function renderPage(pathname: string, imageInfo?: ImageInfo): Promise<RenderedPage> {
@@ -43,7 +46,17 @@ export async function renderPage(pathname: string, imageInfo?: ImageInfo): Promi
     { progressiveChunkSize: Number.POSITIVE_INFINITY },
   );
   const appHtml = await new Response(prelude).text();
-  return { path, routeType: route.type, noIndex: !!meta.noIndex, title: meta.title, appHtml, headHtml: renderHeadTags(meta), expected: expectedContent(route) };
+  const guideTreatment = route.type === 'treatment' && guideFor(route.treatmentId) ? treatmentById(route.treatmentId) : undefined;
+  return {
+    path,
+    routeType: route.type,
+    noIndex: !!meta.noIndex,
+    title: meta.title,
+    appHtml,
+    headHtml: renderHeadTags(meta),
+    expected: expectedContent(route),
+    preloadModules: guideTreatment ? [guideModulePath(guideTreatment)] : [],
+  };
 }
 
 // What the data says a page must contain, so the build can tell a page that
@@ -379,7 +392,7 @@ function validateTreatments(errors: string[], warnings: string[]) {
   }
 
   const seen = new Set<string>();
-  TREATMENT_GUIDES.forEach((guide, index) => {
+  TREATMENT_GUIDE_FILES.forEach(({ file, guide }, index) => {
     const raw = guide as unknown as Record<string, unknown>;
     const treatment = typeof raw.treatmentId === 'string' ? treatmentById(raw.treatmentId) : undefined;
     const where = `Treatment guide ${treatment ? `"${treatment.slug}"` : `#${index + 1} (treatmentId "${String(raw.treatmentId)}")`}`;
@@ -388,6 +401,8 @@ function validateTreatments(errors: string[], warnings: string[]) {
       return;
     }
     if (seen.has(treatment.id)) errors.push(`${where}: there is more than one guide for this treatment.`);
+    // The browser fetches a guide by its file name, so it must match the slug.
+    if (file !== treatment.slug) errors.push(`${where}: the file must be named ${treatment.slug}.ts (it is ${file}.ts), to match the treatment's slug.`);
     seen.add(treatment.id);
     for (const key of Object.keys(raw)) {
       if (!GUIDE_KEYS.has(key)) errors.push(`${where}: unknown field "${key}". Fields: ${[...GUIDE_KEYS].join(', ')}.`);

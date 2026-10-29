@@ -20,8 +20,16 @@ export type Route =
 // Dr. Swetha's profile page.
 export const DOCTOR_PATH = '/dr-swetha';
 
+// "/treatments//braces/", "/dr%2Dswetha" -> the path the host serves the
+// page from, so the browser recognises every URL the host answers.
 export function normalizePath(pathname: string): string {
-  return pathname.replace(/\/+$/, '') || '/';
+  let path = pathname;
+  try {
+    path = decodeURI(path);
+  } catch {
+    // Malformed escapes: leave the path as it is.
+  }
+  return path.replace(/\/{2,}/g, '/').replace(/\/+$/, '') || '/';
 }
 
 // The sole authority for whether a URL is a real page: a bot probing

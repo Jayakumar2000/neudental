@@ -1,6 +1,6 @@
 // neudental v1 - Root Application Component
 // See README.md for full setup instructions
-import React, { useState, useEffect, Suspense, lazy } from 'react';
+import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import About from './components/About';
@@ -26,6 +26,7 @@ import { trackConversion, trackPageView, stopClarityRecording } from './lib/anal
 import { getRouteMeta, setPageMeta } from './lib/seo';
 import { classifyRoute, normalizePath, routePath, type Route } from './lib/routes';
 import { NavigationProvider } from './lib/navigation';
+import { guideFor, loadTreatmentGuide } from './lib/treatments';
 import { useHydrated } from './lib/useHydrated';
 
 // Code-split: the staff-only admin CRM is never opened by patients, so it
@@ -112,6 +113,9 @@ export default function App({ initialPath }: { initialPath?: string } = {}) {
   const [treatmentPick, setTreatmentPick] = useState(0);
   const [symptomCheckerOpen, setSymptomCheckerOpen] = useState(false);
   const [faqOpenId, setFaqOpenId] = useState<string | null>(null);
+  // Counts navigations, so a page that finishes loading after the visitor
+  // has already clicked somewhere else is not shown.
+  const navSeq = useRef(0);
 
   if (route.type === 'admin') {
     return (
@@ -130,8 +134,15 @@ export default function App({ initialPath }: { initialPath?: string } = {}) {
   // Keep the page in sync with the browser's own back/forward navigation.
   useEffect(() => {
     const handlePopState = () => {
-      setSymptomCheckerOpen(false);
-      setRoute(classifyRoute(window.location.pathname));
+      const next = classifyRoute(window.location.pathname);
+      const seq = ++navSeq.current;
+      const show = () => {
+        if (seq !== navSeq.current) return;
+        setSymptomCheckerOpen(false);
+        setRoute(next);
+      };
+      if (next.type === 'treatment' && !guideFor(next.treatmentId)) loadTreatmentGuide(next.treatmentId).then(show, () => window.location.reload());
+      else show();
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
@@ -170,6 +181,7 @@ export default function App({ initialPath }: { initialPath?: string } = {}) {
       scrollToTarget();
       return;
     }
+    navSeq.current++;
     setSymptomCheckerOpen(false);
     setRoute({ type: 'home' });
     if (normalizePath(window.location.pathname) !== '/') window.history.pushState(null, '', '/');
@@ -192,11 +204,22 @@ export default function App({ initialPath }: { initialPath?: string } = {}) {
       navigateToSection(decodeURIComponent(url.hash.slice(1)));
       return;
     }
-    setSymptomCheckerOpen(false);
-    if (routePath(next) !== routePath(route) || next.type === 'notFound') setRoute(next);
-    const path = normalizePath(url.pathname);
-    if (normalizePath(window.location.pathname) !== path || window.location.hash) window.history.pushState(null, '', path);
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    const seq = ++navSeq.current;
+    const show = () => {
+      if (seq !== navSeq.current) return;
+      setSymptomCheckerOpen(false);
+      if (routePath(next) !== routePath(route) || next.type === 'notFound') setRoute(next);
+      const path = normalizePath(url.pathname);
+      if (normalizePath(window.location.pathname) !== path || window.location.hash) window.history.pushState(null, '', path);
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    };
+    // A treatment's guide is its own small file: fetch it first, so the page
+    // appears complete. If it can't be fetched, load the page normally.
+    if (next.type === 'treatment' && !guideFor(next.treatmentId)) {
+      loadTreatmentGuide(next.treatmentId).then(show, () => window.location.assign(url.href));
+      return;
+    }
+    show();
   };
 
   const handleScrollToBooking = () => navigateToSection('booking-section');

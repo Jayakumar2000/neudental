@@ -1,7 +1,7 @@
 // neudental v1 - treatment pages: lookups and the {{price}}-style
 // placeholders guides use so their text always matches TREATMENTS.
 import { TREATMENTS } from '../data';
-import { TREATMENT_GUIDES } from '../content/treatments';
+import { loadGuide, loadedGuide } from '../content/treatments';
 import type { Treatment, TreatmentGuide } from '../types';
 
 export const TREATMENT_CATEGORIES: { key: Treatment['category']; label: string }[] = [
@@ -28,8 +28,21 @@ export function treatmentById(id: string): Treatment | undefined {
   return TREATMENTS.find((t) => t.id === id);
 }
 
+// The treatment's guide, once loaded: always at build time; in the browser,
+// after loadTreatmentGuide() (main-v1.tsx and App's navigate() wait for it
+// before showing a treatment page).
 export function guideFor(treatmentId: string): TreatmentGuide | undefined {
-  return TREATMENT_GUIDES.find((g) => g.treatmentId === treatmentId);
+  return loadedGuide(treatmentId);
+}
+
+export function loadTreatmentGuide(treatmentId: string): Promise<TreatmentGuide | undefined> {
+  const treatment = treatmentById(treatmentId);
+  return treatment ? loadGuide(treatment.id, treatment.slug) : Promise.resolve(undefined);
+}
+
+// Source path of a treatment's guide file, for preloading it.
+export function guideModulePath(treatment: Pick<Treatment, 'slug'>): string {
+  return `src/content/treatments/${treatment.slug}.ts`;
 }
 
 // "₹30000-₹1,50,000" -> { min: 30000, max: 150000 }; "₹5000+" -> { min: 5000 }.

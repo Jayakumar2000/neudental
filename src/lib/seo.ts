@@ -189,9 +189,20 @@ export function renderHeadTags(meta: PageMeta): string {
   return lines.join('\n    ');
 }
 
+// Set by main-v1.tsx when React attaches to a prerendered page: the first
+// setPageMeta() call (the initial route) then leaves the build's head alone.
+let keepHeadOnce = false;
+export function keepPrerenderedHead() {
+  keepHeadOnce = true;
+}
+
 // In the browser: apply the same head on in-app navigation.
 export function setPageMeta(meta: PageMeta) {
   if (typeof document === 'undefined') return;
+  if (keepHeadOnce) {
+    keepHeadOnce = false;
+    return;
+  }
   document.title = meta.title;
   for (const [kind, key, value] of headEntries(meta)) {
     const selector = kind === 'canonical' ? 'link[rel="canonical"]' : `meta[${kind}="${key}"]`;

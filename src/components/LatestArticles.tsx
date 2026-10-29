@@ -11,7 +11,13 @@ const LATEST_COUNT = 3;
 
 export default function LatestArticles() {
   const latest = [...BLOGS]
-    .sort((a, b) => (postPublishedDate(b) ?? '').localeCompare(postPublishedDate(a) ?? ''))
+    .sort((a, b) => {
+      // Newest first; plain string comparison of ISO dates, the same on the
+      // build server and in every browser.
+      const x = postPublishedDate(a) ?? '';
+      const y = postPublishedDate(b) ?? '';
+      return x < y ? 1 : x > y ? -1 : 0;
+    })
     .slice(0, LATEST_COUNT);
   if (!latest.length) return null;
   return (

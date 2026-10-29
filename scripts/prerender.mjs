@@ -107,6 +107,27 @@ function fillTemplate(headHtml, appHtml) {
   return html.slice(0, at) + `<div id="root">${appHtml}</div>` + html.slice(at + EMPTY_ROOT.length);
 }
 
+// Code-split modules a page needs before it hydrates (a treatment's guide)
+// are preloaded from its <head>, so they download alongside the main script.
+let manifest = {};
+try {
+  manifest = JSON.parse(await fs.readFile(path.join(DIST, '.vite', 'manifest.json'), 'utf8'));
+} catch {
+  fail('dist/.vite/manifest.json is missing: vite.config.ts must keep build.manifest on.');
+}
+function preloadTags(modules) {
+  const files = new Set();
+  const visit = (key) => {
+    const chunk = manifest[key];
+    if (!chunk) return fail(`No built file for ${key} in the Vite manifest.`);
+    if (chunk.isEntry || files.has(chunk.file)) return;
+    files.add(chunk.file);
+    (chunk.imports ?? []).forEach(visit);
+  };
+  modules.forEach(visit);
+  return [...files].map((file) => `<link rel="modulepreload" crossorigin href="/${file}">`).join('\n    ');
+}
+
 // 4. Render every page, following internal links to pages not listed up front.
 const queue = ssr.prerenderPaths().map((p) => ({ path: ssr.normalizePath(p), from: 'src/lib/routes.ts' }));
 const seen = new Set(queue.map((q) => q.path));
@@ -196,7 +217,8 @@ while (queue.length) {
     continue;
   }
   if (pagePath === '/') homeAppHtml = page.appHtml;
-  page.html = fillTemplate(page.headHtml, page.appHtml);
+  const preloads = preloadTags(page.preloadModules);
+  page.html = fillTemplate(preloads ? `${page.headHtml}\n    ${preloads}` : page.headHtml, page.appHtml);
   checkPage(page, page.html, homeAppHtml);
   if (page.routeType === 'notFound') continue;
   rendered.push(page);
@@ -238,6 +260,7 @@ await write('llms-full.txt', ssr.llmsFullTxt());
 
 // 7. Build-only files never ship.
 await fs.rm(SSR_DIR, { recursive: true, force: true });
+await fs.rm(path.join(DIST, '.vite'), { recursive: true, force: true });
 
 console.log(`\nPrerendered ${rendered.length} pages: ${rendered.map((p) => p.path).join(', ')}`);
 console.log('Generated sitemap.xml, blogs/rss.xml, llms.txt, llms-full.txt, admin.html');

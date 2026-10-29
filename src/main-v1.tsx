@@ -3,6 +3,9 @@ import {StrictMode} from 'react';
 import {createRoot, hydrateRoot} from 'react-dom/client';
 import App from './App-v1.tsx';
 import { trackEvent } from './lib/analytics';
+import { classifyRoute } from './lib/routes';
+import { keepPrerenderedHead } from './lib/seo';
+import { loadTreatmentGuide } from './lib/treatments';
 import './index.css';
 
 // Every deploy renames the code-split files. A tab opened before a deploy
@@ -37,7 +40,14 @@ const app = (
 // Production pages arrive as complete HTML from the build-time prerender
 // (scripts/prerender.mjs), so React attaches to that markup instead of
 // redrawing it. The dev server and the /admin shell send an empty root.
-if (container.firstElementChild) {
+function start() {
+  if (!container.firstElementChild) {
+    createRoot(container).render(app);
+    return;
+  }
+  // The prerendered <head> is already right for this page (and carries
+  // details only the build knows, like image sizes).
+  keepPrerenderedHead();
   hydrateRoot(container, app, {
     // A page whose first browser render differs from its prerendered HTML
     // still works (React redraws it), but it means something renders from
@@ -51,6 +61,13 @@ if (container.firstElementChild) {
       });
     },
   });
+}
+
+// A treatment page needs its guide (a separate file, preloaded by the page's
+// HTML) before React can attach: its first render must match the HTML.
+const initialRoute = classifyRoute(location.pathname);
+if (initialRoute.type === 'treatment') {
+  loadTreatmentGuide(initialRoute.treatmentId).catch(() => undefined).then(start);
 } else {
-  createRoot(container).render(app);
+  start();
 }
