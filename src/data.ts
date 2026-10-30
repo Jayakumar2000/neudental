@@ -60,8 +60,8 @@ export const CLINIC = {
   email: 'neudental26@gmail.com',
   geo: { latitude: 13.1309218, longitude: 80.2535879 },
   // Open all 7 days, in two sessions (24-hour clock).
-  sessions: [{ opens: '10:00', closes: '14:00' }, { opens: '17:00', closes: '21:30' }],
-  hoursText: 'Open all 7 days, 10:00 AM – 2:00 PM and 5:00 PM – 9:30 PM',
+  sessions: [{ opens: '10:00', closes: '14:00' }, { opens: '17:00', closes: '22:00' }],
+  hoursText: 'Open all 7 days, 10:00 AM – 2:00 PM and 5:00 PM – 10:00 PM',
 };
 
 // The clinic's WhatsApp Business chat link (its greeting is set in the WhatsApp
@@ -91,7 +91,7 @@ export const FAQS: FAQItem[] = [
   { id: 'faq-1', question: 'Is root canal treatment painful?', answer: 'No! Modern root canal treatment using rotary endodontics is virtually painless. Dr. Swetha uses advanced local anesthesia and gentle techniques to ensure you are comfortable throughout the procedure. Most patients are surprised at how easy it is.', category: 'treatment' },
   { id: 'faq-2', question: 'How often should I visit the dentist?', answer: 'We recommend visiting neudental every 6 months for a regular check-up and professional cleaning. However, if you have specific dental concerns or ongoing treatments, Dr. Swetha may recommend more frequent visits.', category: 'appointment' },
   { id: 'faq-3', question: 'Do you offer clear aligners / Invisalign?', answer: 'Yes! We offer modern orthodontic solutions including clear aligners for straightening teeth discreetly. Dr. Swetha will assess your case and recommend the best treatment plan during a consultation.', category: 'treatment' },
-  { id: 'faq-4', question: 'What are your clinic timings?', answer: 'We are open all 7 days, Monday to Sunday: 10:00 AM - 2:00 PM and 5:00 PM - 9:30 PM. You can book appointments via WhatsApp or our online form.', category: 'appointment' },
+  { id: 'faq-4', question: 'What are your clinic timings?', answer: 'We are open all 7 days, Monday to Sunday: 10:00 AM - 2:00 PM and 5:00 PM - 10:00 PM. You can book appointments via WhatsApp or our online form.', category: 'appointment' },
   { id: 'faq-5', question: 'How do I book an appointment?', answer: 'You can book an appointment using any of the options we offer — the booking form on this website, chatting with us on WhatsApp, or calling us directly. Walk-ins are also welcome during clinic hours.', category: 'appointment' },
   { id: 'faq-6', question: 'Is Neudental the same as Bludental?', answer: 'Yes — Neudental was formerly known as Bludental. It is the same clinic, at the same location in Kodungaiyur, with the same team led by Dr. Swetha. Only the name has changed.', category: 'general' },
 ];
