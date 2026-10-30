@@ -8,6 +8,9 @@ export interface Treatment {
   // addresses keep working (the build writes a redirect for each).
   formerSlugs?: string[];
   name: string;
+  // Other names people use for it (e.g. the clinical term and the everyday
+  // one), shown on its page and given to search engines as alternate names.
+  alternateNames?: string[];
   category: 'preventive' | 'restorative' | 'cosmetic-ortho' | 'specialized' | 'pediatric';
   description: string;
   seoKeywords: string[];

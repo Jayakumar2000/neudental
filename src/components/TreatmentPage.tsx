@@ -7,7 +7,7 @@ import { BLOGS, CLINIC, DOCTOR, TREATMENTS } from '../data';
 import { trackConversion } from '../lib/analytics';
 import { Link } from '../lib/navigation';
 import { DOCTOR_PATH, inAppClick } from '../lib/routes';
-import { categoryLabel, fillTokens, formatPriceRange, guideFor, treatmentById, treatmentPath } from '../lib/treatments';
+import { alternateNamesText, categoryLabel, fillTokens, formatPriceRange, guideFor, treatmentById, treatmentPath } from '../lib/treatments';
 import type { BlogPost, Treatment } from '../types';
 import Breadcrumbs from './Breadcrumbs';
 import ContentBlocks, { InlineText, VisitCta, formatIsoDate } from './ContentBlocks';
@@ -41,6 +41,7 @@ export default function TreatmentPage({ treatmentId, onBookTreatment }: Treatmen
           <span className="text-secondary font-sans text-xs font-bold tracking-[0.2em] uppercase">{categoryLabel(treatment.category)}</span>
           <h1 className="font-serif text-3xl sm:text-4xl md:text-[2.75rem] text-primary font-bold leading-tight mt-3">{guide ? fill(guide.headline) : `${treatment.name} in Kodungaiyur, Chennai`}</h1>
           <p className="font-sans text-base md:text-lg text-on-surface-variant mt-4 leading-relaxed">{treatment.description}.</p>
+          {treatment.alternateNames?.length ? <p className="font-sans text-sm text-cool-gray mt-2">Also known as {alternateNamesText(treatment)}.</p> : null}
           <div className="flex flex-wrap items-center gap-2.5 mt-6 font-sans text-xs font-bold text-primary">
             <span className="inline-flex items-center gap-1.5 bg-white border border-cool-gray/15 rounded-full px-3.5 py-2"><Clock className="w-3.5 h-3.5 text-secondary" aria-hidden="true" /> {treatment.duration}</span>
             <span className="inline-flex items-center gap-1.5 bg-white border border-cool-gray/15 rounded-full px-3.5 py-2"><IndianRupee className="w-3.5 h-3.5 text-secondary" aria-hidden="true" /> {price}</span>

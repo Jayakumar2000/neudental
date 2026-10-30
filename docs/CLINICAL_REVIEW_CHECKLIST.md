@@ -42,10 +42,13 @@ For each guide:
       her profile page.
 - [ ] **Exact publish dates of the three older blog posts**: add
       `datePublished: 'YYYY-MM-DD'` to each (the build warns until you do).
-- [ ] **"Wisdom Tooth Impaction" was renamed "Wisdom Tooth Removal"** in the
-      treatment list (the procedure, not the condition, is what people search
-      for and what the page describes). The address and existing bookings are
-      unchanged. Rename it back in `src/data.ts` if the clinic prefers.
+- [x] **Wisdom tooth naming** (decided by the clinic, 30 Oct 2026): "wisdom
+      tooth impaction" (the clinical term) and "wisdom tooth extraction" (the
+      term patients use) are the same treatment. It is listed as **Wisdom
+      Tooth Extraction** at `/treatments/wisdom-tooth-extraction`, with
+      "wisdom tooth impaction", "impacted wisdom tooth removal" and "wisdom
+      tooth removal" given as alternate names on the page and to search
+      engines, so all of them lead to it.
 - [ ] Similar questions appear on several pages on purpose, each answered for
       that treatment ("Does it hurt?", "Is it safe in pregnancy?", "Will it look
       natural?"). It's worth reading those answers side by side.
@@ -218,9 +221,9 @@ Guide file: `src/content/treatments/clear-aligners.ts`
 - [ ] General statements to confirm: 'Most people get used to aligners within a few days'; a new set feels tight 'for a day or two'; take trays out for any drink other than plain water; clean trays with a soft brush and cool water.
 - [ ] Whole page read and approved by Dr. Swetha → add `reviewedBy` and `dateModified`.
 
-## Wisdom Tooth Removal — `/treatments/wisdom-tooth-removal`
+## Wisdom Tooth Extraction — `/treatments/wisdom-tooth-extraction`
 
-Guide file: `src/content/treatments/wisdom-tooth-removal.ts`
+Guide file: `src/content/treatments/wisdom-tooth-extraction.ts`
 
 - [ ] Duration: the guide repeats TREATMENTS' '20-30 minutes' as the usual removal time, with the caveat that a deeply impacted tooth, especially a lower one, can take longer. Please confirm this is realistic for impacted (surgical) wisdom tooth removal at the clinic, and whether the time includes waiting for the anaesthetic to work.
 - [ ] Cost: is the '₹3000+' starting price per tooth? Is the X-ray or OPG included or charged separately (the guide only says one is usually needed first and links to the X-ray page)? Are the review visit and stitch removal included?

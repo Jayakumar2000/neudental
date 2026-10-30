@@ -48,7 +48,7 @@ const guide: TreatmentGuide = {
         'A tooth hurts or is sensitive, and the cause cannot be seen by eye',
         'There is swelling or a gum boil near a tooth',
         'You need [root canal treatment](/treatments/root-canal-treatment), where X-rays are usually taken before, during and after treatment to check the canals',
-        'A tooth needs to come out, especially a [wisdom tooth](/treatments/wisdom-tooth-removal) whose position and roots must be checked first',
+        'A tooth needs to come out, especially a [wisdom tooth](/treatments/wisdom-tooth-extraction) whose position and roots must be checked first',
         'You are planning braces, clear aligners or [dental implants](/treatments/dental-implants), which need a clear view of the roots and bone',
         'There are signs of gum disease, such as receding gums or loose teeth, and the bone support needs checking',
         'You have had a fall or an injury to the teeth or jaw',

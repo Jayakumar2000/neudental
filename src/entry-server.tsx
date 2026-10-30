@@ -8,7 +8,7 @@ import { prerender } from 'react-dom/static';
 import App from './App-v1';
 import { BLOGS, CLINIC, DOCTOR, FAQS, TREATMENTS } from './data';
 import { DOCTOR_PATH, classifyRoute, normalizePath, prerenderPaths, type Route } from './lib/routes';
-import { GUIDE_TOKENS, categoryLabel, fillTokens, formatPriceRange, guideFor, guideModulePath, priceBounds, treatmentById, treatmentPath } from './lib/treatments';
+import { GUIDE_TOKENS, alternateNamesText, categoryLabel, fillTokens, formatPriceRange, guideFor, guideModulePath, priceBounds, treatmentById, treatmentPath } from './lib/treatments';
 import { TREATMENT_GUIDE_FILES } from './content/treatments';
 import { getRouteMeta, renderHeadTags, type ImageInfo } from './lib/seo';
 import { SITE_URL, absoluteUrl, contentTexts, plainText, postModifiedDate, postPublishedDate, postTextBlocks, postUrl } from './lib/schema';
@@ -235,6 +235,7 @@ function treatmentMarkdown(treatment: Treatment): string {
     `## ${treatment.name}`,
     '',
     `URL: ${SITE_URL}${treatmentPath(treatment)}`,
+    ...(treatment.alternateNames?.length ? [`Also known as: ${treatment.alternateNames.join('; ')}`] : []),
     `Category: ${categoryLabel(treatment.category)}`,
     `Typical duration: ${treatment.duration}`,
     `Indicative price at Neudental: ${formatPriceRange(treatment.priceRange)} (final cost confirmed after examination)`,
@@ -270,7 +271,7 @@ ${treatmentList()}
 
 ## Treatment guides
 
-${TREATMENTS.map((t) => `- [${t.name}](${SITE_URL}${treatmentPath(t)}): ${t.description}; ${t.duration}; indicative price ${formatPriceRange(t.priceRange)}`).join('\n')}
+${TREATMENTS.map((t) => `- [${t.name}](${SITE_URL}${treatmentPath(t)})${t.alternateNames?.length ? ` (also known as ${alternateNamesText(t)})` : ''}: ${t.description}; ${t.duration}; indicative price ${formatPriceRange(t.priceRange)}`).join('\n')}
 
 ## Blog articles
 
@@ -405,6 +406,9 @@ function validateTreatments(errors: string[], warnings: string[]) {
     if (typeof t.slug !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(t.slug)) errors.push(`${where}: slug must be lowercase letters, numbers and single hyphens (it is the page address /treatments/{slug}).`);
     else if (slugs.has(t.slug)) errors.push(`${where}: slug "${t.slug}" is used by another treatment.`);
     slugs.add(t.slug);
+    if (t.alternateNames !== undefined && !(Array.isArray(t.alternateNames) && t.alternateNames.every((n) => typeof n === 'string' && n.trim() && n.trim().toLowerCase() !== t.name.toLowerCase()))) {
+      errors.push(`${where}: alternateNames must be a list of other names, e.g. ['Wisdom tooth removal'] (not empty, and not the treatment's own name).`);
+    }
     for (const old of t.formerSlugs ?? []) {
       if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(old) || former.has(old)) errors.push(`${where}: former slug "${old}" is not a valid slug, or is listed twice.`);
       former.add(old);

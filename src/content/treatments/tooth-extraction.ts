@@ -26,7 +26,7 @@ const guide: TreatmentGuide = {
         'Crowding, when removing a tooth is part of a braces plan',
       ],
     },
-    'Wisdom teeth that are stuck under the gum or growing at an angle need their own assessment: see [wisdom tooth removal](/treatments/wisdom-tooth-removal).',
+    'Wisdom teeth that are stuck under the gum or growing at an angle need their own assessment: see [wisdom tooth extraction](/treatments/wisdom-tooth-extraction).',
     { type: 'heading', id: 'save-or-extract', text: 'Can the tooth be saved instead?' },
     'A painful or infected tooth does not automatically need to come out. Many can be saved with [root canal treatment](/treatments/root-canal-treatment), often followed by a crown. Extraction ends the problem quickly, but it leaves a gap that usually needs replacing later, which often costs more and takes longer than keeping the tooth.',
     'Dr. Swetha checks the tooth, root, bone and gums and explains whether it can be saved. If not, extraction is usually the right choice, as a badly infected tooth left in place can spread the infection.',

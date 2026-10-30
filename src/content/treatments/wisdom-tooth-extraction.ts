@@ -1,4 +1,4 @@
-// Patient guide for /treatments/wisdom-tooth-removal. Fields are explained on
+// Patient guide for /treatments/wisdom-tooth-extraction. Fields are explained on
 // TreatmentGuide in src/types.ts. Never type a price: {{price}},
 // {{startingPrice}} and {{duration}} are filled in from TREATMENTS.
 // This treatment's priceRange is open-ended, so {{price}} reads "From ₹..."
@@ -8,10 +8,10 @@ import type { TreatmentGuide } from '../../types';
 
 const guide: TreatmentGuide = {
   treatmentId: 'extraction',
-  seoTitle: 'Wisdom Tooth Removal in Kodungaiyur: Cost & Care | Neudental',
-  metaDescription: 'Impacted wisdom tooth removal at Neudental, Kodungaiyur: symptoms, X-ray assessment, the procedure, dry socket care and cost (from {{startingPrice}}).',
-  headline: 'Impacted Wisdom Tooth Removal in Kodungaiyur, Chennai',
-  answer: 'An impacted wisdom tooth is a back molar stuck partly or fully in the gum or jawbone, usually because there is not enough room. If it causes pain, swollen gums, infection or decay in the next tooth, removal is usually advised. After an examination and X-ray, it is removed under local anaesthesia, usually in {{duration}}. At Neudental in Kodungaiyur, removal starts at {{startingPrice}}.',
+  seoTitle: 'Wisdom Tooth Extraction in Kodungaiyur: Cost | Neudental',
+  metaDescription: 'Impacted wisdom tooth extraction at Neudental, Kodungaiyur: symptoms, X-ray assessment, the procedure, dry socket care and cost (from {{startingPrice}}).',
+  headline: 'Impacted Wisdom Tooth Extraction in Kodungaiyur, Chennai',
+  answer: 'An impacted wisdom tooth is a back molar stuck partly or fully in the gum or jawbone, usually because there is not enough room. If it causes pain, swollen gums, infection or decay in the next tooth, extraction is usually advised. After an examination and X-ray, it is removed under local anaesthesia, usually in {{duration}}. At Neudental in Kodungaiyur, extraction starts at {{startingPrice}}.',
   content: [
     { type: 'contents' },
     { type: 'heading', id: 'what-is-an-impacted-wisdom-tooth', text: 'What is an impacted wisdom tooth?' },
@@ -40,7 +40,7 @@ const guide: TreatmentGuide = {
     { type: 'heading', id: 'does-every-wisdom-tooth-need-removal', text: 'Does every wisdom tooth need to come out?' },
     'No. A wisdom tooth that has come through fully and can be kept clean may never need treatment, and one buried deep without causing harm is often simply monitored at your [regular check-ups](/treatments/dental-checkup). Removal is usually advised when an impacted tooth causes repeated or severe pericoronitis, has decay that cannot be repaired, is damaging the gum, bone or tooth in front of it, or has a cyst forming around it.',
     "To decide, [Dr. Swetha](/dr-swetha) examines the area and takes an X-ray, often a full-mouth OPG scan, to see the tooth's depth, angle and roots, and how close it lies to the nerve in the lower jaw or the sinus above the upper back teeth. If it sits very close to the nerve, a 3D scan (CBCT) or an oral surgeon's opinion may be advised.",
-    { type: 'heading', id: 'how-wisdom-tooth-removal-is-done', text: 'What happens during wisdom tooth extraction at Neudental?' },
+    { type: 'heading', id: 'how-wisdom-tooth-extraction-is-done', text: 'What happens during wisdom tooth extraction at Neudental?' },
     {
       type: 'steps',
       items: [
@@ -52,7 +52,7 @@ const guide: TreatmentGuide = {
       ],
     },
     'The removal itself usually takes {{duration}}, though a deeply impacted tooth, especially a lower one, can take longer. If your stitches need taking out, a short review may be advised about a week later. If several wisdom teeth need removing, your dentist will advise whether to do them together or separately.',
-    { type: 'heading', id: 'wisdom-tooth-removal-cost', text: 'Wisdom tooth removal cost in Kodungaiyur' },
+    { type: 'heading', id: 'wisdom-tooth-extraction-cost', text: 'Wisdom tooth extraction cost in Kodungaiyur' },
     {
       type: 'table',
       caption: 'Impacted wisdom tooth removal cost at Neudental',
@@ -64,7 +64,7 @@ const guide: TreatmentGuide = {
       ],
     },
     'Removing an impacted wisdom tooth is usually more involved than a routine extraction. For other teeth that cannot be saved, see [tooth extraction](/treatments/tooth-extraction).',
-    { type: 'heading', id: 'recovery-after-wisdom-tooth-removal', text: 'How long does recovery take after wisdom tooth removal?' },
+    { type: 'heading', id: 'recovery-after-wisdom-tooth-extraction', text: 'How long does recovery take after wisdom tooth extraction?' },
     'Expect soreness for a few days. Swelling and jaw stiffness usually peak on the second or third day and then ease, while the gum takes a few weeks to heal fully. To help it settle:',
     {
       type: 'list',
@@ -103,11 +103,11 @@ const guide: TreatmentGuide = {
     'If swelling spreads towards your eye or neck, or you have difficulty swallowing or breathing, go to a hospital emergency department straight away.',
   ],
   faqs: [
-    { question: 'How much does impacted wisdom tooth removal cost at Neudental?', answer: 'At Neudental in Kodungaiyur, impacted wisdom tooth removal starts at {{startingPrice}}. The final cost depends on how deep and angled the tooth is, whether bone needs removing or the tooth dividing, and how many teeth are taken out. It is confirmed after your examination and X-ray, before treatment starts.' },
+    { question: 'How much does impacted wisdom tooth extraction cost at Neudental?', answer: 'At Neudental in Kodungaiyur, impacted wisdom tooth extraction starts at {{startingPrice}}. The final cost depends on how deep and angled the tooth is, whether bone needs removing or the tooth dividing, and how many teeth are taken out. It is confirmed after your examination and X-ray, before treatment starts.' },
     { question: 'How long does it take to remove a wisdom tooth?', answer: 'The removal usually takes {{duration}}, plus a little time for the anaesthetic to work and for your aftercare instructions. A deeply buried or sideways tooth can take longer. It is usually done in one visit, sometimes with a short review about a week later to check healing or remove stitches.' },
-    { question: 'Will I be awake during wisdom tooth removal?', answer: 'Yes. The tooth is removed under local anaesthesia, so you stay awake while the area is numb. You should feel pressure, not sharp pain. If you feel nervous, tell your dentist beforehand; knowing what to expect at each step often helps.' },
+    { question: 'Will I be awake during wisdom tooth extraction?', answer: 'Yes. The tooth is removed under local anaesthesia, so you stay awake while the area is numb. You should feel pressure, not sharp pain. If you feel nervous, tell your dentist beforehand; knowing what to expect at each step often helps.' },
     { question: 'When can I go back to work or college?', answer: 'Many people return within a few days, depending on their work and how the tooth came out. Swelling is usually greatest around the second or third day, so plan a quieter few days, and avoid heavy exercise until your dentist says it is fine.' },
-    { question: 'What can I eat after wisdom tooth removal?', answer: 'Once the numbness wears off, choose soft, lukewarm food such as curd rice, idli, pongal, khichdi or mashed vegetables. Avoid hot, spicy, crunchy or hard food, like chips, nuts or murukku, for the first few days, chew on the other side, and avoid using a straw.' },
+    { question: 'What can I eat after wisdom tooth extraction?', answer: 'Once the numbness wears off, choose soft, lukewarm food such as curd rice, idli, pongal, khichdi or mashed vegetables. Avoid hot, spicy, crunchy or hard food, like chips, nuts or murukku, for the first few days, chew on the other side, and avoid using a straw.' },
     { question: 'Should I remove a wisdom tooth that does not hurt?', answer: 'Not always. A wisdom tooth that does not hurt can still cause hidden problems, such as decay or gum pockets around the tooth in front of it, which show up only on an examination and X-ray. If nothing like that is found, it can usually be left and checked at your regular visits.' },
     { question: 'Can a swollen wisdom tooth be removed straight away?', answer: 'Sometimes. If the gum is badly infected or you cannot open your mouth well, your dentist may first clean the area and treat the infection, then remove the tooth once the swelling settles. Do not ignore it when the pain eases, as pericoronitis often comes back.' },
   ],

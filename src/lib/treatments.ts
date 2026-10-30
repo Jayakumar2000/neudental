@@ -40,6 +40,13 @@ export function guideFor(treatmentId: string): TreatmentGuide | undefined {
   return loadedGuide(treatmentId);
 }
 
+// ['Wisdom tooth impaction', 'Wisdom tooth removal'] ->
+// "wisdom tooth impaction and wisdom tooth removal" (acronyms keep their case).
+export function alternateNamesText(treatment: Pick<Treatment, 'alternateNames'>): string {
+  const names = (treatment.alternateNames ?? []).map((n) => (/^[A-Z][a-z]/.test(n) ? n[0].toLowerCase() + n.slice(1) : n));
+  return names.length > 1 ? `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}` : names.join('');
+}
+
 // Whether a treatment has a guide, known without loading it.
 export function hasGuide(treatment: Pick<Treatment, 'slug'>): boolean {
   return hasGuideFile(treatment.slug);

@@ -331,6 +331,7 @@ export function treatmentJsonLd(treatment: Treatment, guide: TreatmentGuide | un
       '@type': 'MedicalProcedure',
       '@id': procedureId(treatment),
       name: treatment.name,
+      ...(treatment.alternateNames?.length ? { alternateName: treatment.alternateNames } : {}),
       description: guide ? fill(guide.answer) : treatment.description,
       url,
       ...(steps ? { howPerformed: steps.items.map((step, i) => `${i + 1}. ${fill(step.title)}: ${fill(step.text)}`).join(' ') } : {}),
