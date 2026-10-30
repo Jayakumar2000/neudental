@@ -33,12 +33,10 @@ For each guide:
 
 ## Questions that affect more than one page
 
-- [ ] **Does a check-up include a professional cleaning?** The blog post *Why
-      Regular Dental Checkups Matter* says it does. The price list, and the
-      check-up and cleaning guides, treat cleaning as a separate treatment
-      with its own price, and tell patients to ask whether it can be done at
-      the same visit. Decide which is true, then correct the blog post (in
-      `src/data.ts`) or the two guides.
+- [x] **Does a check-up include a professional cleaning?** No (confirmed by
+      the clinic, 30 Oct 2026). Cleaning is a separate treatment with its own
+      price. The blog post *Why Regular Dental Checkups Matter* has been
+      corrected to say so; the check-up and cleaning guides already did.
 - [ ] **Dr. Swetha's Tamil Nadu State Dental Council registration number**:
       add `registration: '...'` to `DOCTOR` in `src/data.ts`. It appears on
       her profile page.
@@ -58,7 +56,7 @@ For each guide:
 Guide file: `src/content/treatments/dental-checkup.ts`
 
 - [ ] Complimentary X-ray: the guide says it is included 'when your dentist needs one', which fits taking X-rays only when there is a clinical reason. The data.ts feature just says 'Complimentary X-ray', and the dental-x-ray guide says a check-up 'includes a complimentary X-ray' with no condition. Please confirm whether it is given at every check-up or only when indicated, and whether it is a single intraoral X-ray or can be an OPG, so the two pages can be made to match.
-- [ ] Cleaning and check-up: the guide calls professional cleaning a separate treatment with its own cost and tells patients to ask whether it can be done at the same visit. The clinic's blog post why-regular-checkups-matter says 'Checkups also include a professional cleaning'. Please confirm which is correct; the blog post (src/data.ts) or this guide needs updating so they agree.
+- [x] Cleaning and check-up: confirmed by the clinic that a check-up does not include a professional cleaning, which is a separate treatment with its own cost, as this guide says. The blog post why-regular-checkups-matter has been corrected to match.
 - [ ] What moves the check-up fee within the listed range (for example, a first full examination versus a six-monthly review)? The guide only says it 'depends on what your visit needs to cover' and to ask when booking.
 - [ ] Step 1 names Dr. Swetha as the person taking the history. Does she see every check-up patient, or do other dentists or a hygienist sometimes do it (a testimonial mentions a hygienist)?
 - [ ] 'Your dentist may suggest coming more often if you are pregnant, or are in the middle of ongoing dental treatment': confirm this matches the clinic's practice.
