@@ -246,8 +246,7 @@ guide with a typed price.
    the strongest trust signal for health content.
 2. **Add Dr. Swetha's Tamil Nadu State Dental Council registration number** to
    `DOCTOR` in `src/data.ts` (`registration: '...'`). It appears on her profile.
-3. **Add the exact publish dates** of the three older blog posts
-   (`datePublished`). The build warns until they're set.
+3. ~~**Add the exact publish dates** of the three older blog posts.~~ Done (5, 10 and 28 September 2026).
 4. **Keep Google Business Profile, Practo and Justdial** showing exactly the
    same name, address, phone and hours as the site.
 5. Optionally, one **"Getting here from Perambur / Kolathur / Madhavaram"**

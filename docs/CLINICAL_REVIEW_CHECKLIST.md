@@ -40,8 +40,9 @@ For each guide:
 - [ ] **Dr. Swetha's Tamil Nadu State Dental Council registration number**:
       add `registration: '...'` to `DOCTOR` in `src/data.ts`. It appears on
       her profile page.
-- [ ] **Exact publish dates of the three older blog posts**: add
-      `datePublished: 'YYYY-MM-DD'` to each (the build warns until you do).
+- [x] **Exact publish dates of the three older blog posts** (given by the
+      clinic, 30 Oct 2026): laser dentistry 5 Sep 2026, regular checkups
+      10 Sep 2026, habits after a root canal 28 Sep 2026.
 - [x] **Wisdom tooth naming** (decided by the clinic, 30 Oct 2026): "wisdom
       tooth impaction" (the clinical term) and "wisdom tooth extraction" (the
       term patients use) are the same treatment. It is listed as **Wisdom
