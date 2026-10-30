@@ -158,7 +158,16 @@
         "@type": "Person",
         "name": "Dr. Swetha",
         "jobTitle": "Dental Surgeon & Clinical Director",
-        "hasCredential": "BDS, FGDS"
+        "hasCredential": [
+          { "@type": "EducationalOccupationalCredential", "credentialCategory": "degree", "name": "BDS, FGDS" },
+          {
+            "@type": "EducationalOccupationalCredential",
+            "credentialCategory": "license",
+            "name": "Tamil Nadu Dental Council registration",
+            "identifier": "38437",
+            "recognizedBy": { "@type": "Organization", "name": "Tamil Nadu Dental Council" }
+          }
+        ]
       },
       "availableService": [
         { "@type": "MedicalProcedure", "name": "Root Canal Treatment (RCT)" },

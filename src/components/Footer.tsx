@@ -7,7 +7,7 @@ const SOCIAL_LINKS = [
 { name: 'YouTube', href: 'https://www.youtube.com/channel/UCfyFaSu7_EJshABsfOuBbWw', icon: Youtube },
 ];
 import BrandLogo, { BRAND } from './BrandLogo';
-import { TREATMENTS } from '../data';
+import { TREATMENTS, DOCTOR } from '../data';
 import { trackConversion } from '../lib/analytics';
 
 interface FooterProps {
@@ -45,7 +45,7 @@ Member of Indian Dental Association
 </p>
 <p className="flex items-center gap-1.5 font-bold">
 <span className="inline-block w-2 h-2 rounded-full bg-emerald-400" />
-TN State Dental Council Registered
+{DOCTOR.registration}
 </p>
 </div>
 </div>

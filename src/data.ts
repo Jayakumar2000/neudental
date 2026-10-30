@@ -33,6 +33,7 @@ export const DOCTOR: Doctor = {
   specialty: 'Dental Surgeon & Clinical Director',
   experience: 'KSR Dental College',
   education: 'Saveetha Dental University',
+  registration: 'Tamil Nadu Dental Council Reg.\u00a0No.\u00a038437', // non-breaking: keep "Reg. No. 38437" on one line
   bio: 'Dr. Swetha is a dedicated dental professional with 5+ years of experience in general and cosmetic dentistry. A proud alumna of Saveetha Dental University and KSR Dental College, she has performed over 5,000+ dental procedures, from tooth fillings and tooth extractions to complex root canal treatments, implants, and orthodontics. Her patient-first approach, backed by the latest technology, ensures every treatment is comfortable, transparent, and of the highest clinical standard.',
   imageAlt: 'Dr. Swetha - Lead Dentist at neudental',
   avatarUrl: '',

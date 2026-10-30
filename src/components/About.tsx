@@ -1,7 +1,7 @@
 import React from 'react';
 import { DOCTORS } from '../data';
 import { SmileCurve } from './BrandShapes';
-import { GraduationCap, Camera, Award, Users, Activity, Sparkles, Home } from 'lucide-react';
+import { GraduationCap, ShieldCheck, Camera, Award, Users, Activity, Sparkles, Home } from 'lucide-react';
 
 // `featured` gets the filled navy ring so the eye lands on it first.
 const TRUST_STATS = [
@@ -123,6 +123,9 @@ className="w-full h-full object-cover object-top"
 </h4>
 <p className="font-sans text-sm font-medium text-cool-gray mt-1 flex items-start gap-1.5">
 <GraduationCap className="w-4 h-4 text-secondary shrink-0 mt-0.5" /> <span>{doc.education} &amp; {doc.experience}</span>
+</p>
+<p className="font-sans text-sm font-medium text-cool-gray mt-1 flex items-start gap-1.5">
+<ShieldCheck className="w-4 h-4 text-secondary shrink-0 mt-0.5" /> <span>{doc.registration}</span>
 </p>
 <p className="font-sans text-base text-on-surface-variant leading-relaxed mt-4">
 {doc.bio}

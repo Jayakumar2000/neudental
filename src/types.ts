@@ -19,6 +19,7 @@ export interface Doctor {
   specialty: string;
   experience: string;
   education: string;
+  registration: string;
   bio: string;
   imageAlt: string;
   avatarUrl: string;
