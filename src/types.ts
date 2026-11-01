@@ -24,8 +24,9 @@ export interface Treatment {
 
 export interface Doctor {
   name: string;
-  // Dental council registration, shown on the profile page when set.
-  registration?: string;
+  // Dental council registration, shown on the profile page and given to
+  // search engines as her licence when set.
+  registration?: { council: string; number: string };
   title: string;
   specialty: string;
   experience: string;

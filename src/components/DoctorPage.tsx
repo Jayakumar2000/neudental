@@ -14,7 +14,12 @@ import { VisitCta } from './ContentBlocks';
 import { DOCTOR_PATH } from '../lib/routes';
 
 // Shown in the site footer as the clinic's professional standing.
-export const DOCTOR_MEMBERSHIPS = ['Member of the Indian Dental Association', 'Registered with the Tamil Nadu State Dental Council'];
+export const DOCTOR_MEMBERSHIPS = ['Member of the Indian Dental Association'];
+
+// "Registered with the Tamil Nadu State Dental Council (Reg. No. 38437)".
+const registrationText = DOCTOR.registration
+  ? `Registered with the ${DOCTOR.registration.council} (Reg. No. ${DOCTOR.registration.number})`
+  : 'Registered with the Tamil Nadu State Dental Council';
 
 export default function DoctorPage() {
   const reviewed = BLOGS.filter((post) => post.reviewedBy?.startsWith(DOCTOR.name));
@@ -36,7 +41,7 @@ export default function DoctorPage() {
                 {DOCTOR_MEMBERSHIPS.map((m) => (
                   <li key={m} className="flex gap-2"><BadgeCheck className="w-4 h-4 text-secondary shrink-0 mt-0.5" aria-hidden="true" /><span>{m}</span></li>
                 ))}
-                {DOCTOR.registration && <li className="flex gap-2"><ShieldCheck className="w-4 h-4 text-secondary shrink-0 mt-0.5" aria-hidden="true" /><span>Registration: {DOCTOR.registration}</span></li>}
+                <li className="flex gap-2"><ShieldCheck className="w-4 h-4 text-secondary shrink-0 mt-0.5" aria-hidden="true" /><span>{registrationText}</span></li>
               </ul>
             </div>
           </div>

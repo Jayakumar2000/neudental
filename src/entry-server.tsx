@@ -220,7 +220,7 @@ function clinicFacts(): string {
 - Phone / WhatsApp: ${CLINIC.phone}
 - Email: ${CLINIC.email}
 - Hours: ${CLINIC.hoursText}
-- Lead dentist: ${DOCTOR.name}, ${DOCTOR.title}, ${DOCTOR.specialty}. ${DOCTOR.bio}
+- Lead dentist: ${DOCTOR.name}, ${DOCTOR.title}, ${DOCTOR.specialty}${DOCTOR.registration ? ` (${DOCTOR.registration.council} Reg. No. ${DOCTOR.registration.number})` : ''}. ${DOCTOR.bio}
 - Areas served: Kodungaiyur, North Chennai (Perambur, Madhavaram, Kolathur, Vyasarpadi, Moolakadai, Korukkupet, Villivakkam) and Chennai
 - Book: online at ${SITE_URL}/#booking-section, on WhatsApp or by phone; walk-ins welcome`;
 }

@@ -37,9 +37,9 @@ For each guide:
       the clinic, 30 Oct 2026). Cleaning is a separate treatment with its own
       price. The blog post *Why Regular Dental Checkups Matter* has been
       corrected to say so; the check-up and cleaning guides already did.
-- [ ] **Dr. Swetha's Tamil Nadu State Dental Council registration number**:
-      add `registration: '...'` to `DOCTOR` in `src/data.ts`. It appears on
-      her profile page.
+- [x] **Dr. Swetha's Tamil Nadu State Dental Council registration number**:
+      38437 (given by the clinic, 1 Nov 2026). Shown on her profile page and
+      given to search engines as her licence.
 - [x] **Exact publish dates of the three older blog posts** (given by the
       clinic, 30 Oct 2026): laser dentistry 5 Sep 2026, regular checkups
       10 Sep 2026, habits after a root canal 28 Sep 2026.

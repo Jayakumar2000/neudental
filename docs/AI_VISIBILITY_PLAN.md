@@ -244,8 +244,7 @@ guide with a typed price.
    `reviewedBy` to the guide (see `BLOG_GUIDE.md`, "After Dr. Swetha has
    reviewed a guide"). Each reviewed page then shows "Reviewed by Dr. Swetha",
    the strongest trust signal for health content.
-2. **Add Dr. Swetha's Tamil Nadu State Dental Council registration number** to
-   `DOCTOR` in `src/data.ts` (`registration: '...'`). It appears on her profile.
+2. ~~**Add Dr. Swetha's Tamil Nadu State Dental Council registration number.**~~ Done (Reg. No. 38437).
 3. ~~**Add the exact publish dates** of the three older blog posts.~~ Done (5, 10 and 28 September 2026).
 4. **Keep Google Business Profile, Practo and Justdial** showing exactly the
    same name, address, phone and hours as the site.

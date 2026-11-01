@@ -144,6 +144,15 @@ export function siteJsonLd() {
         jobTitle: DOCTOR.specialty,
         alumniOf: [DOCTOR.education, DOCTOR.experience].map((name) => ({ '@type': 'CollegeOrUniversity', name })),
         memberOf: { '@type': 'Organization', name: 'Indian Dental Association' },
+        ...(DOCTOR.registration ? {
+          hasCredential: {
+            '@type': 'EducationalOccupationalCredential',
+            credentialCategory: 'license',
+            name: `${DOCTOR.registration.council} registration`,
+            identifier: DOCTOR.registration.number,
+            recognizedBy: { '@type': 'Organization', name: DOCTOR.registration.council },
+          },
+        } : {}),
         knowsAbout: DOCTOR.skills,
         url: SITE_URL + DOCTOR_PATH,
         image: `${SITE_URL}/doctor/dr-swetha.webp`,

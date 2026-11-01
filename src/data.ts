@@ -30,6 +30,7 @@ export const TREATMENTS: Treatment[] = [
 export const DOCTOR: Doctor = {
   name: 'Dr. Swetha',
   title: 'BDS, FGDS',
+  registration: { council: 'Tamil Nadu State Dental Council', number: '38437' },
   specialty: 'Dental Surgeon & Clinical Director',
   experience: 'KSR Dental College',
   education: 'Saveetha Dental University',
