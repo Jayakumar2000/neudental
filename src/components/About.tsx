@@ -1,9 +1,10 @@
 import React from 'react';
 import { DOCTORS } from '../data';
 import { SmileCurve } from './BrandShapes';
-import { GraduationCap, Camera, Award, Users, Activity, Sparkles, Home, ArrowRight } from 'lucide-react';
+import { GraduationCap, ShieldCheck, Camera, Award, Users, Activity, Sparkles, Home, ArrowRight } from 'lucide-react';
 import { Link } from '../lib/navigation';
 import { DOCTOR_PATH } from '../lib/routes';
+import { registrationLabel } from '../lib/doctor';
 
 // `featured` gets the filled navy ring so the eye lands on it first.
 export const TRUST_STATS = [
@@ -125,6 +126,9 @@ className="w-full h-full object-cover object-top"
 </h4>
 <p className="font-sans text-sm font-medium text-cool-gray mt-1 flex items-start gap-1.5">
 <GraduationCap className="w-4 h-4 text-secondary shrink-0 mt-0.5" /> <span>{doc.education} &amp; {doc.experience}</span>
+</p>
+<p className="font-sans text-sm font-medium text-cool-gray mt-1 flex items-start gap-1.5">
+<ShieldCheck className="w-4 h-4 text-secondary shrink-0 mt-0.5" /> <span>{registrationLabel(doc)}</span>
 </p>
 <p className="font-sans text-base text-on-surface-variant leading-relaxed mt-4">
 {doc.bio}

@@ -12,14 +12,12 @@ import { TRUST_STATS } from './About';
 import Breadcrumbs from './Breadcrumbs';
 import { VisitCta } from './ContentBlocks';
 import { DOCTOR_PATH } from '../lib/routes';
+import { registrationSentence } from '../lib/doctor';
 
 // Shown in the site footer as the clinic's professional standing.
 export const DOCTOR_MEMBERSHIPS = ['Member of the Indian Dental Association'];
 
-// "Registered with the Tamil Nadu State Dental Council (Reg. No. 38437)".
-const registrationText = DOCTOR.registration
-  ? `Registered with the ${DOCTOR.registration.council} (Reg. No. ${DOCTOR.registration.number})`
-  : 'Registered with the Tamil Nadu State Dental Council';
+const registrationText = registrationSentence(DOCTOR);
 
 export default function DoctorPage() {
   const reviewed = BLOGS.filter((post) => post.reviewedBy?.startsWith(DOCTOR.name));

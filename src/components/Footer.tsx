@@ -7,10 +7,11 @@ const SOCIAL_LINKS = [
 { name: 'YouTube', href: 'https://www.youtube.com/channel/UCfyFaSu7_EJshABsfOuBbWw', icon: Youtube },
 ];
 import BrandLogo, { BRAND } from './BrandLogo';
-import { TREATMENTS } from '../data';
+import { TREATMENTS, DOCTOR } from '../data';
 import { trackConversion } from '../lib/analytics';
 import { Link } from '../lib/navigation';
 import { DOCTOR_PATH, inAppClick } from '../lib/routes';
+import { registrationLabel } from '../lib/doctor';
 import { treatmentPath } from '../lib/treatments';
 import { useHydrated } from '../lib/useHydrated';
 
@@ -48,7 +49,7 @@ Member of Indian Dental Association
 </p>
 <p className="flex items-center gap-1.5 font-bold">
 <span className="inline-block w-2 h-2 rounded-full bg-emerald-400" />
-TN State Dental Council Registered
+{registrationLabel(DOCTOR)}
 </p>
 </div>
 </div>

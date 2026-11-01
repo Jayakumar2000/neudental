@@ -7,6 +7,7 @@ import { StrictMode } from 'react';
 import { prerender } from 'react-dom/static';
 import App from './App-v1';
 import { BLOGS, CLINIC, DOCTOR, FAQS, TREATMENTS } from './data';
+import { registrationLabel } from './lib/doctor';
 import { DOCTOR_PATH, classifyRoute, normalizePath, prerenderPaths, type Route } from './lib/routes';
 import { GUIDE_TOKENS, alternateNamesText, categoryLabel, fillTokens, formatPriceRange, guideFor, guideModulePath, priceBounds, treatmentById, treatmentPath } from './lib/treatments';
 import { TREATMENT_GUIDE_FILES } from './content/treatments';
@@ -220,7 +221,7 @@ function clinicFacts(): string {
 - Phone / WhatsApp: ${CLINIC.phone}
 - Email: ${CLINIC.email}
 - Hours: ${CLINIC.hoursText}
-- Lead dentist: ${DOCTOR.name}, ${DOCTOR.title}, ${DOCTOR.specialty}${DOCTOR.registration ? ` (${DOCTOR.registration.council} Reg. No. ${DOCTOR.registration.number})` : ''}. ${DOCTOR.bio}
+- Lead dentist: ${DOCTOR.name}, ${DOCTOR.title}, ${DOCTOR.specialty}${DOCTOR.registration ? ` (${registrationLabel(DOCTOR).replace(/\u00a0/g, ' ')})` : ''}. ${DOCTOR.bio}
 - Areas served: Kodungaiyur, North Chennai (Perambur, Madhavaram, Kolathur, Vyasarpadi, Moolakadai, Korukkupet, Villivakkam) and Chennai
 - Book: online at ${SITE_URL}/#booking-section, on WhatsApp or by phone; walk-ins welcome`;
 }
